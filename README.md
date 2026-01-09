@@ -26,4 +26,4 @@ echo HTMLProcessor::fromString($html)
 
 ```
 
-Browse the <a href="./tests">tests folder</a> for usage examples.
+Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
