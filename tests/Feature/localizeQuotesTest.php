@@ -18,7 +18,6 @@ test('Localizes german quotes', function () {
     runTest("<p>\"Hallo\"</p>", $locale, '<p>„Hallo“</p>');
     runTest("<p>'Hallo'</p>", $locale, '<p>‚Hallo‘</p>');
     runTest("<p>\"'Hallo', sagte sie\"</p>", $locale, '<p>„‚Hallo‘, sagte sie“</p>');
-
 });
 
 test('Localizes english quotes', function () {
@@ -37,4 +36,10 @@ test('Localizes french quotes', function () {
     runTest("<p>'Bonjour'</p>", $locale, '<p>‹ Bonjour ›</p>');
     runTest("<p>\"'Bonjour', dit-elle\"</p>", $locale, '<p>« ‹ Bonjour ›, dit-elle »</p>');
 
+});
+
+test('Parses locales robustly', function() {
+    runTest("<p>\"Hallo\"</p>", 'de_DE', '<p>„Hallo“</p>');
+    runTest("<p>\"Hallo\"</p>", 'de_DE_formal', '<p>„Hallo“</p>');
+    runTest("<p>\"Hallo\"</p>", 'de-DE', '<p>„Hallo“</p>');
 });

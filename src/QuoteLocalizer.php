@@ -24,7 +24,8 @@ final readonly class QuoteLocalizer
         string $locale,
         protected bool $debug
     ) {
-        [$this->languageCode, $this->countryCode] = explode('_', $locale, 2);
+        $separator = str_contains($locale, '_') ? '_' : '-';
+        [$this->languageCode, $this->countryCode] = explode($separator, $locale, 2);
     }
 
     /**
