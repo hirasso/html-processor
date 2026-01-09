@@ -1,0 +1,53 @@
+{
+  "name": "hirasso/html-processor",
+  "description": "A tiny HTML processor written in PHP 🐘",
+  "type": "library",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Rasso Hilber",
+      "email": "mail@rassohilber.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Hirasso\\HTMLProcessor\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Hirasso\\HTMLProcessor\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": ">=8.1",
+    "asika/autolink": "^2.2",
+    "illuminate/collections": "^11",
+    "ivopetkov/html5-dom-document-php": "^2.10"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.20",
+    "pestphp/pest": "^3.7",
+    "pestphp/pest-plugin-watch": "^3.0",
+    "phpstan/phpstan": "^2.1",
+    "symfony/var-dumper": "^7.2"
+  },
+  "scripts": {
+    "format": "./vendor/bin/pint",
+    "test": "./vendor/bin/pest",
+    "test:watch": "./vendor/bin/pest --watch",
+    "test:coverage": "php -d zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-83-arm64.so -d xdebug.mode=coverage ./vendor/bin/pest --coverage --coverage-html ./tests/reports",
+    "test:ci": "./vendor/bin/pest --coverage-clover coverage.xml",
+    "analyse": "./vendor/bin/phpstan analyse --memory-limit=2G"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

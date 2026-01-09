@@ -1,0 +1,36 @@
+<?php
+
+use Hirasso\HTMLProcessor\HTMLProcessor;
+
+function runTest(string $str, string $locale, string $expected): void {
+    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->toHTML();
+    expect($result)->toBe($expected);
+}
+
+test('Localizes german quotes', function () {
+    $locale = 'de_DE';
+
+    runTest("<p>\"Hallo\"</p>", $locale, '<p>„Hallo“</p>');
+    runTest("<p>'Hallo'</p>", $locale, '<p>‚Hallo‘</p>');
+    runTest("<p>\"'Hallo', sagte sie\"</p>", $locale, '<p>„‚Hallo‘, sagte sie“</p>');
+
+});
+
+test('Localizes english quotes', function () {
+    $locale = 'en_US';
+
+    runTest("<p>\"Hello\"</p>", $locale, '<p>“Hello”</p>');
+    runTest("<p>'Hello'</p>", $locale, '<p>‘Hello’</p>');
+    runTest("<p>\"'Hello', she said\"</p>", $locale, '<p>“‘Hello’, she said”</p>');
+
+});
+
+test('Localizes french quotes', function () {
+    $locale = 'fr_FR';
+
+    runTest("<p>\"Bonjour\"</p>", $locale, '<p>« Bonjour »</p>');
+    runTest("<p>'Bonjour'</p>", $locale, '<p>‹ Bonjour ›</p>');
+    runTest("<p>\"'Bonjour', dit-elle\"</p>", $locale, '<p>« ‹ Bonjour ›, dit-elle »</p>');
+
+});
+
