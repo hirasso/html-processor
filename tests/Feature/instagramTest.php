@@ -11,4 +11,3 @@ test('Autolinks #tags to Instagram', function () {
     $result = HTMLProcessor::fromString("#tag")->instagram()->toHTML();
     expect($result)->toBe('<a href="https://www.instagram.com/explore/tags/tag">#tag</a>');
 });
-
