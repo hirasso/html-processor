@@ -50,8 +50,7 @@ final class Beautifier
      */
     public function preventWidows()
     {
-        $xpath = new \DOMXPath($this->processor->getDocument());
-        $textNodes = $xpath->query('//text()');
+        $textNodes = $this->processor->queryXPath('//text()');
 
         /**
          * Traverse the DOMNodeList backwards, prevent widows on the first textNode that is not empty

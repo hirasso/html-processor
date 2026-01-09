@@ -14,4 +14,16 @@ composer require hirasso/html-processor
 
 ## Usage
 
-@TODO
+```php
+use Hirasso\HTMLProcessor\HTMLProcessor;
+
+echo HTMLProcessor::fromString($html)
+    ->autolink() // automatically wrap urls in links
+    ->localizeQuotes('en_US') // localize quotes based on locale
+    ->processLinks(fn ($el) => $el->setAttribute('data-my-attr', '')) // add various classes to links
+    ->beautify() // prevent widows, remove empty paragraphs
+    ->encodeEmails(); // encode email addresses (must be called last!)
+
+```
+
+Browse the <a href="./tests">tests folder</a> for usage examples.

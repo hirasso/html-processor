@@ -19,7 +19,16 @@ enum UrlType
     case Invalid;
 }
 
-
+/**
+ * Process links in HTML. Add classes reflecting the behaviour
+ *
+ * - mailto:
+ * - tel:
+ * - #hash
+ * - internal
+ * - external
+ * - to files
+ */
 final class LinkProcessor
 {
     public static function process(
@@ -74,6 +83,9 @@ final class LinkProcessor
         }
     }
 
+    /**
+     * Detect the type of a URL (internal/external/invalid)
+     */
     protected static function detectUrlType(string $url): UrlType
     {
         $baseDomain = $_SERVER['HTTP_HOST'] ?? '';

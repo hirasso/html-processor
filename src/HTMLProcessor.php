@@ -49,14 +49,6 @@ final class HTMLProcessor
     }
 
     /**
-     * Get the document
-     */
-    public function getDocument()
-    {
-        return $this->document;
-    }
-
-    /**
      * query the document's XPath
      */
     public function queryXPath(string $expression)
