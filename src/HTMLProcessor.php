@@ -154,12 +154,19 @@ final class HTMLProcessor
     /**
      * Removes empty paragraphs from the DOM
      */
-    public function beautify(): self
-    {
+    public function beautify(
+        ?bool $removeEmptyParagraphs = true,
+        ?bool $preventWidows = true
+    ): self {
         $beautifier = new Beautifier($this);
-        $beautifier
-            ->removeEmptyParagraphs()
-            ->preventWidows();
+
+        if ($removeEmptyParagraphs) {
+            $beautifier->removeEmptyParagraphs();
+        }
+
+        if ($preventWidows) {
+            $beautifier->preventWidows();
+        }
 
         return $this;
     }
