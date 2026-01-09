@@ -11,6 +11,7 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
+use DOMNode;
 use DOMXPath;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
@@ -49,11 +50,11 @@ final class HTMLProcessor
     }
 
     /**
-     * query the document's XPath
+     * Query the document via XPath
      */
-    public function queryXPath(string $expression)
+    public function queryXPath(string $expression, ?DOMNode $contextNode = null)
     {
-        return $this->xPath->query($expression);
+        return $this->xPath->query($expression, $contextNode);
     }
 
     /**
@@ -74,7 +75,7 @@ final class HTMLProcessor
         $autolink = new Autolink($options ?? new AutolinkOptions(
             /** strip the scheme in the link text */
             stripScheme: true,
-            textLimit: null,
+            textLimit: 35,
             autoTitle: false,
             escape: true,
             linkNoScheme: true
@@ -128,11 +129,12 @@ final class HTMLProcessor
     }
 
     /**
-     * Automatically link @foobar and #hashtag to instagram
+     * Automatically link @foobar or #hashtag to a social network (or anywhere)
      */
-    public function instagram(): self
+    public function linkToSocial(string $prefix, string $baseURL): self
     {
-        InstagramLinker::link($this->document);
+        $linker = new SocialLinker($this);
+        $linker->link($prefix, $baseURL);
 
         return $this;
     }

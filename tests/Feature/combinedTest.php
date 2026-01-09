@@ -7,7 +7,8 @@ test('Runs various tasks on a string', function () {
 
     $processor = HTMLProcessor::fromString($html)
         ->autolink()
-        ->instagram()
+        ->linkToSocial('@', 'https://www.instagram.com')
+        ->linkToSocial('#', 'https://www.instagram.com/explore/tags/tag')
         ->localizeQuotes('en_US')
         ->processLinks(fn ($el) => $el->setAttribute('data-my-attr', ''))
         ->beautify();
