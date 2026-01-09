@@ -14,8 +14,8 @@ use DOMXPath;
 
 final class InstagramLinker
 {
-
-    public static function link(HTML5DOMDocument $document): void {
+    public static function link(HTML5DOMDocument $document): void
+    {
         $xpath = new DOMXPath($document);
         $textNodes = $xpath->query('//text()');
 

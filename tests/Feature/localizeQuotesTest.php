@@ -2,7 +2,8 @@
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
-function runTest(string $str, string $locale, string $expected): void {
+function runTest(string $str, string $locale, string $expected): void
+{
     $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->toHTML();
     expect($result)->toBe($expected);
 }
@@ -33,4 +34,3 @@ test('Localizes french quotes', function () {
     runTest("<p>\"'Bonjour', dit-elle\"</p>", $locale, '<p>« ‹ Bonjour ›, dit-elle »</p>');
 
 });
-

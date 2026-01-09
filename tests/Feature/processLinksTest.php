@@ -3,11 +3,11 @@
 use Hirasso\HTMLProcessor\HTMLProcessor;
 use IvoPetkov\HTML5DOMElement;
 
-beforeAll(function() {
+beforeAll(function () {
     $_SERVER['HTTP_HOST'] = 'example.com';
 });
 
-afterAll(function() {
+afterAll(function () {
     $_SERVER['HTTP_HOST'] = null;
 });
 
