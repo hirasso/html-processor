@@ -8,6 +8,10 @@ function runTest(string $str, string $locale, string $expected): void
     expect($result)->toBe($expected);
 }
 
+test('Ignores empty strings', function() {
+    runTest("", 'de_DE', '');
+});
+
 test('Localizes german quotes', function () {
     $locale = 'de_DE';
 

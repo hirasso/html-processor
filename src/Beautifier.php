@@ -84,8 +84,8 @@ final class Beautifier
             return $string;
         }
 
-        $lastWord = self::convertHTML5DOMDocumentEntities($words[$wordCount - 1]);
-        $secondLastWord = self::convertHTML5DOMDocumentEntities($words[$wordCount - 2]);
+        $lastWord = self::placeholdersToEntities($words[$wordCount - 1]);
+        $secondLastWord = self::placeholdersToEntities($words[$wordCount - 2]);
 
         // bail early if the last two words together are longer then 25 characters
         if (strlen("$lastWord $secondLastWord") > 25) {
@@ -100,7 +100,7 @@ final class Beautifier
     /**
      * Convert internal entity placeholders from HTML5DOMDocument back to the real entity
      */
-    private static function convertHTML5DOMDocumentEntities(string $html): string
+    protected static function placeholdersToEntities(string $html): string
     {
         if (strpos($html, 'html5-dom-document-internal-entity') === false) {
             return $html;
