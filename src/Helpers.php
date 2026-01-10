@@ -33,7 +33,6 @@ final class Helpers
         $html = $document->saveHTML();
         preg_match('/<body[^>]*>(?<content>.*?)<\/body>/is', $html, $matches);
         $html = $matches['content'] ?? '';
-        $html = html_entity_decode($html);
         $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
         return $html;
     }
@@ -45,9 +44,10 @@ final class Helpers
      */
     public static function normalizeWhitespace(string $string): string
     {
-        $string = trim(str_replace("html5-dom-document-internal-entity1-nbsp-end", " ", $string));
+        $string = str_replace("html5-dom-document-internal-entity1-nbsp-end", ' ', $string);
         $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string);
         $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string);
+        $string = preg_replace('/\s+/', ' ', $string);
         return $string;
     }
 }

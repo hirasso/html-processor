@@ -22,7 +22,7 @@ final class Beautifier
 
             $textContent = Helpers::normalizeWhitespace($p->textContent);
 
-            if (empty($textContent)) {
+            if (empty(trim($textContent))) {
                 $p->parentNode->removeChild($p);
             }
         }

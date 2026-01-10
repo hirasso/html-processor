@@ -159,7 +159,7 @@ final class HTMLProcessor
 
         $html = $this->runDOMOperations($html);
 
-        return $html;
+        return html_entity_decode($html);
     }
 
     protected function runHTMLOperations(string $html): string {
@@ -194,7 +194,6 @@ final class HTMLProcessor
         foreach ($operations as $operation) {
             ($operation->handler)($document);
         }
-
         return Helpers::extractBodyHTML($document);
     }
 
