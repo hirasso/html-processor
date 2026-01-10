@@ -11,6 +11,9 @@ use IvoPetkov\HTML5DOMElement;
 
 final class HTMLProcessor
 {
+    /** track if entities should be decoded */
+    protected bool $decodeEntities = true;
+
     /** @var Operation[] */
     protected array $operations = [];
 
@@ -137,6 +140,9 @@ final class HTMLProcessor
             type: OperationType::HTML,
             name: 'encodeEmails',
             handler: function (string $html): string {
+                /** Do not decode entities, otherwise the encoding would be lost */
+                $this->decodeEntities = false;
+
                 $encoder = new EmailEncoder();
                 return $encoder->encode($html);
             }
@@ -159,10 +165,13 @@ final class HTMLProcessor
 
         $html = $this->runDOMOperations($html);
 
-        return html_entity_decode($html);
+        return $this->decodeEntities
+            ? html_entity_decode($html)
+            : $html;
     }
 
-    protected function runHTMLOperations(string $html): string {
+    protected function runHTMLOperations(string $html): string
+    {
         $operations = $this->filterOperations(OperationType::HTML);
 
         if (empty($operations)) {
@@ -177,7 +186,8 @@ final class HTMLProcessor
         return $html;
     }
 
-    protected function runDOMOperations(string $html): string {
+    protected function runDOMOperations(string $html): string
+    {
         $operations = $this->filterOperations(OperationType::DOM);
 
         if (empty($operations)) {
@@ -198,7 +208,8 @@ final class HTMLProcessor
     }
 
     /** @return Operation[] */
-    protected function filterOperations(OperationType $type): array {
+    protected function filterOperations(OperationType $type): array
+    {
         return array_filter(
             $this->operations,
             fn ($op) => $op->type === $type
