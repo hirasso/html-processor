@@ -20,7 +20,7 @@ final class Beautifier
     {
         foreach ($this->document->querySelectorAll('p') as $p) {
 
-            $textContent = $this->removeWhitespace($p->textContent);
+            $textContent = Helpers::normalizeWhitespace($p->textContent);
 
             if (empty($textContent)) {
                 $p->parentNode->removeChild($p);
@@ -28,19 +28,6 @@ final class Beautifier
         }
 
         return $this;
-    }
-
-    /**
-     * Remove any whitespace-looking stuff from a html string
-     * \s matches regular whitespace, \xc2\xa0 matches UTF-8 non-breaking space
-     * @see https://stackoverflow.com/a/30101404/586823
-     */
-    protected function removeWhitespace(string $string): string
-    {
-        $string = trim(str_replace("html5-dom-document-internal-entity1-nbsp-end", " ", $string));
-        $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string);
-        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string);
-        return $string;
     }
 
     /**
@@ -69,7 +56,7 @@ final class Beautifier
     private function maybePreventWidows(string $string): string
     {
         // first remove any eventual white space
-        $string = $this->removeWhitespace($string);
+        $string = Helpers::normalizeWhitespace($string);
 
         // count the words
         $words = explode(" ", $string);

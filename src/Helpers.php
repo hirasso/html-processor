@@ -37,4 +37,17 @@ final class Helpers
         $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
         return $html;
     }
+
+    /**
+     * Remove any whitespace-looking stuff from a html string
+     * \s matches regular whitespace, \xc2\xa0 matches UTF-8 non-breaking space
+     * @see https://stackoverflow.com/a/30101404/586823
+     */
+    public static function normalizeWhitespace(string $string): string
+    {
+        $string = trim(str_replace("html5-dom-document-internal-entity1-nbsp-end", " ", $string));
+        $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string);
+        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string);
+        return $string;
+    }
 }
