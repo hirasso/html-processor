@@ -38,8 +38,8 @@ final class Beautifier
     protected function removeWhitespace(string $string): string
     {
         $string = trim(str_replace("html5-dom-document-internal-entity1-nbsp-end", " ", $string));
-        $string = preg_replace('/^[\s\xc2\xa0]*$/i', '', $string);
-        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', '', $string);
+        $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string);
+        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string);
         return $string;
     }
 
@@ -56,9 +56,6 @@ final class Beautifier
          */
         for ($i = $textNodes->length; $i--; $i >= 0) {
             $node = $textNodes[$i];
-            if (empty(trim($node->textContent))) {
-                continue;
-            }
             $node->textContent = $this->maybePreventWidows($node->textContent);
             break;
         }

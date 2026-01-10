@@ -155,38 +155,55 @@ final class HTMLProcessor
             return $this->originalHTML;
         }
 
-        $document = new HTML5DOMDocument();
-        $document->loadHTML(
-            htmlspecialchars_decode(Helpers::htmlentities($this->originalHTML)),
-            HTML5DOMDocument::ALLOW_DUPLICATE_IDS,
-        );
+        $html = $this->runHTMLOperations($this->originalHTML);
 
-        // Separate operations by type for optimal execution
-        $domOperations = array_filter(
-            $this->operations,
-            fn (Operation $op) => $op->type === OperationType::DOM
-        );
-        $htmlOperations = array_filter(
-            $this->operations,
-            fn (Operation $op) => $op->type === OperationType::HTML
-        );
+        $html = $this->runDOMOperations($html);
 
-        // Execute all DOM operations first (no serialization needed)
-        foreach ($domOperations as $operation) {
-            ($operation->handler)($document);
+        return $html;
+    }
+
+    protected function runHTMLOperations(string $html): string {
+        $operations = $this->filterOperations(OperationType::HTML);
+
+        if (empty($operations)) {
+            return $html;
         }
 
-        $html = Helpers::extractBodyHTML($document);
-
-        // Then execute HTML operations (only one serialize/parse cycle)
-        if (!empty($htmlOperations)) {
-
-            foreach ($htmlOperations as $operation) {
-                $html = ($operation->handler)($html);
-            }
+        // Run operations against the raw HTML
+        foreach ($operations as $operation) {
+            $html = ($operation->handler)($html);
         }
 
         return $html;
+    }
+
+    protected function runDOMOperations(string $html): string {
+        $operations = $this->filterOperations(OperationType::DOM);
+
+        if (empty($operations)) {
+            return $html;
+        }
+
+        $document = new HTML5DOMDocument();
+        $document->loadHTML(
+            htmlspecialchars_decode(Helpers::htmlentities($html)),
+            HTML5DOMDocument::ALLOW_DUPLICATE_IDS,
+        );
+
+        // Execute all DOM operations
+        foreach ($operations as $operation) {
+            ($operation->handler)($document);
+        }
+
+        return Helpers::extractBodyHTML($document);
+    }
+
+    /** @return Operation[] */
+    protected function filterOperations(OperationType $type): array {
+        return array_filter(
+            $this->operations,
+            fn ($op) => $op->type === $type
+        );
     }
 
     /**
