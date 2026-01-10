@@ -1,17 +1,15 @@
 <?php
 
-/*
- * Copyright (c) Rasso Hilber
- * https://rassohilber.com
- */
-
 declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor;
 
+use DOMXPath;
+use IvoPetkov\HTML5DOMDocument;
+
 final class Beautifier
 {
-    public function __construct(protected HTMLProcessor $processor)
+    public function __construct(protected HTML5DOMDocument $document)
     {
     }
 
@@ -20,7 +18,7 @@ final class Beautifier
      */
     public function removeEmptyParagraphs(): self
     {
-        foreach ($this->processor->queryAll('p') as $p) {
+        foreach ($this->document->querySelectorAll('p') as $p) {
 
             $textContent = $this->removeWhitespace($p->textContent);
 
@@ -50,7 +48,8 @@ final class Beautifier
      */
     public function preventWidows()
     {
-        $textNodes = $this->processor->queryXPath('//text()');
+        $xPath = new DOMXPath($this->document);
+        $textNodes = $xPath->query('//text()');
 
         /**
          * Traverse the DOMNodeList backwards, prevent widows on the first textNode that is not empty
