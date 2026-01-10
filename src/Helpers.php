@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor;
 
+use IvoPetkov\HTML5DOMDocument;
+
 final class Helpers
 {
     /**
@@ -21,5 +23,18 @@ final class Helpers
             '&amp;',
             strtr($text, $translation_table)
         );
+    }
+
+    /**
+     * Extract HTML from body
+     */
+    public static function extractBodyHTML(HTML5DOMDocument $document): string
+    {
+        $html = $document->saveHTML();
+        preg_match('/<body[^>]*>(?<content>.*?)<\/body>/is', $html, $matches);
+        $html = $matches['content'] ?? '';
+        $html = html_entity_decode($html);
+        $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
+        return $html;
     }
 }

@@ -6,26 +6,16 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
-use DOMNode;
-use DOMXPath;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
 final class HTMLProcessor
 {
-    protected HTML5DOMDocument $document;
-    protected DOMXPath $xPath;
-    protected string $originalHTML;
-
     /** @var Operation[] */
     protected array $operations = [];
 
-    protected bool $isProcessed = false;
-
-    protected function __construct(string $html)
+    protected function __construct(protected readonly string $originalHTML)
     {
-        $this->originalHTML = $html;
-        $this->initializeDOM($html);
     }
 
     /**
@@ -37,37 +27,6 @@ final class HTMLProcessor
     }
 
     /**
-     * Initialize the DOM without processing
-     */
-    protected function initializeDOM(string $html): void
-    {
-        $this->document = new HTML5DOMDocument();
-        $this->document->loadHTML(
-            htmlspecialchars_decode(Helpers::htmlentities($html)),
-            HTML5DOMDocument::ALLOW_DUPLICATE_IDS,
-        );
-        $this->xPath = new DOMXPath($this->document);
-    }
-
-    /**
-     * Query the document via XPath
-     */
-    public function queryXPath(string $expression, ?DOMNode $contextNode = null)
-    {
-        $this->process();
-        return $this->xPath->query($expression, $contextNode);
-    }
-
-    /**
-     * @return HTML5DOMElement[]
-     */
-    public function queryAll(string $selector): array
-    {
-        $this->process();
-        return [...$this->document->querySelectorAll($selector)];
-    }
-
-    /**
      * Makes urls clickable
      */
     public function autolink(?AutolinkOptions $options = null): self
@@ -75,7 +34,7 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::HTML,
             name: 'autolink',
-            handler: function(string $html) use ($options): string {
+            handler: function (string $html) use ($options): string {
                 $autolink = new Autolink($options ?? new AutolinkOptions(
                     stripScheme: true,
                     textLimit: 35,
@@ -90,8 +49,6 @@ final class HTMLProcessor
                 return $html;
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
@@ -103,13 +60,11 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::DOM,
             name: 'linkToSocial',
-            handler: function($document) use ($prefix, $url): void {
+            handler: function ($document) use ($prefix, $url): void {
                 $linker = new SocialLinker($document);
                 $linker->link($prefix, $url);
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
@@ -123,12 +78,10 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::DOM,
             name: 'processLinks',
-            handler: function(HTML5DOMDocument $doc) use ($callback): void {
+            handler: function (HTML5DOMDocument $doc) use ($callback): void {
                 LinkProcessor::process($doc, $callback);
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
@@ -142,7 +95,7 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::DOM,
             name: 'beautify',
-            handler: function(HTML5DOMDocument $doc) use ($removeEmptyParagraphs, $preventWidows): void {
+            handler: function (HTML5DOMDocument $doc) use ($removeEmptyParagraphs, $preventWidows): void {
                 $beautifier = new Beautifier($doc);
 
                 if ($removeEmptyParagraphs) {
@@ -154,8 +107,6 @@ final class HTMLProcessor
                 }
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
@@ -169,13 +120,11 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::DOM,
             name: 'localizeQuotes',
-            handler: function(HTML5DOMDocument $doc) use ($locale, $debug): void {
+            handler: function (HTML5DOMDocument $doc) use ($locale, $debug): void {
                 $localizer = new QuoteLocalizer($doc, $locale, $debug);
                 $localizer->localize();
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
@@ -187,75 +136,57 @@ final class HTMLProcessor
         $this->operations[] = new Operation(
             type: OperationType::HTML,
             name: 'encodeEmails',
-            handler: function(string $html): string {
+            handler: function (string $html): string {
                 $encoder = new EmailEncoder();
                 return $encoder->encode($html);
             }
         );
-
-        $this->isProcessed = false;
         return $this;
     }
 
     /**
      * Execute all queued operations in optimal order
+     *
+     * @return string – the processed HTML string
      */
-    protected function process(): void
+    public function process(): string
     {
-        if ($this->isProcessed || empty($this->operations)) {
-            return;
+        if (empty($this->originalHTML) || empty($this->operations)) {
+            return $this->originalHTML;
         }
+
+        $document = new HTML5DOMDocument();
+        $document->loadHTML(
+            htmlspecialchars_decode(Helpers::htmlentities($this->originalHTML)),
+            HTML5DOMDocument::ALLOW_DUPLICATE_IDS,
+        );
 
         // Separate operations by type for optimal execution
         $domOperations = array_filter(
             $this->operations,
-            fn(Operation $op) => $op->type === OperationType::DOM
+            fn (Operation $op) => $op->type === OperationType::DOM
         );
         $htmlOperations = array_filter(
             $this->operations,
-            fn(Operation $op) => $op->type === OperationType::HTML
+            fn (Operation $op) => $op->type === OperationType::HTML
         );
 
         // Execute all DOM operations first (no serialization needed)
         foreach ($domOperations as $operation) {
-            ($operation->handler)($this->document);
+            ($operation->handler)($document);
         }
+
+        $html = Helpers::extractBodyHTML($document);
 
         // Then execute HTML operations (only one serialize/parse cycle)
         if (!empty($htmlOperations)) {
-            $html = $this->extractBodyHTML();
 
             foreach ($htmlOperations as $operation) {
                 $html = ($operation->handler)($html);
             }
-
-            // Re-parse only once after all HTML operations
-            $this->initializeDOM($html);
         }
 
-        $this->isProcessed = true;
-    }
-
-    /**
-     * Extract HTML from body
-     */
-    protected function extractBodyHTML(): string
-    {
-        $html = $this->document->saveHTML();
-        preg_match('/<body[^>]*>(?<content>.*?)<\/body>/is', $html, $matches);
-        $html = $matches['content'] ?? '';
-        $html = html_entity_decode($html);
-        $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
         return $html;
-    }
-
-    /**
-     * Convert the document to a string and return it (triggers lazy processing)
-     */
-    public function toHTML(): string
-    {
-        $this->process();
-        return $this->extractBodyHTML();
     }
 
     /**
@@ -263,19 +194,7 @@ final class HTMLProcessor
      */
     public function __toString(): string
     {
-        return $this->toHTML();
-    }
-
-    /**
-     * Reset all operations and return to original HTML
-     */
-    public function reset(): self
-    {
-        $this->operations = [];
-        $this->initializeDOM($this->originalHTML);
-        $this->isProcessed = false;
-
-        return $this;
+        return $this->process();
     }
 
     /**
@@ -285,6 +204,6 @@ final class HTMLProcessor
      */
     public function getQueuedOperations(): array
     {
-        return array_map(fn(Operation $op) => $op->name, $this->operations);
+        return array_map(fn (Operation $op) => $op->name, $this->operations);
     }
 }
