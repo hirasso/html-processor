@@ -10,3 +10,6 @@ node_modules
 # tests
 coverage.xml
 tests/reports
+
+# claude
+.claude

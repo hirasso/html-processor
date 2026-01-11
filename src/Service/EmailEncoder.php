@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service;
 
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots

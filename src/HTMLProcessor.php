@@ -6,12 +6,20 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
-use Hirasso\HTMLProcessor\Operations\DOMOperation;
-use Hirasso\HTMLProcessor\Operations\DOMQueue;
-use Hirasso\HTMLProcessor\Operations\HTMLOperation;
-use Hirasso\HTMLProcessor\Operations\HTMLQueue;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
+
+use Hirasso\HTMLProcessor\Queue\DOMOperation;
+use Hirasso\HTMLProcessor\Queue\DOMQueue;
+use Hirasso\HTMLProcessor\Queue\HTMLOperation;
+use Hirasso\HTMLProcessor\Queue\HTMLQueue;
+use Hirasso\HTMLProcessor\Service\Beautifier;
+use Hirasso\HTMLProcessor\Service\EmailEncoder;
+use Hirasso\HTMLProcessor\Service\LinkProcessor;
+use Hirasso\HTMLProcessor\Service\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\SocialLinker;
+use Hirasso\HTMLProcessor\Support\Helpers;
+
 
 final class HTMLProcessor
 {

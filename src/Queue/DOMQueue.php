@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Operations;
+namespace Hirasso\HTMLProcessor\Queue;
 
-use Hirasso\HTMLProcessor\Contracts\HTMLQueueContract;
+use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
 
-final class HTMLQueue implements HTMLQueueContract
+final class DOMQueue implements DOMQueueContract
 {
-    /** @var array<string, HTMLOperation> */
+    /** @var array<string, DOMOperation> */
     protected array $operations = [];
 
-    public function add(HTMLOperation $operation): void {
+    public function add(DOMOperation $operation): void
+    {
         $this->operations[$operation->name] = $operation;
     }
 
@@ -20,7 +21,6 @@ final class HTMLQueue implements HTMLQueueContract
         return empty($this->operations);
     }
 
-    /** @return array<string, HTMLOperation> */
     public function all(): array
     {
         return $this->operations;

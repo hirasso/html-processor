@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Operations;
+namespace Hirasso\HTMLProcessor\Queue;
 
 use Closure;
-use IvoPetkov\HTML5DOMDocument;
 
-final readonly class DOMOperation
+final readonly class HTMLOperation
 {
     /**
-     * @param Closure(HTML5DOMDocument): void $handler
+     * @param Closure(string): string $handler
      */
     public function __construct(
         public string $name,

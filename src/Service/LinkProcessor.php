@@ -2,17 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service;
 
+use Hirasso\HTMLProcessor\Enum\UrlType;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
-
-enum UrlType
-{
-    case Internal;
-    case External;
-    case Invalid;
-}
 
 /**
  * Process links in HTML. Add classes reflecting the behaviour

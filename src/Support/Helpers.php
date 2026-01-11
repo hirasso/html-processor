@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Support;
 
 use IvoPetkov\HTML5DOMDocument;
 

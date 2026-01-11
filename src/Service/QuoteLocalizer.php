@@ -7,9 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service;
 
 use DOMXPath;
+use Hirasso\HTMLProcessor\Support\Helpers;
 use IvoPetkov\HTML5DOMDocument;
 
 /**
