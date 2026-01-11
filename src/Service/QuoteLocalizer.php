@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service;
 
 use DOMXPath;
+use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Helpers;
 use IvoPetkov\HTML5DOMDocument;
 
@@ -18,24 +19,28 @@ use IvoPetkov\HTML5DOMDocument;
  * Usage: $html = QuoteLocalizer::localize($html, get_locale());
  * Supported languages: English, German, French
  */
-final readonly class QuoteLocalizer
+final readonly class QuoteLocalizer implements DOMServiceContract
 {
     protected string $languageCode;
     protected string $countryCode;
 
     public function __construct(
-        protected HTML5DOMDocument $document,
-        string $locale,
-        protected bool $debug
+        protected string $locale,
+        protected bool $debug = false,
     ) {
         $separator = str_contains($locale, '_') ? '_' : '-';
         [$this->languageCode, $this->countryCode] = explode($separator, $locale, 2);
     }
 
+    public function getName(): string
+    {
+        return 'localizeQuotes';
+    }
+
     /**
      * Run the normalizer
      */
-    public function localize()
+    public function run(HTML5DOMDocument $document): void
     {
         $doubleQuoteChars = ['“', '”', '„', '«', '»'];
         $singleQuoteChars = ['‘', '’', '‚', '‹', '›'];
@@ -60,7 +65,7 @@ final readonly class QuoteLocalizer
             'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
         ];
 
-        $xPath = new DOMXPath($this->document);
+        $xPath = new DOMXPath($document);
 
         foreach ($xPath->query('//text()') as $textNode) {
             if (trim($textNode->nodeValue) === '') {

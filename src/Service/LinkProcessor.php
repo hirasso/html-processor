@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service;
 
+use Closure;
 use Hirasso\HTMLProcessor\Enum\UrlType;
+use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
@@ -18,12 +20,20 @@ use IvoPetkov\HTML5DOMElement;
  * - external
  * - to files
  */
-final class LinkProcessor
+final readonly class LinkProcessor implements DOMServiceContract
 {
-    public static function process(
-        HTML5DOMDocument $document,
-        ?callable $callback = null,
-    ): void {
+    public function __construct(
+        protected ?Closure $callback = null,
+    ) {
+    }
+
+    public function getName(): string
+    {
+        return 'processLinks';
+    }
+
+    public function run(HTML5DOMDocument $document): void
+    {
         foreach ($document->querySelectorAll('a[href]') as $el) {
 
             /** @var HTML5DOMElement $el */
@@ -66,8 +76,8 @@ final class LinkProcessor
 
             $el->setAttribute('class', implode(' ', $classList));
 
-            if ($callback !== null) {
-                $callback($el);
+            if ($this->callback !== null) {
+                ($this->callback)($el);
             }
         }
     }

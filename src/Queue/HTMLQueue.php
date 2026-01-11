@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Queue;
 
 use Hirasso\HTMLProcessor\Queue\Contract\HTMLQueueContract;
+use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 
 final class HTMLQueue implements HTMLQueueContract
 {
-    /** @var array<string, HTMLOperation> */
-    protected array $operations = [];
+    /** @var array<string, HTMLServiceContract> */
+    protected array $services = [];
 
-    public function add(HTMLOperation $operation): void
+    public function add(HTMLServiceContract $service): void
     {
-        $this->operations[$operation->name] = $operation;
+        $this->services[$service->getName()] = $service;
     }
 
     public function isEmpty(): bool
     {
-        return empty($this->operations);
+        return empty($this->services);
     }
 
-    /** @return array<string, HTMLOperation> */
+    /** @return array<string, HTMLServiceContract> */
     public function all(): array
     {
-        return $this->operations;
+        return $this->services;
     }
 }

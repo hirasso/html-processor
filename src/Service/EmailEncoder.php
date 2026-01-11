@@ -9,18 +9,30 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service;
 
+use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
+
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
-final readonly class EmailEncoder
+final readonly class EmailEncoder implements HTMLServiceContract
 {
+    public function getName(): string
+    {
+        return 'encodeEmails';
+    }
+
+    public function shouldDecodeEntities(): bool
+    {
+        return false;
+    }
+
     /**
      * Searches for plain email addresses in given $string and encodes them
      *
      * Regular expression is based on based on John Gruber's Markdown.
      * http://daringfireball.net/projects/markdown/
      */
-    public function encode(string $html): string
+    public function run(string $html): string
     {
         if (!str_contains($html, '@')) {
             return $html;

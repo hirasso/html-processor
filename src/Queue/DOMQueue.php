@@ -5,24 +5,26 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Queue;
 
 use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
+use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 
 final class DOMQueue implements DOMQueueContract
 {
-    /** @var array<string, DOMOperation> */
-    protected array $operations = [];
+    /** @var array<string, DOMServiceContract> */
+    protected array $services = [];
 
-    public function add(DOMOperation $operation): void
+    public function add(DOMServiceContract $service): void
     {
-        $this->operations[$operation->name] = $operation;
+        $this->services[$service->getName()] = $service;
     }
 
     public function isEmpty(): bool
     {
-        return empty($this->operations);
+        return empty($this->services);
     }
 
+    /** @return array<string, DOMServiceContract> */
     public function all(): array
     {
-        return $this->operations;
+        return $this->services;
     }
 }
