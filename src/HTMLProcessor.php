@@ -140,6 +140,9 @@ final class HTMLProcessor
         return $html;
     }
 
+    /**
+     * Run operations against DOMDocument
+     */
     protected function runDOMQueue(string $html): string
     {
         if ($this->domQueue->isEmpty()) {

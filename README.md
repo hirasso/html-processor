@@ -6,6 +6,13 @@
 
 **A tiny HTML processor written in PHP 🐘**
 
+## Features
+
+- Fluent API
+- Understands HTML5
+- Optimized for performance
+- Extensively tested
+
 ## Installation
 
 ```shell
@@ -18,11 +25,12 @@ composer require hirasso/html-processor
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 echo HTMLProcessor::fromString($html)
-    ->autolink() // automatically wrap urls in links
-    ->localizeQuotes('en_US') // localize quotes based on locale
-    ->processLinks(fn ($el) => $el->setAttribute('data-my-attr', '')) // add various classes to links
-    ->beautify() // prevent widows, remove empty paragraphs
-    ->encodeEmails(); // encode email addresses (must be called last!)
+    ->autolink() // wrap raw url strings in `<a>` tags
+    ->localizeQuotes('de_DE') // localize quotes based on locale
+    ->processLinks() // mark link types via class attribute (mailto:, tel:, internal, external, ...)
+    ->beautify() // remove empty paragraphs, prevent widows
+    ->linkToSocial('#', 'https://bsky.app/hashtag') // automatically link #hashtags to Bluesky
+    ->encodeEmails(); // encode emails to confuse spam bots
 
 ```
 
