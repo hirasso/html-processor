@@ -6,6 +6,10 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
+use Hirasso\HTMLProcessor\Operations\DOMOperation;
+use Hirasso\HTMLProcessor\Operations\DOMOperations;
+use Hirasso\HTMLProcessor\Operations\HTMLOperation;
+use Hirasso\HTMLProcessor\Operations\HTMLOperations;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
@@ -14,11 +18,14 @@ final class HTMLProcessor
     /** track if entities should be decoded */
     protected bool $decodeEntities = true;
 
-    /** @var Operation[] */
-    protected array $operations = [];
+    protected DOMOperations $domOperations;
+    protected HTMLOperations $htmlOperations;
 
-    protected function __construct(protected readonly string $originalHTML)
-    {
+    protected function __construct(
+        protected readonly string $originalHTML
+    ) {
+        $this->domOperations = new DOMOperations();
+        $this->htmlOperations = new HTMLOperations();
     }
 
     /**
@@ -34,8 +41,7 @@ final class HTMLProcessor
      */
     public function autolink(?AutolinkOptions $options = null): self
     {
-        $this->operations[] = new Operation(
-            type: OperationType::HTML,
+        $this->htmlOperations->add(new HTMLOperation(
             name: 'autolink',
             handler: function (string $html) use ($options): string {
                 $autolink = new Autolink($options ?? new AutolinkOptions(
@@ -51,7 +57,7 @@ final class HTMLProcessor
 
                 return $html;
             }
-        );
+        ));
         return $this;
     }
 
@@ -60,14 +66,13 @@ final class HTMLProcessor
      */
     public function linkToSocial(string $prefix, string $url): self
     {
-        $this->operations[] = new Operation(
-            type: OperationType::DOM,
+        $this->domOperations->add(new DOMOperation(
             name: 'linkToSocial',
             handler: function ($document) use ($prefix, $url): void {
                 $linker = new SocialLinker($document);
                 $linker->link($prefix, $url);
             }
-        );
+        ));
         return $this;
     }
 
@@ -78,13 +83,12 @@ final class HTMLProcessor
      */
     public function processLinks(?callable $callback = null): self
     {
-        $this->operations[] = new Operation(
-            type: OperationType::DOM,
+        $this->domOperations->add(new DOMOperation(
             name: 'processLinks',
             handler: function (HTML5DOMDocument $doc) use ($callback): void {
                 LinkProcessor::process($doc, $callback);
             }
-        );
+        ));
         return $this;
     }
 
@@ -95,8 +99,7 @@ final class HTMLProcessor
         ?bool $removeEmptyParagraphs = true,
         ?bool $preventWidows = true
     ): self {
-        $this->operations[] = new Operation(
-            type: OperationType::DOM,
+        $this->domOperations->add(new DOMOperation(
             name: 'beautify',
             handler: function (HTML5DOMDocument $doc) use ($removeEmptyParagraphs, $preventWidows): void {
                 $beautifier = new Beautifier($doc);
@@ -109,7 +112,7 @@ final class HTMLProcessor
                     $beautifier->preventWidows();
                 }
             }
-        );
+        ));
         return $this;
     }
 
@@ -120,14 +123,13 @@ final class HTMLProcessor
         string $locale,
         ?bool $debug = false
     ): self {
-        $this->operations[] = new Operation(
-            type: OperationType::DOM,
+        $this->domOperations->add(new DOMOperation(
             name: 'localizeQuotes',
             handler: function (HTML5DOMDocument $doc) use ($locale, $debug): void {
                 $localizer = new QuoteLocalizer($doc, $locale, $debug);
                 $localizer->localize();
             }
-        );
+        ));
         return $this;
     }
 
@@ -136,8 +138,7 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
-        $this->operations[] = new Operation(
-            type: OperationType::HTML,
+        $this->htmlOperations->add(new HTMLOperation(
             name: 'encodeEmails',
             handler: function (string $html): string {
                 /** Do not decode entities, otherwise the encoding would be lost */
@@ -146,8 +147,15 @@ final class HTMLProcessor
                 $encoder = new EmailEncoder();
                 return $encoder->encode($html);
             }
-        );
+        ));
         return $this;
+    }
+
+    /**
+     * Check if there are any operations registered
+     */
+    protected function hasOperations(): bool {
+        return !$this->htmlOperations->isEmpty() || !$this->domOperations->isEmpty();
     }
 
     /**
@@ -157,7 +165,7 @@ final class HTMLProcessor
      */
     public function process(): string
     {
-        if (empty($this->originalHTML) || empty($this->operations)) {
+        if (empty($this->originalHTML) || !$this->hasOperations()) {
             return $this->originalHTML;
         }
 
@@ -170,16 +178,12 @@ final class HTMLProcessor
             : $html;
     }
 
+    /**
+     * Run operations against the raw HTML
+     */
     protected function runHTMLOperations(string $html): string
     {
-        $operations = $this->filterOperations(OperationType::HTML);
-
-        if (empty($operations)) {
-            return $html;
-        }
-
-        // Run operations against the raw HTML
-        foreach ($operations as $operation) {
+        foreach ($this->htmlOperations->all() as $operation) {
             $html = ($operation->handler)($html);
         }
 
@@ -188,9 +192,7 @@ final class HTMLProcessor
 
     protected function runDOMOperations(string $html): string
     {
-        $operations = $this->filterOperations(OperationType::DOM);
-
-        if (empty($operations)) {
+        if ($this->domOperations->isEmpty()) {
             return $html;
         }
 
@@ -201,19 +203,10 @@ final class HTMLProcessor
         );
 
         // Execute all DOM operations
-        foreach ($operations as $operation) {
+        foreach ($this->domOperations->all() as $operation) {
             ($operation->handler)($document);
         }
         return Helpers::extractBodyHTML($document);
-    }
-
-    /** @return Operation[] */
-    protected function filterOperations(OperationType $type): array
-    {
-        return array_filter(
-            $this->operations,
-            fn ($op) => $op->type === $type
-        );
     }
 
     /**
@@ -222,15 +215,5 @@ final class HTMLProcessor
     public function __toString(): string
     {
         return $this->process();
-    }
-
-    /**
-     * Get the names of all queued operations (useful for debugging)
-     *
-     * @return string[]
-     */
-    public function getQueuedOperations(): array
-    {
-        return array_map(fn (Operation $op) => $op->name, $this->operations);
     }
 }
