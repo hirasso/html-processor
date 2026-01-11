@@ -7,9 +7,9 @@ namespace Hirasso\HTMLProcessor;
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
 use Hirasso\HTMLProcessor\Operations\DOMOperation;
-use Hirasso\HTMLProcessor\Operations\DOMOperations;
+use Hirasso\HTMLProcessor\Operations\DOMQueue;
 use Hirasso\HTMLProcessor\Operations\HTMLOperation;
-use Hirasso\HTMLProcessor\Operations\HTMLOperations;
+use Hirasso\HTMLProcessor\Operations\HTMLQueue;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
@@ -18,14 +18,14 @@ final class HTMLProcessor
     /** track if entities should be decoded */
     protected bool $decodeEntities = true;
 
-    protected DOMOperations $domOperations;
-    protected HTMLOperations $htmlOperations;
+    protected DOMQueue $domQueue;
+    protected HTMLQueue $htmlQueue;
 
     protected function __construct(
         protected readonly string $originalHTML
     ) {
-        $this->domOperations = new DOMOperations();
-        $this->htmlOperations = new HTMLOperations();
+        $this->domQueue = new DOMQueue();
+        $this->htmlQueue = new HTMLQueue();
     }
 
     /**
@@ -41,7 +41,7 @@ final class HTMLProcessor
      */
     public function autolink(?AutolinkOptions $options = null): self
     {
-        $this->htmlOperations->add(new HTMLOperation(
+        $this->htmlQueue->add(new HTMLOperation(
             name: 'autolink',
             handler: function (string $html) use ($options): string {
                 $autolink = new Autolink($options ?? new AutolinkOptions(
@@ -66,7 +66,7 @@ final class HTMLProcessor
      */
     public function linkToSocial(string $prefix, string $url): self
     {
-        $this->domOperations->add(new DOMOperation(
+        $this->domQueue->add(new DOMOperation(
             name: 'linkToSocial',
             handler: function ($document) use ($prefix, $url): void {
                 $linker = new SocialLinker($document);
@@ -83,7 +83,7 @@ final class HTMLProcessor
      */
     public function processLinks(?callable $callback = null): self
     {
-        $this->domOperations->add(new DOMOperation(
+        $this->domQueue->add(new DOMOperation(
             name: 'processLinks',
             handler: function (HTML5DOMDocument $doc) use ($callback): void {
                 LinkProcessor::process($doc, $callback);
@@ -99,7 +99,7 @@ final class HTMLProcessor
         ?bool $removeEmptyParagraphs = true,
         ?bool $preventWidows = true
     ): self {
-        $this->domOperations->add(new DOMOperation(
+        $this->domQueue->add(new DOMOperation(
             name: 'beautify',
             handler: function (HTML5DOMDocument $doc) use ($removeEmptyParagraphs, $preventWidows): void {
                 $beautifier = new Beautifier($doc);
@@ -123,7 +123,7 @@ final class HTMLProcessor
         string $locale,
         ?bool $debug = false
     ): self {
-        $this->domOperations->add(new DOMOperation(
+        $this->domQueue->add(new DOMOperation(
             name: 'localizeQuotes',
             handler: function (HTML5DOMDocument $doc) use ($locale, $debug): void {
                 $localizer = new QuoteLocalizer($doc, $locale, $debug);
@@ -138,7 +138,7 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
-        $this->htmlOperations->add(new HTMLOperation(
+        $this->htmlQueue->add(new HTMLOperation(
             name: 'encodeEmails',
             handler: function (string $html): string {
                 /** Do not decode entities, otherwise the encoding would be lost */
@@ -156,7 +156,7 @@ final class HTMLProcessor
      */
     protected function hasOperations(): bool
     {
-        return !$this->htmlOperations->isEmpty() || !$this->domOperations->isEmpty();
+        return !$this->htmlQueue->isEmpty() || !$this->domQueue->isEmpty();
     }
 
     /**
@@ -170,9 +170,9 @@ final class HTMLProcessor
             return $this->originalHTML;
         }
 
-        $html = $this->runHTMLOperations($this->originalHTML);
-
-        $html = $this->runDOMOperations($html);
+        $html = $this->originalHTML;
+        $html = $this->runHTMLQueue($html);
+        $html = $this->runDOMQueue($html);
 
         return $this->decodeEntities
             ? html_entity_decode($html)
@@ -182,18 +182,18 @@ final class HTMLProcessor
     /**
      * Run operations against the raw HTML
      */
-    protected function runHTMLOperations(string $html): string
+    protected function runHTMLQueue(string $html): string
     {
-        foreach ($this->htmlOperations->all() as $operation) {
+        foreach ($this->htmlQueue->all() as $operation) {
             $html = ($operation->handler)($html);
         }
 
         return $html;
     }
 
-    protected function runDOMOperations(string $html): string
+    protected function runDOMQueue(string $html): string
     {
-        if ($this->domOperations->isEmpty()) {
+        if ($this->domQueue->isEmpty()) {
             return $html;
         }
 
@@ -204,7 +204,7 @@ final class HTMLProcessor
         );
 
         // Execute all DOM operations
-        foreach ($this->domOperations->all() as $operation) {
+        foreach ($this->domQueue->all() as $operation) {
             ($operation->handler)($document);
         }
         return Helpers::extractBodyHTML($document);

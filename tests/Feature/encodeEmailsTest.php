@@ -15,4 +15,4 @@ function expectEncoded(string $string): void
 
 test('Encodes Email addresses', function () {
     expectEncoded(encode('<a href="mailto:mail@example.com">mail@example.com</a>'));
-})->only();
+});

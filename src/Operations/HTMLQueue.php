@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Operations;
 
-final class DOMOperations
-{
-    /** @var array<string, DOMOperation> */
-    protected array $operations;
+use Hirasso\HTMLProcessor\Contracts\HTMLQueueContract;
 
-    public function add(
-        DOMOperation $operation
-    ) {
+final class HTMLQueue implements HTMLQueueContract
+{
+    /** @var array<string, HTMLOperation> */
+    protected array $operations = [];
+
+    public function add(HTMLOperation $operation): void {
         $this->operations[$operation->name] = $operation;
     }
 
@@ -20,6 +20,7 @@ final class DOMOperations
         return empty($this->operations);
     }
 
+    /** @return array<string, HTMLOperation> */
     public function all(): array
     {
         return $this->operations;
