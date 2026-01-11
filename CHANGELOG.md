@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.4
+
+### Patch Changes
+
+- a3c8c6e: Run assigned tasks lazily and in an order that makes sense
+- 1aba0f8: Refactor code
+
 ## 0.0.3
 
 ### Patch Changes
