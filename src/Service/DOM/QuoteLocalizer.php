@@ -32,11 +32,6 @@ final readonly class QuoteLocalizer implements DOMServiceContract
         [$this->languageCode, $this->countryCode] = explode($separator, $locale, 2);
     }
 
-    public function getName(): string
-    {
-        return 'localizeQuotes';
-    }
-
     /**
      * Run the normalizer
      */

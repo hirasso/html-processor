@@ -18,11 +18,6 @@ final readonly class Autolinker implements HTMLServiceContract
     ) {
     }
 
-    public function getName(): string
-    {
-        return 'autolink';
-    }
-
     public function shouldDecodeEntities(): bool
     {
         return true;

@@ -28,11 +28,6 @@ final readonly class LinkProcessor implements DOMServiceContract
     ) {
     }
 
-    public function getName(): string
-    {
-        return 'processLinks';
-    }
-
     public function run(HTML5DOMDocument $document): void
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {

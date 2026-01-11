@@ -16,11 +16,6 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
  */
 final readonly class EmailEncoder implements HTMLServiceContract
 {
-    public function getName(): string
-    {
-        return 'encodeEmails';
-    }
-
     public function shouldDecodeEntities(): bool
     {
         return false;

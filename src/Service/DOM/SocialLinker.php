@@ -16,11 +16,6 @@ final readonly class SocialLinker implements DOMServiceContract
     ) {
     }
 
-    public function getName(): string
-    {
-        return 'linkToSocial';
-    }
-
     /**
      * Link a prefix to a URL
      */

@@ -17,11 +17,6 @@ final readonly class Beautifier implements DOMServiceContract
     ) {
     }
 
-    public function getName(): string
-    {
-        return 'beautify';
-    }
-
     public function run(HTML5DOMDocument $document): void
     {
         if ($this->removeEmptyParagraphs) {

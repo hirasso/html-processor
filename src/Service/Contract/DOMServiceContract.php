@@ -12,9 +12,4 @@ interface DOMServiceContract
      * Execute the DOM operation
      */
     public function run(HTML5DOMDocument $document): void;
-
-    /**
-     * Get the unique name of this service
-     */
-    public function getName(): string;
 }

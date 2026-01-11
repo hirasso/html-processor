@@ -9,12 +9,12 @@ use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 
 final class DOMQueue implements DOMQueueContract
 {
-    /** @var array<string, DOMServiceContract> */
+    /** @var array<class-string<DOMServiceContract>, DOMServiceContract> */
     protected array $services = [];
 
     public function add(DOMServiceContract $service): void
     {
-        $this->services[$service->getName()] = $service;
+        $this->services[$service::class] = $service;
     }
 
     public function isEmpty(): bool
