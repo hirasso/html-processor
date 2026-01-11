@@ -16,11 +16,6 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
  */
 final readonly class EmailEncoder implements HTMLServiceContract
 {
-    public function shouldDecodeEntities(): bool
-    {
-        return false;
-    }
-
     /**
      * Searches for plain email addresses in given $string and encodes them
      *

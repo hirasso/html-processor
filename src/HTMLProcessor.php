@@ -20,7 +20,7 @@ use Hirasso\HTMLProcessor\Support\Helpers;
 final class HTMLProcessor
 {
     /** track if entities should be decoded */
-    protected bool $decodeEntities = true;
+    protected bool $preserveEntities = false;
 
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
@@ -95,6 +95,7 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
+        $this->preserveEntities = true;
         $this->htmlQueue->add(new EmailEncoder());
         return $this;
     }
@@ -122,7 +123,7 @@ final class HTMLProcessor
         $html = $this->runHTMLQueue($html);
         $html = $this->runDOMQueue($html);
 
-        return $this->decodeEntities
+        return !$this->preserveEntities
             ? html_entity_decode($html)
             : $html;
     }
@@ -134,10 +135,6 @@ final class HTMLProcessor
     {
         foreach ($this->htmlQueue->all() as $service) {
             $html = $service->run($html);
-
-            if (!$service->shouldDecodeEntities()) {
-                $this->decodeEntities = false;
-            }
         }
 
         return $html;

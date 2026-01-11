@@ -18,11 +18,6 @@ final readonly class Autolinker implements HTMLServiceContract
     ) {
     }
 
-    public function shouldDecodeEntities(): bool
-    {
-        return true;
-    }
-
     public function run(string $html): string
     {
         $autolink = new Autolink($this->options ?? new AutolinkOptions(
