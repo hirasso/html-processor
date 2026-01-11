@@ -4,11 +4,11 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 function runTest(string $str, string $locale, string $expected): void
 {
-    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->toHTML();
+    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->process();
     expect($result)->toBe($expected);
 }
 
-test('Ignores empty strings', function() {
+test('Ignores empty strings', function () {
     runTest("", 'de_DE', '');
 });
 
@@ -38,8 +38,12 @@ test('Localizes french quotes', function () {
 
 });
 
-test('Parses locales robustly', function() {
+test('Parses locales robustly', function () {
     runTest("<p>\"Hallo\"</p>", 'de_DE', '<p>„Hallo“</p>');
     runTest("<p>\"Hallo\"</p>", 'de_DE_formal', '<p>„Hallo“</p>');
     runTest("<p>\"Hallo\"</p>", 'de-DE', '<p>„Hallo“</p>');
+});
+
+test('Ignores quotes in tags', function () {
+    runTest('<p><a href="example.com">should be ignored</a></p>', 'de_DE', '<p><a href="example.com">should be ignored</a></p>');
 });

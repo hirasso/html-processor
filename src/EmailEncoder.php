@@ -80,6 +80,8 @@ final readonly class EmailEncoder
                 }
             }
         }
-        return implode('', $chars);
+        $encoded = implode('', $chars);
+
+        return $encoded;
     }
 }

@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor;
 
+use DOMXPath;
+use IvoPetkov\HTML5DOMDocument;
+
 /**
  * Localize single and double quotes to the correct format in various languages
  * Usage: $html = QuoteLocalizer::localize($html, get_locale());
@@ -20,7 +23,7 @@ final readonly class QuoteLocalizer
     protected string $countryCode;
 
     public function __construct(
-        protected HTMLProcessor $processor,
+        protected HTML5DOMDocument $document,
         string $locale,
         protected bool $debug
     ) {
@@ -56,7 +59,9 @@ final readonly class QuoteLocalizer
             'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
         ];
 
-        foreach ($this->processor->queryXPath('//text()') as $textNode) {
+        $xPath = new DOMXPath($this->document);
+
+        foreach ($xPath->query('//text()') as $textNode) {
             if (trim($textNode->nodeValue) === '') {
                 continue;
             }
@@ -103,7 +108,7 @@ final readonly class QuoteLocalizer
      */
     protected function entitiesToPlaceholders(string $str): string
     {
-        $str = $this->processor->htmlentities($str);
+        $str = Helpers::htmlentities($str);
         $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str);
         $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str);
         return $str;
