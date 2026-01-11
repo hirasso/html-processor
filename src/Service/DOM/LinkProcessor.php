@@ -48,24 +48,28 @@ final readonly class LinkProcessor implements DOMServiceContract
 
             $urlType = self::detectUrlType($href);
 
-            if ($linkClass = match(true) {
+            $classList[] = match(true) {
                 str_starts_with($href, 'mailto:') => 'link--mailto',
                 str_starts_with($href, 'tel:') => 'link--tel',
                 str_starts_with($href, '#') => 'link--anchor',
                 $urlType === UrlType::External => 'link--external',
                 $urlType === UrlType::Internal => 'link--internal',
-                default => null
-            }) {
-                $classList[] = $linkClass;
-            }
+                default => 'link--unknown'
+            };
 
             if ($urlType === UrlType::External) {
                 $el->setAttribute('target', '_blank');
             }
 
             if ($extension = self::getFileLinkExtension($href)) {
-                $classList[] = "link--file link--file--{$extension}";
+                $classList[] = "link--file";
+                $classList[] = "link--file--{$extension}";
             }
+
+            $classList = array_filter(
+                array_map('trim', $classList),
+                fn($class) => !empty(trim($class))
+            );
 
             $el->setAttribute('class', implode(' ', $classList));
 
@@ -85,7 +89,7 @@ final readonly class LinkProcessor implements DOMServiceContract
         $parsed = parse_url($url);
 
         return match(true) {
-            $parsed === false => UrlType::Invalid,
+            !$parsed => UrlType::Invalid,
             !isset($parsed['host']) => UrlType::Internal,
             default => (function () use ($parsed, $baseDomain): UrlType {
                 $host = strtolower($parsed['host']);

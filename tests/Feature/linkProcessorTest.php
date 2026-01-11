@@ -70,6 +70,6 @@ test('Provides a callback for link processing', function () {
 });
 
 test('Adds a class for invalid links', function () {
-    $result = HTMLProcessor::fromString('<a href=""></a>')->processLinks();
-    expect($result->process())->toBe('<a href=""></a>');
+    $result = HTMLProcessor::fromString('<a href="http://user@:80"></a>')->processLinks();
+    expect($result->process())->toBe('<a href="http://user@:80" class="link--invalid"></a>');
 });
