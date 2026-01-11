@@ -4,7 +4,7 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 function runTest(string $str, string $locale, string $expected): void
 {
-    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->process();
+    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale)->process();
     expect($result)->toBe($expected);
 }
 
@@ -18,6 +18,10 @@ test('Localizes german quotes', function () {
     runTest("<p>\"Hallo\"</p>", $locale, '<p>„Hallo“</p>');
     runTest("<p>'Hallo'</p>", $locale, '<p>‚Hallo‘</p>');
     runTest("<p>\"'Hallo', sagte sie\"</p>", $locale, '<p>„‚Hallo‘, sagte sie“</p>');
+});
+
+test('Works with simple language codes', function () {
+    runTest("<p>\"Hallo\"</p>", 'de', '<p>„Hallo“</p>');
 });
 
 test('Localizes english quotes', function () {

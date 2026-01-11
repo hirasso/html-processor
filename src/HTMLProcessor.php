@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor;
 
-use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
-use Hirasso\HTMLProcessor\Operations\DOMOperation;
-use Hirasso\HTMLProcessor\Operations\DOMQueue;
-use Hirasso\HTMLProcessor\Operations\HTMLOperation;
-use Hirasso\HTMLProcessor\Operations\HTMLQueue;
+use Closure;
 use IvoPetkov\HTML5DOMDocument;
-use IvoPetkov\HTML5DOMElement;
+use Hirasso\HTMLProcessor\Queue\DOMQueue;
+use Hirasso\HTMLProcessor\Queue\HTMLQueue;
+use Hirasso\HTMLProcessor\Service\DOM\Beautifier;
+use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
+use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\SocialLinker;
+use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
+use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
+use Hirasso\HTMLProcessor\Support\Helpers;
 
 final class HTMLProcessor
 {
     /** track if entities should be decoded */
-    protected bool $decodeEntities = true;
+    protected bool $preserveEntities = false;
 
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
@@ -31,7 +35,7 @@ final class HTMLProcessor
     /**
      * Create an instance from a string of HTML
      */
-    public static function fromString(?string $html = ''): self
+    public static function fromString(string $html): self
     {
         return new self($html);
     }
@@ -41,23 +45,7 @@ final class HTMLProcessor
      */
     public function autolink(?AutolinkOptions $options = null): self
     {
-        $this->htmlQueue->add(new HTMLOperation(
-            name: 'autolink',
-            handler: function (string $html) use ($options): string {
-                $autolink = new Autolink($options ?? new AutolinkOptions(
-                    stripScheme: true,
-                    textLimit: 35,
-                    autoTitle: false,
-                    escape: true,
-                    linkNoScheme: true
-                ));
-
-                $html = $autolink->convert($html);
-                $html = $autolink->convertEmail($html);
-
-                return $html;
-            }
-        ));
+        $this->htmlQueue->add(new Autolinker($options));
         return $this;
     }
 
@@ -66,29 +54,18 @@ final class HTMLProcessor
      */
     public function linkToSocial(string $prefix, string $url): self
     {
-        $this->domQueue->add(new DOMOperation(
-            name: 'linkToSocial',
-            handler: function ($document) use ($prefix, $url): void {
-                $linker = new SocialLinker($document);
-                $linker->link($prefix, $url);
-            }
-        ));
+        $this->domQueue->add(new SocialLinker($prefix, $url));
         return $this;
     }
 
     /**
      * Add classes to links, open external links in a new tab, etc.
      *
-     * @param callable(HTML5DOMElement): mixed $callback
+     * @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback
      */
-    public function processLinks(?callable $callback = null): self
+    public function processLinks(?Closure $callback = null): self
     {
-        $this->domQueue->add(new DOMOperation(
-            name: 'processLinks',
-            handler: function (HTML5DOMDocument $doc) use ($callback): void {
-                LinkProcessor::process($doc, $callback);
-            }
-        ));
+        $this->domQueue->add(new LinkProcessor($callback));
         return $this;
     }
 
@@ -99,20 +76,7 @@ final class HTMLProcessor
         ?bool $removeEmptyParagraphs = true,
         ?bool $preventWidows = true
     ): self {
-        $this->domQueue->add(new DOMOperation(
-            name: 'beautify',
-            handler: function (HTML5DOMDocument $doc) use ($removeEmptyParagraphs, $preventWidows): void {
-                $beautifier = new Beautifier($doc);
-
-                if ($removeEmptyParagraphs) {
-                    $beautifier->removeEmptyParagraphs();
-                }
-
-                if ($preventWidows) {
-                    $beautifier->preventWidows();
-                }
-            }
-        ));
+        $this->domQueue->add(new Beautifier($removeEmptyParagraphs, $preventWidows));
         return $this;
     }
 
@@ -121,15 +85,8 @@ final class HTMLProcessor
      */
     public function localizeQuotes(
         string $locale,
-        ?bool $debug = false
     ): self {
-        $this->domQueue->add(new DOMOperation(
-            name: 'localizeQuotes',
-            handler: function (HTML5DOMDocument $doc) use ($locale, $debug): void {
-                $localizer = new QuoteLocalizer($doc, $locale, $debug);
-                $localizer->localize();
-            }
-        ));
+        $this->domQueue->add(new QuoteLocalizer($locale));
         return $this;
     }
 
@@ -138,16 +95,8 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
-        $this->htmlQueue->add(new HTMLOperation(
-            name: 'encodeEmails',
-            handler: function (string $html): string {
-                /** Do not decode entities, otherwise the encoding would be lost */
-                $this->decodeEntities = false;
-
-                $encoder = new EmailEncoder();
-                return $encoder->encode($html);
-            }
-        ));
+        $this->preserveEntities = true;
+        $this->htmlQueue->add(new EmailEncoder());
         return $this;
     }
 
@@ -174,7 +123,7 @@ final class HTMLProcessor
         $html = $this->runHTMLQueue($html);
         $html = $this->runDOMQueue($html);
 
-        return $this->decodeEntities
+        return !$this->preserveEntities
             ? html_entity_decode($html)
             : $html;
     }
@@ -184,8 +133,8 @@ final class HTMLProcessor
      */
     protected function runHTMLQueue(string $html): string
     {
-        foreach ($this->htmlQueue->all() as $operation) {
-            $html = ($operation->handler)($html);
+        foreach ($this->htmlQueue->all() as $service) {
+            $html = $service->run($html);
         }
 
         return $html;
@@ -203,9 +152,9 @@ final class HTMLProcessor
             HTML5DOMDocument::ALLOW_DUPLICATE_IDS,
         );
 
-        // Execute all DOM operations
-        foreach ($this->domQueue->all() as $operation) {
-            ($operation->handler)($document);
+        // Execute all DOM services
+        foreach ($this->domQueue->all() as $service) {
+            $service->run($document);
         }
         return Helpers::extractBodyHTML($document);
     }

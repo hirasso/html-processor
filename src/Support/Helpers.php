@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Support;
 
 use IvoPetkov\HTML5DOMDocument;
 
@@ -18,11 +18,13 @@ final class Helpers
         $translation_table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
         $translation_table[chr(38)] = '&';
 
-        return preg_replace(
+        $result = preg_replace(
             '/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,3};)/',
             '&amp;',
             strtr($text, $translation_table)
         );
+
+        return $result ?? $text;
     }
 
     /**
@@ -45,9 +47,9 @@ final class Helpers
     public static function normalizeWhitespace(string $string): string
     {
         $string = str_replace("html5-dom-document-internal-entity1-nbsp-end", ' ', $string);
-        $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string);
-        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string);
-        $string = preg_replace('/\s+/', ' ', $string);
+        $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
+        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
+        $string = preg_replace('/\s+/', ' ', $string) ?? $string;
         return $string;
     }
 }

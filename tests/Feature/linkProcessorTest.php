@@ -38,13 +38,13 @@ test('Processes internal links', function () {
 
 test('Processes local file links', function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com/file.zip"></a>')->processLinks();
-    expect($result->process())->toBe('<a href="https://example.com/file.zip" class="link--internal link--file link--file-zip"></a>');
+    expect($result->process())->toBe('<a href="https://example.com/file.zip" class="link--internal link--file link--file--zip"></a>');
 
     $result = HTMLProcessor::fromString('<a href="file.zip"></a>')->processLinks();
-    expect($result->process())->toBe('<a href="file.zip" class="link--internal link--file link--file-zip"></a>');
+    expect($result->process())->toBe('<a href="file.zip" class="link--internal link--file link--file--zip"></a>');
 
     $result = HTMLProcessor::fromString('<a href="/path/to/file.zip"></a>')->processLinks();
-    expect($result->process())->toBe('<a href="/path/to/file.zip" class="link--internal link--file link--file-zip"></a>');
+    expect($result->process())->toBe('<a href="/path/to/file.zip" class="link--internal link--file link--file--zip"></a>');
 });
 
 test("Doesn't wrongly detect file links", function () {
@@ -70,6 +70,6 @@ test('Provides a callback for link processing', function () {
 });
 
 test('Adds a class for invalid links', function () {
-    $result = HTMLProcessor::fromString('<a href=""></a>')->processLinks();
-    expect($result->process())->toBe('<a href=""></a>');
+    $result = HTMLProcessor::fromString('<a href="http://user@:80"></a>')->processLinks();
+    expect($result->process())->toBe('<a href="http://user@:80" class="link--invalid"></a>');
 });

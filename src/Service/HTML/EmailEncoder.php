@@ -7,12 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service\HTML;
+
+use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
-final readonly class EmailEncoder
+final readonly class EmailEncoder implements HTMLServiceContract
 {
     /**
      * Searches for plain email addresses in given $string and encodes them
@@ -20,7 +22,7 @@ final readonly class EmailEncoder
      * Regular expression is based on based on John Gruber's Markdown.
      * http://daringfireball.net/projects/markdown/
      */
-    public function encode(string $html): string
+    public function run(string $html): string
     {
         if (!str_contains($html, '@')) {
             return $html;
@@ -41,11 +43,13 @@ final readonly class EmailEncoder
             )
         }xi';
 
-        return preg_replace_callback(
+        $result = preg_replace_callback(
             $pattern,
             fn ($matches) => self::encodeString($matches[0]),
             $html
         );
+
+        return $result ?? $html;
     }
 
     /**

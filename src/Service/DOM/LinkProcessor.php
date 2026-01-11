@@ -2,17 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service\DOM;
 
+use Closure;
+use Hirasso\HTMLProcessor\Enum\UrlType;
+use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
-
-enum UrlType
-{
-    case Internal;
-    case External;
-    case Invalid;
-}
 
 /**
  * Process links in HTML. Add classes reflecting the behaviour
@@ -24,12 +20,16 @@ enum UrlType
  * - external
  * - to files
  */
-final class LinkProcessor
+final readonly class LinkProcessor implements DOMServiceContract
 {
-    public static function process(
-        HTML5DOMDocument $document,
-        ?callable $callback = null,
-    ): void {
+    /** @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback */
+    public function __construct(
+        protected ?Closure $callback = null,
+    ) {
+    }
+
+    public function run(HTML5DOMDocument $document): void
+    {
         foreach ($document->querySelectorAll('a[href]') as $el) {
 
             /** @var HTML5DOMElement $el */
@@ -48,32 +48,33 @@ final class LinkProcessor
 
             $urlType = self::detectUrlType($href);
 
-            if ($linkClass = match(true) {
+            $classList[] = match(true) {
                 str_starts_with($href, 'mailto:') => 'link--mailto',
                 str_starts_with($href, 'tel:') => 'link--tel',
                 str_starts_with($href, '#') => 'link--anchor',
                 $urlType === UrlType::External => 'link--external',
                 $urlType === UrlType::Internal => 'link--internal',
-                default => null
-            }) {
-                $classList[] = $linkClass;
-            }
+                default => 'link--invalid'
+            };
 
             if ($urlType === UrlType::External) {
                 $el->setAttribute('target', '_blank');
             }
 
-            if (self::isFileLink($href)) {
-                $classList[] = 'link--file';
-                // Add extension-specific class
-                $ext = strtolower(pathinfo(parse_url($href, PHP_URL_PATH), PATHINFO_EXTENSION));
-                $classList[] = "link--file-{$ext}";
+            if ($extension = self::getFileLinkExtension($href)) {
+                $classList[] = "link--file";
+                $classList[] = "link--file--{$extension}";
             }
+
+            $classList = array_filter(
+                array_map('trim', $classList),
+                fn($class) => !empty(trim($class))
+            );
 
             $el->setAttribute('class', implode(' ', $classList));
 
-            if ($callback !== null) {
-                $callback($el);
+            if ($this->callback !== null) {
+                ($this->callback)($el);
             }
         }
     }
@@ -88,7 +89,7 @@ final class LinkProcessor
         $parsed = parse_url($url);
 
         return match(true) {
-            $parsed === false => UrlType::Invalid,
+            !$parsed => UrlType::Invalid,
             !isset($parsed['host']) => UrlType::Internal,
             default => (function () use ($parsed, $baseDomain): UrlType {
                 $host = strtolower($parsed['host']);
@@ -107,21 +108,22 @@ final class LinkProcessor
     }
 
     /**
-     * Check if a URL points to a file
+     * Check if a URL points to a file. If so, return the extension.
+     * Ignore "web" extensions like ".html", ".php" ect.
      */
-    protected static function isFileLink(string $url): bool
+    protected static function getFileLinkExtension(string $url): ?string
     {
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
         // Exclude non-http(s) schemes
         if ($scheme && !in_array($scheme, ['http', 'https', ''])) {
-            return false;
+            return null;
         }
 
-        $path = parse_url($url, PHP_URL_PATH);
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
 
-        if ($path === null || $path === '' || $path === '/') {
-            return false;
+        if (in_array($path, ['', '/'], true)) {
+            return null;
         }
 
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
@@ -129,7 +131,9 @@ final class LinkProcessor
         // If no extension or common web extensions, it's likely not a file
         $webExtensions = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp'];
 
-        return $extension !== '' && !in_array($extension, $webExtensions);
+        return $extension && !in_array($extension, $webExtensions, true)
+            ? $extension
+            : null;
     }
 
 }

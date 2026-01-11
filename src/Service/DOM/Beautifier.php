@@ -2,23 +2,38 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor;
+namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use DOMXPath;
+use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Support\Helpers;
 use IvoPetkov\HTML5DOMDocument;
 
-final class Beautifier
+final readonly class Beautifier implements DOMServiceContract
 {
-    public function __construct(protected HTML5DOMDocument $document)
+    public function __construct(
+        protected ?bool $removeEmptyParagraphs = true,
+        protected ?bool $preventWidows = true,
+    ) {
+    }
+
+    public function run(HTML5DOMDocument $document): void
     {
+        if ($this->removeEmptyParagraphs) {
+            $this->doRemoveEmptyParagraphs($document);
+        }
+
+        if ($this->preventWidows) {
+            $this->doPreventWidows($document);
+        }
     }
 
     /**
      * Remove empty-looking paragraphs from html
      */
-    public function removeEmptyParagraphs(): self
+    private function doRemoveEmptyParagraphs(HTML5DOMDocument $document): void
     {
-        foreach ($this->document->querySelectorAll('p') as $p) {
+        foreach ($document->querySelectorAll('p') as $p) {
 
             $textContent = Helpers::normalizeWhitespace($p->textContent);
 
@@ -26,17 +41,19 @@ final class Beautifier
                 $p->parentNode->removeChild($p);
             }
         }
-
-        return $this;
     }
 
     /**
      * Prevent widows in html text
      */
-    public function preventWidows()
+    private function doPreventWidows(HTML5DOMDocument $document): void
     {
-        $xPath = new DOMXPath($this->document);
+        $xPath = new DOMXPath($document);
         $textNodes = $xPath->query('//text()');
+
+        if ($textNodes === false) {
+            return;
+        }
 
         /**
          * Traverse the DOMNodeList backwards, prevent widows on the first textNode that is not empty
@@ -75,9 +92,9 @@ final class Beautifier
             return $string;
         }
 
-        $string = preg_replace('/([^\s])\s+([^\s]+)\s*$/', '$1&nbsp;$2', $string);
+        $result = preg_replace('/([^\s])\s+([^\s]+)\s*$/', '$1&nbsp;$2', $string);
 
-        return $string;
+        return $result ?? $string;
     }
 
     /**
@@ -88,8 +105,8 @@ final class Beautifier
         if (strpos($html, 'html5-dom-document-internal-entity') === false) {
             return $html;
         }
-        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html);
-        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html);
+        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html) ?? $html;
+        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html) ?? $html;
         return $html;
     }
 }
