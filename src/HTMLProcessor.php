@@ -154,7 +154,8 @@ final class HTMLProcessor
     /**
      * Check if there are any operations registered
      */
-    protected function hasOperations(): bool {
+    protected function hasOperations(): bool
+    {
         return !$this->htmlOperations->isEmpty() || !$this->domOperations->isEmpty();
     }
 

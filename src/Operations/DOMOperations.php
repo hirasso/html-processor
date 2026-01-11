@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Operations;
 
-use Hirasso\HTMLProcessor\Contracts\Operations;
-
 final class DOMOperations
 {
     /** @var array<string, DOMOperation> */
@@ -17,11 +15,13 @@ final class DOMOperations
         $this->operations[$operation->name] = $operation;
     }
 
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return empty($this->operations);
     }
 
-    public function all(): array {
+    public function all(): array
+    {
         return $this->operations;
     }
 }

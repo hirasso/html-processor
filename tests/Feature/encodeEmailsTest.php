@@ -2,10 +2,12 @@
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
-function encode(string $string): string {
+function encode(string $string): string
+{
     return HTMLProcessor::fromString($string)->encodeEmails()->process();
 }
-function expectEncoded(string $string): void {
+function expectEncoded(string $string): void
+{
     expect(str_starts_with($string, '<a href="'))->toBe(true);
     expect(str_ends_with($string, '</a>'))->toBe(true);
     expect(substr_count($string, '#') > 10)->toBe(true);
