@@ -24,26 +24,35 @@ final readonly class SocialLinker implements DOMServiceContract
         $baseURL = rtrim($this->baseURL, '/');
         $xPath = new DOMXPath($document);
 
-        foreach ($xPath->query('//text()') as $textNode) {
+        if (!$textNodes = $xPath->query('//text()')) {
+            return;
+        };
+
+        foreach ($textNodes as $textNode) {
             // Skip text nodes inside <a> elements
-            if ($xPath->query('ancestor::a', $textNode)->length) {
+            $ancestors = $xPath->query('ancestor::a', $textNode);
+            if (!!$ancestors && $ancestors->length) {
                 continue;
             }
 
-            if (!str_contains($textNode->nodeValue, $this->prefix)) {
+            $nodeValue = $textNode->nodeValue ?? '';
+
+            if (!str_contains($nodeValue, $this->prefix)) {
                 continue;
             }
 
             $quotedPrefix = preg_quote($this->prefix);
 
-            $textNode->nodeValue = preg_replace_callback(
-                "/(?<=^|\s)$quotedPrefix(.*?)(?=\s|$)/",
-                function ($matches) use ($baseURL) {
+            $result = preg_replace_callback(
+                pattern: "/(?<=^|\s)$quotedPrefix(.*?)(?=\s|$)/",
+                callback: function ($matches) use ($baseURL) {
                     [, $captured] = $matches;
                     return "<a href=\"$baseURL/$captured\">{$this->prefix}{$captured}</a>";
                 },
-                $textNode->nodeValue
+                subject: $nodeValue
             );
+
+            $textNode->nodeValue = $result ?? $nodeValue;
         }
     }
 }

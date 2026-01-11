@@ -35,7 +35,7 @@ final class HTMLProcessor
     /**
      * Create an instance from a string of HTML
      */
-    public static function fromString(?string $html = ''): self
+    public static function fromString(string $html): self
     {
         return new self($html);
     }
@@ -85,9 +85,8 @@ final class HTMLProcessor
      */
     public function localizeQuotes(
         string $locale,
-        ?bool $debug = false
     ): self {
-        $this->domQueue->add(new QuoteLocalizer($locale, $debug));
+        $this->domQueue->add(new QuoteLocalizer($locale));
         return $this;
     }
 

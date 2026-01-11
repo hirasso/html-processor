@@ -63,11 +63,8 @@ final readonly class LinkProcessor implements DOMServiceContract
                 $el->setAttribute('target', '_blank');
             }
 
-            if (self::isFileLink($href)) {
-                $classList[] = 'link--file';
-                // Add extension-specific class
-                $ext = strtolower(pathinfo(parse_url($href, PHP_URL_PATH), PATHINFO_EXTENSION));
-                $classList[] = "link--file-{$ext}";
+            if ($extension = self::getFileLinkExtension($href)) {
+                $classList[] = "link--file link--file--{$extension}";
             }
 
             $el->setAttribute('class', implode(' ', $classList));
@@ -107,21 +104,22 @@ final readonly class LinkProcessor implements DOMServiceContract
     }
 
     /**
-     * Check if a URL points to a file
+     * Check if a URL points to a file. If so, return the extension.
+     * Ignore "web" extensions like ".html", ".php" ect.
      */
-    protected static function isFileLink(string $url): bool
+    protected static function getFileLinkExtension(string $url): ?string
     {
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
         // Exclude non-http(s) schemes
         if ($scheme && !in_array($scheme, ['http', 'https', ''])) {
-            return false;
+            return null;
         }
 
-        $path = parse_url($url, PHP_URL_PATH);
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
 
-        if ($path === null || $path === '' || $path === '/') {
-            return false;
+        if (in_array($path, ['', '/'], true)) {
+            return null;
         }
 
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
@@ -129,7 +127,9 @@ final readonly class LinkProcessor implements DOMServiceContract
         // If no extension or common web extensions, it's likely not a file
         $webExtensions = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp'];
 
-        return $extension !== '' && !in_array($extension, $webExtensions);
+        return $extension && !in_array($extension, $webExtensions, true)
+            ? $extension
+            : null;
     }
 
 }

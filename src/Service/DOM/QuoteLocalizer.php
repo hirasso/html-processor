@@ -26,7 +26,6 @@ final readonly class QuoteLocalizer implements DOMServiceContract
 
     public function __construct(
         protected string $locale,
-        protected bool $debug = false,
     ) {
         $separator = str_contains($locale, '_') ? '_' : '-';
         [$this->languageCode, $this->countryCode] = explode($separator, $locale, 2);
@@ -60,14 +59,18 @@ final readonly class QuoteLocalizer implements DOMServiceContract
             'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
         ];
 
-        $xPath = new DOMXPath($document);
+        if (!$textNodes = (new DOMXPath($document))->query('//text()')) {
+            return;
+        }
 
-        foreach ($xPath->query('//text()') as $textNode) {
-            if (trim($textNode->nodeValue) === '') {
+        foreach ($textNodes as $textNode) {
+            $nodeValue = $textNode->nodeValue ?? '';
+
+            if (empty(trim($nodeValue))) {
                 continue;
             }
 
-            $text = $this->entitiesToPlaceholders($textNode->nodeValue);
+            $text = $this->entitiesToPlaceholders($nodeValue);
 
             // Normalize all quotes to a consistent representation
             $text = str_replace($doubleQuoteSearch, $doubleQuoteEntity, $text);
@@ -83,6 +86,8 @@ final readonly class QuoteLocalizer implements DOMServiceContract
 
     /**
      * Replace quotes based on language
+     *
+     * @param array<string, callable(string): string> $replacements
      */
     private function replaceQuoted(
         string $text,
@@ -97,11 +102,13 @@ final readonly class QuoteLocalizer implements DOMServiceContract
          */
         $escapedQuoteEntity = preg_quote($quoteEntity, '/');
 
-        return preg_replace_callback(
+        $result = preg_replace_callback(
             "/$escapedQuoteEntity(.*?)$escapedQuoteEntity/",
             fn ($matches) => isset($replacements[$lang]) ? $replacements[$lang]($matches[1]) : $matches[0],
             $text
         );
+
+        return $result ?? $text;
     }
 
     /**
@@ -110,8 +117,8 @@ final readonly class QuoteLocalizer implements DOMServiceContract
     protected function entitiesToPlaceholders(string $str): string
     {
         $str = Helpers::htmlentities($str);
-        $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str);
-        $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str);
+        $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str) ?? $str;
+        $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str) ?? $str;
         return $str;
     }
 }

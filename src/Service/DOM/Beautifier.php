@@ -12,8 +12,8 @@ use IvoPetkov\HTML5DOMDocument;
 final readonly class Beautifier implements DOMServiceContract
 {
     public function __construct(
-        protected bool $removeEmptyParagraphs = true,
-        protected bool $preventWidows = true,
+        protected ?bool $removeEmptyParagraphs = true,
+        protected ?bool $preventWidows = true,
     ) {
     }
 
@@ -50,6 +50,10 @@ final readonly class Beautifier implements DOMServiceContract
     {
         $xPath = new DOMXPath($document);
         $textNodes = $xPath->query('//text()');
+
+        if ($textNodes === false) {
+            return;
+        }
 
         /**
          * Traverse the DOMNodeList backwards, prevent widows on the first textNode that is not empty
@@ -88,9 +92,9 @@ final readonly class Beautifier implements DOMServiceContract
             return $string;
         }
 
-        $string = preg_replace('/([^\s])\s+([^\s]+)\s*$/', '$1&nbsp;$2', $string);
+        $result = preg_replace('/([^\s])\s+([^\s]+)\s*$/', '$1&nbsp;$2', $string);
 
-        return $string;
+        return $result ?? $string;
     }
 
     /**
@@ -101,8 +105,8 @@ final readonly class Beautifier implements DOMServiceContract
         if (strpos($html, 'html5-dom-document-internal-entity') === false) {
             return $html;
         }
-        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html);
-        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html);
+        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html) ?? $html;
+        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html) ?? $html;
         return $html;
     }
 }

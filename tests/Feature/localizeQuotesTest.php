@@ -4,7 +4,7 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 function runTest(string $str, string $locale, string $expected): void
 {
-    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale, true)->process();
+    $result = HTMLProcessor::fromString($str)->localizeQuotes($locale)->process();
     expect($result)->toBe($expected);
 }
 

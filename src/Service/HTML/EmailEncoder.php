@@ -48,11 +48,13 @@ final readonly class EmailEncoder implements HTMLServiceContract
             )
         }xi';
 
-        return preg_replace_callback(
+        $result = preg_replace_callback(
             $pattern,
             fn ($matches) => self::encodeString($matches[0]),
             $html
         );
+
+        return $result ?? $html;
     }
 
     /**
