@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
+use Closure;
 use IvoPetkov\HTML5DOMDocument;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\Autolinker;
-use Hirasso\HTMLProcessor\Service\Beautifier;
-use Hirasso\HTMLProcessor\Service\EmailEncoder;
-use Hirasso\HTMLProcessor\Service\LinkProcessor;
-use Hirasso\HTMLProcessor\Service\QuoteLocalizer;
-use Hirasso\HTMLProcessor\Service\SocialLinker;
+use Hirasso\HTMLProcessor\Service\DOM\Beautifier;
+use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
+use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\SocialLinker;
+use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
+use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
 use Hirasso\HTMLProcessor\Support\Helpers;
 
 final class HTMLProcessor
@@ -60,9 +61,9 @@ final class HTMLProcessor
     /**
      * Add classes to links, open external links in a new tab, etc.
      *
-     * @param callable(\IvoPetkov\HTML5DOMElement): mixed $callback
+     * @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback
      */
-    public function processLinks(?callable $callback = null): self
+    public function processLinks(?Closure $callback = null): self
     {
         $this->domQueue->add(new LinkProcessor($callback));
         return $this;

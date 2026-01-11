@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service;
+namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Closure;
 use Hirasso\HTMLProcessor\Enum\UrlType;
@@ -22,6 +22,7 @@ use IvoPetkov\HTML5DOMElement;
  */
 final readonly class LinkProcessor implements DOMServiceContract
 {
+    /** @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback */
     public function __construct(
         protected ?Closure $callback = null,
     ) {

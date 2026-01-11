@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service;
+namespace Hirasso\HTMLProcessor\Service\HTML;
 
 use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 
