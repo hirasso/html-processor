@@ -3,16 +3,17 @@
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 test('Runs various tasks on a string', function () {
-    $html = 'Please reach out to mail@example.com to learn more about us, or follow @acme on instagram';
+    $html = 'Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more, or follow <a href="https://www.instagram.com/acme">@acme</a> on instagram';
 
-    $processor = HTMLProcessor::fromString($html)
-        ->autolink()
+    $result = HTMLProcessor::fromString($html)
         ->linkToSocial('@', 'https://www.instagram.com')
         ->linkToSocial('#', 'https://www.instagram.com/explore/tags/tag')
+        ->autolink()
         ->localizeQuotes('en_US')
         ->processLinks(fn ($el) => $el->setAttribute('data-my-attr', ''))
-        ->beautify();
+        ->beautify()
+        ->process();
 
-    expect($processor->toHTML())
-        ->toBe('Please reach out to <a href="mailto:mail@example.com" class="link--mailto" data-my-attr="">mail@example.com</a>to learn more about us, or follow <a href=“https://www.instagram.com/acme”>@acme</a> on&nbsp;instagram');
+    expect($result)
+        ->toBe('Please reach out to <a href="mailto:mail@example.com" class="link--mailto" data-my-attr="">mail@example.com</a> to learn more, or follow <a href="https://www.instagram.com/acme" target="_blank" class="link--external" data-my-attr="">@acme</a> on instagram');
 });

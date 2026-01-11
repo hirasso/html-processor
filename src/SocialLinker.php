@@ -1,18 +1,16 @@
 <?php
 
-/*
- * Copyright (c) Rasso Hilber
- * https://rassohilber.com
- */
-
 declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor;
 
+use DOMXPath;
+use IvoPetkov\HTML5DOMDocument;
+
 final readonly class SocialLinker
 {
     public function __construct(
-        protected HTMLProcessor $processor,
+        protected HTML5DOMDocument $document,
     ) {
     }
 
@@ -22,10 +20,11 @@ final readonly class SocialLinker
     public function link(string $prefix, string $baseURL): void
     {
         $baseURL = rtrim($baseURL, '/');
+        $xPath = new DOMXPath($this->document);
 
-        foreach ($this->processor->queryXPath('//text()') as $textNode) {
+        foreach ($xPath->query('//text()') as $textNode) {
             // Skip text nodes inside <a> elements
-            if ($this->processor->queryXPath('ancestor::a', $textNode)->length) {
+            if ($xPath->query('ancestor::a', $textNode)->length) {
                 continue;
             }
 
