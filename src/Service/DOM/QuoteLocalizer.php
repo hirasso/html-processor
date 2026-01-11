@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
+use Closure;
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Helpers;
@@ -19,16 +20,65 @@ use IvoPetkov\HTML5DOMDocument;
  * Usage: $html = QuoteLocalizer::localize($html, get_locale());
  * Supported languages: English, German, French
  */
-final readonly class QuoteLocalizer implements DOMServiceContract
+final class QuoteLocalizer implements DOMServiceContract
 {
-    protected string $languageCode;
-    protected string $countryCode;
+    private const FALLBACK_LANGUAGE = 'en';
+
+    private string $languageCode;
+
+    /** @var array<string, Closure(string): string> */
+    private array $doubleQuoteReplacements;
+
+    /** @var array<string, Closure(string): string> */
+    private array $singleQuoteReplacements;
 
     public function __construct(
-        protected string $locale,
+        private string $locale,
     ) {
+        $this->locale = strtolower($this->locale);
+        $this->validateLocale($this->locale);
+
         $separator = str_contains($locale, '_') ? '_' : '-';
-        [$this->languageCode, $this->countryCode] = explode($separator, $locale, 2);
+        [$this->languageCode] = explode($separator, $locale);
+
+        $this->initializeQuoteReplacements();
+    }
+
+    /**
+     * Check if the locale is valid. Valid is any of these:
+     *
+     * - de
+     * - de_DE
+     * - or de-DE
+     * - or de_DE_formal
+     */
+    private function validateLocale(string $locale): void
+    {
+        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
+            throw new \InvalidArgumentException(
+                "Invalid locale format: {$locale}. Expected format: en, en_US or en-US"
+            );
+        }
+    }
+
+    /**
+     * Current supported quote replacements
+     */
+    private function initializeQuoteReplacements(): void
+    {
+        $this->doubleQuoteReplacements = [
+            'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
+            'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
+            // French has narrow non-breaking spaces between the quotes and the word
+            'fr' => fn (string $s) => $this->entitiesToPlaceholders("«\u{202F}{$s}\u{202F}»"),
+        ];
+
+        $this->singleQuoteReplacements = [
+            'en' => fn (string $s) => $this->entitiesToPlaceholders("‘{$s}’"),
+            'de' => fn (string $s) => $this->entitiesToPlaceholders("‚{$s}‘"),
+            // French has narrow non-breaking spaces between the quotes and the word
+            'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
+        ];
     }
 
     /**
@@ -44,20 +94,6 @@ final readonly class QuoteLocalizer implements DOMServiceContract
 
         $doubleQuoteSearch = array_map([$this, 'entitiesToPlaceholders'], $doubleQuoteChars);
         $singleQuoteSearch = array_map([$this, 'entitiesToPlaceholders'], $singleQuoteChars);
-
-        $doubleQuoteReplacements = [
-            'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
-            'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
-            // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => $this->entitiesToPlaceholders("«\u{202F}{$s}\u{202F}»"),
-        ];
-
-        $singleQuoteReplacements = [
-            'de' => fn (string $s) => $this->entitiesToPlaceholders("‚{$s}‘"),
-            'en' => fn (string $s) => $this->entitiesToPlaceholders("‘{$s}’"),
-            // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
-        ];
 
         if (!$textNodes = (new DOMXPath($document))->query('//text()')) {
             return;
@@ -77,8 +113,8 @@ final readonly class QuoteLocalizer implements DOMServiceContract
             $text = str_replace($singleQuoteSearch, $singleQuoteEntity, $text);
 
             // Localize the quotes
-            $text = $this->replaceQuoted($text, $doubleQuoteEntity, $doubleQuoteReplacements);
-            $text = $this->replaceQuoted($text, $singleQuoteEntity, $singleQuoteReplacements);
+            $text = $this->replaceQuoted($text, $doubleQuoteEntity, $this->doubleQuoteReplacements);
+            $text = $this->replaceQuoted($text, $singleQuoteEntity, $this->singleQuoteReplacements);
 
             $textNode->nodeValue = $text;
         }
@@ -87,7 +123,7 @@ final readonly class QuoteLocalizer implements DOMServiceContract
     /**
      * Replace quotes based on language
      *
-     * @param array<string, callable(string): string> $replacements
+     * @param array<string, Closure(string): string> $replacements
      */
     private function replaceQuoted(
         string $text,
@@ -95,6 +131,11 @@ final readonly class QuoteLocalizer implements DOMServiceContract
         array $replacements
     ): string {
         $lang = $this->languageCode;
+
+        // Fallback to default language if current language is not supported
+        if (!isset($replacements[$lang])) {
+            $lang = self::FALLBACK_LANGUAGE;
+        }
 
         /**
          * Escape the pattern so that html5-dom-document-internal-entity1-...-end
@@ -104,7 +145,7 @@ final readonly class QuoteLocalizer implements DOMServiceContract
 
         $result = preg_replace_callback(
             "/$escapedQuoteEntity(.*?)$escapedQuoteEntity/",
-            fn ($matches) => isset($replacements[$lang]) ? $replacements[$lang]($matches[1]) : $matches[0],
+            fn ($matches) => $replacements[$lang]($matches[1]),
             $text
         );
 

@@ -20,6 +20,10 @@ test('Localizes german quotes', function () {
     runTest("<p>\"'Hallo', sagte sie\"</p>", $locale, '<p>„‚Hallo‘, sagte sie“</p>');
 });
 
+test('Works with simple language codes', function () {
+    runTest("<p>\"Hallo\"</p>", 'de', '<p>„Hallo“</p>');
+});
+
 test('Localizes english quotes', function () {
     $locale = 'en_US';
 
