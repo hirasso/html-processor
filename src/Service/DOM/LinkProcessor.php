@@ -54,7 +54,7 @@ final readonly class LinkProcessor implements DOMServiceContract
                 str_starts_with($href, '#') => 'link--anchor',
                 $urlType === UrlType::External => 'link--external',
                 $urlType === UrlType::Internal => 'link--internal',
-                default => 'link--unknown'
+                default => 'link--invalid'
             };
 
             if ($urlType === UrlType::External) {
