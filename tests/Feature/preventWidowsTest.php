@@ -65,3 +65,12 @@ test('works with nested elements', function () {
     $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
     expect($result)->toBe($expected);
 });
+
+// test('should work with this', function() {
+//     $foo = '<p>is first and foremost a curatorial project in which the archive of the IMD is both a resource and a protagonist. Featuring recordings, letters, photos and documents from its 1946 foundation up to the present day, Deutsch&#8217;s deep dive research is striving to offer a coherent anthology of sonic transformations in contemporary music. Due to run over six years, the first edition – <i>the electric guitar diaries</i> – offers a compilation of 27 compositions available both on digital platforms and in physical format coming in the shape of a box set (3 vinyls and a booklet) filled with essays, photos and other deep cut rarities.</p>';
+//     $bar = '<p>is first and foremost a curatorial project in which the archive of the IMD is both a resource and a protagonist. Featuring recordings, letters, photos and documents from its 1946 foundation up to the present day, Deutsch’s deep dive research is striving to offer a coherent anthology of sonic transformations in contemporary music. Due to run over six years, the first edition – <i>the electric guitar diaries</i> – offers a compilation of 27 compositions available both on digital platforms and in physical format coming in the shape of a box set (3 vinyls and a booklet) filled with essays, photos and other deep cut&nbsp;rarities.</p>';
+//     $result = HTMLProcessor::fromString($foo)
+//         ->typography(localizeQuotes: false)
+//         ->apply();
+//     expect($result)->toBe($bar);
+// });
