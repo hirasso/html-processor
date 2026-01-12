@@ -1,5 +1,12 @@
 <?php
 
+require_once(dirname(__DIR__) . '/vendor/autoload.php');
+
+echo "----------------------------------------------------" . PHP_EOL;
+echo "  PHP " . PHP_VERSION . PHP_EOL;
+echo "  libxml " . LIBXML_DOTTED_VERSION . PHP_EOL;
+echo "----------------------------------------------------" . PHP_EOL;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
