@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 46d54e6: Only prevent widows in the last text node of each block element
+
 ## 0.1.0
 
 ### Minor Changes
