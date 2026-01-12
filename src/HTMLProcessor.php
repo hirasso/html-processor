@@ -211,7 +211,8 @@ final class HTMLProcessor
     /**
      * Only allow duplicate IDs if libxml is lower then 2.14.6
      */
-    private function allowDuplicateIDs(): bool {
+    private function allowDuplicateIDs(): bool
+    {
         return
             version_compare(LIBXML_DOTTED_VERSION, '2.14.6', '<')
             || version_compare(LIBXML_DOTTED_VERSION, '2.16', '>');

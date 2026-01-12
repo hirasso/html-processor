@@ -18,7 +18,8 @@ final readonly class Autolinker implements HTMLServiceContract
     ) {
     }
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return -100;
     }
 

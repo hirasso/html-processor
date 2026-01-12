@@ -13,7 +13,8 @@ final class PrefixLinker implements DOMServiceContract
     /** @var array<string, string> */
     private array $entries;
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
