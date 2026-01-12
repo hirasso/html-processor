@@ -63,7 +63,8 @@ final class HTMLProcessor
      */
     public function autolinkPrefix(string $prefix, string $url): self
     {
-        $linker = $this->domQueue->get(PrefixLinker::class) ?? new PrefixLinker();
+        $linker = $this->domQueue->get(PrefixLinker::class)
+            ?? new PrefixLinker();
 
         $linker->register($prefix, $url);
 

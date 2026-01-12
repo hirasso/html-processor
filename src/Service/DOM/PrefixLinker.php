@@ -56,11 +56,13 @@ final class PrefixLinker implements DOMServiceContract
                 continue;
             }
 
-            $nodeValue = $textNode->nodeValue ?? '';
+            $text = $textNode->nodeValue ?? '';
 
             foreach ($this->entries as $prefix => $url) {
-                $textNode->nodeValue = $this->link($nodeValue, $prefix, $url);
+                $text = $this->link($text, $prefix, $url);
             }
+
+            $textNode->nodeValue = $text;
         }
     }
 
@@ -72,13 +74,15 @@ final class PrefixLinker implements DOMServiceContract
 
         $quotedPrefix = preg_quote($prefix);
 
-        return preg_replace_callback(
+        $result = preg_replace_callback(
             pattern: "/(?<=^|\s)$quotedPrefix(.*?)(?=\s|$)/",
-            callback: function ($matches) use ($prefix, $url) {
+            callback: function ($matches) use ($text, $prefix, $url) {
                 [, $captured] = $matches;
                 return "<a href=\"{$url}{$captured}\">{$prefix}{$captured}</a>";
             },
             subject: $text
-        ) ?? $text;
+        );
+
+        return $result ?? $text;
     }
 }

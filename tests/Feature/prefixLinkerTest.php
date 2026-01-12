@@ -43,15 +43,15 @@ test('Works in complex HTML', function () {
 });
 
 test('Works with repeated calls', function () {
-    $html = <<<HTML
+    $html = trimLines(<<<HTML
         <p>Follow @acme on SocialWeb.</p>
         <p>Learn more about #php on SocialWeb.</p>
-    HTML;
+    HTML);
 
-    $expected = <<<HTML
+    $expected = trimLines(<<<HTML
         <p>Follow <a href="https://your-instance.social/@acme">@acme</a> on SocialWeb.</p>
         <p>Learn more about <a href="https://your-instance.social/tags/php">#php</a> on SocialWeb.</p>
-    HTML;
+    HTML);
 
     $result = HTMLProcessor::fromString($html)
         ->autolinkPrefix('@', 'https://your-instance.social/@')
@@ -59,4 +59,4 @@ test('Works with repeated calls', function () {
         ->process();
 
     expect($result)->toBe($expected);
-})->only();
+});
