@@ -5,7 +5,8 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 test('Runs various tasks on a string', function () {
     $html = trimLines(<<<HTML
-    <p></p><!-- delete me -->
+    <p></p><div></div>
+    <p><!-- preserve-me --></p>
     <p>Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more.</p>
     <p>Follow @acme on SocialWeb.</p>
     <p>And some more text that should not have a widow</p>
@@ -28,12 +29,14 @@ test('Runs various tasks on a string', function () {
         )
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
-        ->removeEmptyElements('p') // remove empty paragraphs
+        ->removeEmptyElements('p,div') // remove empty paragraphs
         ->encodeEmails()
         ->process();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
-    expect($result)->toContain('<!-- delete me -->');
+    expect($result)->not->toContain('<p></p>');
+    expect($result)->not->toContain('<div></div>');
+    expect($result)->not->toContain('<p><!-- preserve me --></p>');
     expect($result)->toContain('class="link--mailto"');
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->toContain('&nbsp;');

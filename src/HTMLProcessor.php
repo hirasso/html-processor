@@ -46,14 +46,17 @@ final class HTMLProcessor
     }
 
     /**
-     * Makes urls clickable
+     * Make urls clickable
      */
-    public function autolinkUrls(
-        ?AutolinkOptions $options = null,
-        ?string $atMentions = null,
-        ?string $hashTags = null,
-    ): self {
-        $this->htmlQueue->add(new Autolinker($options));
+    public function autolinkUrls(?AutolinkOptions $options = null): self
+    {
+        $this->htmlQueue->add(new Autolinker($options  ?? new AutolinkOptions(
+            stripScheme: true,
+            textLimit: 35,
+            autoTitle: false,
+            escape: true,
+            linkNoScheme: true
+        )));
 
         return $this;
     }
