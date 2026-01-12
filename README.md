@@ -19,17 +19,27 @@
 composer require hirasso/html-processor
 ```
 
-## Usage
+## Usage Example
 
 ```php
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 echo HTMLProcessor::fromString($html)
-    ->autolink() // wrap raw url strings in `<a>` tags
-    ->localizeQuotes('de_DE') // localize quotes based on locale
-    ->processLinks() // mark link types via class attribute (mailto:, tel:, internal, external, ...)
-    ->beautify() // remove empty paragraphs, prevent widows
-    ->linkToSocial('#', 'https://bsky.app/hashtag') // automatically link #hashtags to Bluesky
+    ->autolinkUrls() // wrap raw url strings in `<a>` tags
+    ->typography( // optimize typography
+        'de_DE',
+        localizeQuotes: true, // format quotes based on locale
+        preventWidows: true // prevent widows
+    )
+    ->processLinks(function ($el, $type) { // process links by callback
+        if ($type === UrlType::External) {
+            $el->setAttribute('target', '_blank');
+        },
+        addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
+    })
+    ->autolinkSocial('@', 'https://your-instance.social/@') // link @profileName to Mastodon
+    ->autolinkSocial('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
+    ->removeEmptyElements('p') // remove empty paragraphs
     ->encodeEmails(); // encode emails to confuse spam bots
 
 ```

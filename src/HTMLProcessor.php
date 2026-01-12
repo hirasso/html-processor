@@ -6,21 +6,27 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
+use Hirasso\HTMLProcessor\Enum\UrlType;
 use IvoPetkov\HTML5DOMDocument;
+use Hirasso\HTMLProcessor\Support\Helpers;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\DOM\Beautifier;
+use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 use Hirasso\HTMLProcessor\Service\DOM\SocialLinker;
 use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\WidowPreventer;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\QuoteLocalizer;
+
 
 final class HTMLProcessor
 {
     /** track if entities should be decoded */
     protected bool $preserveEntities = false;
+
+    /** used for typography optimizations */
+    protected string $locale = 'en_US';
 
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
@@ -43,16 +49,21 @@ final class HTMLProcessor
     /**
      * Makes urls clickable
      */
-    public function autolink(?AutolinkOptions $options = null): self
+    public function autolinkUrls(
+        ?AutolinkOptions $options = null,
+        ?string $atMentions = null,
+        ?string $hashTags = null,
+    ): self
     {
         $this->htmlQueue->add(new Autolinker($options));
+
         return $this;
     }
 
     /**
      * Automatically link @foobar or #hashtag to a social network (or anywhere)
      */
-    public function linkToSocial(string $prefix, string $url): self
+    public function autolinkSocial(string $prefix, string $url): self
     {
         $this->domQueue->add(new SocialLinker($prefix, $url));
         return $this;
@@ -61,32 +72,38 @@ final class HTMLProcessor
     /**
      * Add classes to links, open external links in a new tab, etc.
      *
-     * @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback
+     * @param ?Closure(\IvoPetkov\HTML5DOMElement $el, UrlType $type): mixed $postProcess – post-process links with information
      */
-    public function processLinks(?Closure $callback = null): self
+    public function processLinks(
+        ?Closure $postProcess = null,
+        ?bool $addClasses = null,
+    ): self
     {
-        $this->domQueue->add(new LinkProcessor($callback));
+        $this->domQueue->add(new LinkProcessor($postProcess, $addClasses ?? true));
         return $this;
     }
 
     /**
-     * Removes empty paragraphs from the DOM
+     * Remove empty elements
      */
-    public function beautify(
-        ?bool $removeEmptyParagraphs = true,
-        ?bool $preventWidows = true
-    ): self {
-        $this->domQueue->add(new Beautifier($removeEmptyParagraphs, $preventWidows));
+    public function removeEmptyElements(?string $selector = null): self
+    {
+        $this->domQueue->add(new EmptyElements($selector));
         return $this;
     }
 
     /**
-     * Localize quotes based on locale
+     * Optimize typography
      */
-    public function localizeQuotes(
-        string $locale,
+    public function typography(
+        ?string $locale = null,
+        ?bool $localizeQuotes = true,
+        ?bool $preventWidows = true,
     ): self {
-        $this->domQueue->add(new QuoteLocalizer($locale));
+
+        $localizeQuotes && $this->domQueue->add(new QuoteLocalizer($locale ?? 'en_US'));
+        $preventWidows && $this->domQueue->add(new WidowPreventer());
+
         return $this;
     }
 

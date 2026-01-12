@@ -11,14 +11,14 @@ afterAll(function () {
     $_SERVER['HTTP_HOST'] = null;
 });
 
-test('Adds a class for links containing http', function () {
-    $result = HTMLProcessor::fromString('<a href="http://example.com">http://example.com</a>')->processLinks();
-    expect($result->process())->toBe('<a href="http://example.com" class="link--contains-http link--internal">http://example.com</a>');
-});
-
 test('Processes mailto: links', function () {
     $result = HTMLProcessor::fromString('<a href="mailto:mail@example.com"></a>')->processLinks();
     expect($result->process())->toBe('<a href="mailto:mail@example.com" class="link--mailto"></a>');
+});
+
+test('Treats custom schemes as external', function () {
+    $result = HTMLProcessor::fromString('<a href="skype://example.com"></a>')->processLinks();
+    expect($result->process())->toBe('<a href="skype://example.com" class="link--external"></a>');
 });
 
 test('Processes tel: links', function () {
@@ -54,17 +54,17 @@ test("Doesn't wrongly detect file links", function () {
 
 test('Processes external links', function () {
     $result = HTMLProcessor::fromString('<a href="https://external.com"></a>')->processLinks();
-    expect($result->process())->toBe('<a href="https://external.com" target="_blank" class="link--external"></a>');
+    expect($result->process())->toBe('<a href="https://external.com" class="link--external"></a>');
 });
 
 test('Treats subdomains as external links', function () {
     $result = HTMLProcessor::fromString('<a href="https://external.example.com"></a>')->processLinks();
-    expect($result->process())->toBe('<a href="https://external.example.com" target="_blank" class="link--external"></a>');
+    expect($result->process())->toBe('<a href="https://external.example.com" class="link--external"></a>');
 });
 
 test('Provides a callback for link processing', function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
-        fn (HTML5DOMElement $el) => $el->setAttribute('x-typowave.notouch.minvw.768', '')
+        postProcess: fn (HTML5DOMElement $el) => $el->setAttribute('x-typowave.notouch.minvw.768', '')
     );
     expect($result->process())->toBe('<a href="https://example.com" class="link--internal" x-typowave.notouch.minvw.768="">example.com</a>');
 });

@@ -22,9 +22,10 @@ use IvoPetkov\HTML5DOMElement;
  */
 final readonly class LinkProcessor implements DOMServiceContract
 {
-    /** @param ?Closure(\IvoPetkov\HTML5DOMElement): mixed $callback */
+    /** @param ?Closure(\IvoPetkov\HTML5DOMElement $el, UrlType $type): mixed $postProcess */
     public function __construct(
-        protected ?Closure $callback = null,
+        private ?Closure $postProcess = null,
+        private ?bool $addClasses = null,
     ) {
     }
 
@@ -39,58 +40,60 @@ final readonly class LinkProcessor implements DOMServiceContract
                 continue;
             }
 
-            $classAttr = $el->getAttribute('class');
-            $classList = $classAttr ? explode(' ', $classAttr) : [];
+            $type = self::detectUrlType($href);
+            $extension = self::getFileLinkExtension($href);
 
-            if (str_starts_with($el->textContent, 'http')) {
-                $classList[] = 'link--contains-http';
-            }
+            $this->addLinkClasses($el, $type, $extension);
 
-            $urlType = self::detectUrlType($href);
-
-            $classList[] = match(true) {
-                str_starts_with($href, 'mailto:') => 'link--mailto',
-                str_starts_with($href, 'tel:') => 'link--tel',
-                str_starts_with($href, '#') => 'link--anchor',
-                $urlType === UrlType::External => 'link--external',
-                $urlType === UrlType::Internal => 'link--internal',
-                default => 'link--invalid'
-            };
-
-            if ($urlType === UrlType::External) {
-                $el->setAttribute('target', '_blank');
-            }
-
-            if ($extension = self::getFileLinkExtension($href)) {
-                $classList[] = "link--file";
-                $classList[] = "link--file--{$extension}";
-            }
-
-            $classList = array_filter(
-                array_map('trim', $classList),
-                fn($class) => !empty(trim($class))
-            );
-
-            $el->setAttribute('class', implode(' ', $classList));
-
-            if ($this->callback !== null) {
-                ($this->callback)($el);
+            if ($this->postProcess !== null) {
+                ($this->postProcess)($el, $type);
             }
         }
+    }
+
+    private function addLinkClasses(HTML5DOMElement $el, UrlType $type, ?string $extension = null): void
+    {
+        if (!$this->addClasses) {
+            return;
+        }
+
+        $classAttr = $el->getAttribute('class');
+        $classList = $classAttr ? explode(' ', $classAttr) : [];
+
+        $classList[] = 'link--' . strtolower($type->name);
+
+        $classList = array_filter(
+            array_map('trim', $classList),
+            fn ($class) => !empty(trim($class))
+        );
+
+        if ($extension) {
+            $classList[] = "link--file link--file--{$extension}";
+        }
+
+        $el->setAttribute('class', implode(' ', $classList));
     }
 
     /**
      * Detect the type of a URL (internal/external/invalid)
      */
-    protected static function detectUrlType(string $url): UrlType
+    public static function detectUrlType(string $url): UrlType
     {
         $baseDomain = $_SERVER['HTTP_HOST'] ?? '';
 
         $parsed = parse_url($url);
+        $host = strtolower($parsed['host'] ?? '');
+        $scheme = strtolower($parsed['scheme'] ?? '');
+        $isCustomScheme = !!$scheme && !in_array($scheme, ['http', 'https'], true);
+        $isAnchorToCurrentPage = str_starts_with(trim($url), '#');
 
         return match(true) {
             !$parsed => UrlType::Invalid,
-            !isset($parsed['host']) => UrlType::Internal,
+            $scheme === 'mailto' => UrlType::Mailto,
+            $scheme === 'tel' => UrlType::Tel,
+            $isCustomScheme => UrlType::External,
+            $isAnchorToCurrentPage => UrlType::Anchor,
+            !$host => UrlType::Internal,
             default => (function () use ($parsed, $baseDomain): UrlType {
                 $host = strtolower($parsed['host']);
                 $base = strtolower($baseDomain);

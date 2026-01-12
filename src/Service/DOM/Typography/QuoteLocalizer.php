@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM;
+namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 
 use Closure;
 use DOMXPath;
@@ -32,40 +32,10 @@ final class QuoteLocalizer implements DOMServiceContract
     /** @var array<string, Closure(string): string> */
     private array $singleQuoteReplacements;
 
-    public function __construct(
-        private string $locale,
-    ) {
-        $this->locale = strtolower($this->locale);
-        $this->validateLocale($this->locale);
+    public function __construct(string $locale) {
 
-        $separator = str_contains($locale, '_') ? '_' : '-';
-        [$this->languageCode] = explode($separator, $locale);
+        $this->setLocale($locale);
 
-        $this->initializeQuoteReplacements();
-    }
-
-    /**
-     * Check if the locale is valid. Valid is any of these:
-     *
-     * - de
-     * - de_DE
-     * - or de-DE
-     * - or de_DE_formal
-     */
-    private function validateLocale(string $locale): void
-    {
-        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
-            throw new \InvalidArgumentException(
-                "Invalid locale format: {$locale}. Expected format: en, en_US or en-US"
-            );
-        }
-    }
-
-    /**
-     * Current supported quote replacements
-     */
-    private function initializeQuoteReplacements(): void
-    {
         $this->doubleQuoteReplacements = [
             'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
             'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
@@ -79,6 +49,30 @@ final class QuoteLocalizer implements DOMServiceContract
             // French has narrow non-breaking spaces between the quotes and the word
             'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
         ];
+    }
+
+    /**
+     * Set a custom locale. Valid formats:
+     *
+     * - de
+     * - de_DE
+     * - or de-DE
+     * - or de_DE_formal
+     */
+    public function setLocale(string $locale): self
+    {
+        $locale = strtolower($locale);
+
+        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
+            throw new \InvalidArgumentException(
+                "Invalid locale format: '{$locale}'. Expected format: 'en', 'en_US' or 'en-US'"
+            );
+        }
+
+        $separator = str_contains($locale, '_') ? '_' : '-';
+        [$this->languageCode] = explode($separator, $locale);
+
+        return $this;
     }
 
     /**
