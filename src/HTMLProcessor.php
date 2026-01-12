@@ -143,9 +143,13 @@ final class HTMLProcessor
         $html = $this->runHTMLQueue($html);
         $html = $this->runDOMQueue($html);
 
-        return !$this->preserveEntities
-            ? html_entity_decode($html)
-            : $html;
+        if (!$this->preserveEntities) {
+            return html_entity_decode($html);
+        }
+
+        // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)
+        // while keeping numeric entities (&#109; &#x6d; &nbsp; etc.)
+        return htmlspecialchars_decode($html);
     }
 
     /**
