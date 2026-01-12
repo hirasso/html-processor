@@ -32,28 +32,79 @@ final readonly class WidowPreventer implements DOMServiceContract
     public function run(HTML5DOMDocument $document): void
     {
         $xPath = new DOMXPath($document);
-        $textNodes = $xPath->query('//text()');
 
-        if ($textNodes === false) {
+        // Find all block elements
+        $blockElementsQuery = implode(' | ', array_map(fn ($tag) => "//{$tag}", self::BLOCK_ELEMENTS));
+        $blockElements = $xPath->query($blockElementsQuery);
+
+        if ($blockElements === false) {
             return;
         }
 
         /**
-         * Process each text node that is a direct child of a block element
+         * For each block element that doesn't contain other block elements (leaf blocks),
+         * find the last text node and apply widow prevention
          */
-        foreach ($textNodes as $node) {
-            $parentNode = $node->parentNode;
-
-            if ($parentNode === null) {
+        foreach ($blockElements as $blockElement) {
+            // Skip if this block contains other block elements
+            if ($this->containsBlockElements($blockElement, $xPath)) {
                 continue;
             }
 
-            $parentTagName = strtolower($parentNode->nodeName);
+            $lastTextNode = $this->findLastTextNode($blockElement);
 
-            if (in_array($parentTagName, self::BLOCK_ELEMENTS, true)) {
-                $node->textContent = $this->maybePreventWidows($node->textContent);
+            if ($lastTextNode !== null) {
+                $lastTextNode->textContent = $this->maybePreventWidows($lastTextNode->textContent);
             }
         }
+    }
+
+    /**
+     * Check if an element contains other block elements
+     */
+    private function containsBlockElements(\DOMNode $element, DOMXPath $xPath): bool
+    {
+        $blockElementsQuery = implode(' | ', array_map(fn ($tag) => ".//{$tag}", self::BLOCK_ELEMENTS));
+        $childBlocks = $xPath->query($blockElementsQuery, $element);
+
+        return $childBlocks !== false && $childBlocks->length > 0;
+    }
+
+    /**
+     * Find the last non-empty text node within an element
+     */
+    private function findLastTextNode(\DOMNode $node): ?\DOMText
+    {
+        // Traverse children in reverse to find the last text node
+        $lastTextNode = null;
+
+        if ($node->hasChildNodes()) {
+            for ($i = $node->childNodes->length - 1; $i >= 0; $i--) {
+                $child = $node->childNodes->item($i);
+
+                if ($child === null) {
+                    continue;
+                }
+
+                // If it's a text node with content, use it
+                if ($child instanceof \DOMText) {
+                    $textContent = trim($child->textContent);
+                    if (!empty($textContent)) {
+                        return $child;
+                    }
+                }
+
+                // Otherwise, recursively search this child
+                if ($child->hasChildNodes()) {
+                    $lastTextNode = $this->findLastTextNode($child);
+                    if ($lastTextNode !== null) {
+                        return $lastTextNode;
+                    }
+                }
+            }
+        }
+
+        return $lastTextNode;
     }
 
     /**
