@@ -23,9 +23,14 @@ composer require hirasso/html-processor
 
 ```php
 use Hirasso\HTMLProcessor\HTMLProcessor;
+use Hirasso\HTMLProcessor\Enum\UrlType;
 
 echo HTMLProcessor::fromString($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
+    ->autolinkSocial('@', 'https://your-instance.social/@') // link @profileName to Mastodon
+    ->autolinkSocial('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
+    ->removeEmptyElements('p') // remove empty paragraphs
+    ->encodeEmails() // encode emails to confuse spam bots
     ->typography( // optimize typography
         'de_DE',
         localizeQuotes: true, // format quotes based on locale
@@ -36,11 +41,7 @@ echo HTMLProcessor::fromString($html)
             $el->setAttribute('target', '_blank');
         },
         addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
-    })
-    ->autolinkSocial('@', 'https://your-instance.social/@') // link @profileName to Mastodon
-    ->autolinkSocial('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
-    ->removeEmptyElements('p') // remove empty paragraphs
-    ->encodeEmails(); // encode emails to confuse spam bots
+    });
 
 ```
 
