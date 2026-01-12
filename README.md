@@ -31,8 +31,7 @@ echo HTMLProcessor::fromString($html)
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
     ->removeEmptyElements('p') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
-    ->typography( // optimize typography
-        'de_DE', // currently supported: 'en', 'de', 'fr'
+    ->typography('de_DE', // optimize typography. currently supported: 'en', 'de', 'fr'
         localizeQuotes: true, // format quotes based on locale
         preventWidows: true // prevent widows
     )
