@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Patch Changes
+
+- 513ad82: Fix widow prevention for text containing HTML entities (umlauts). The length check now correctly counts decoded characters instead of entity byte length, preventing false positives that skipped widow prevention on German text.
+
 ## 0.1.1
 
 ### Patch Changes
