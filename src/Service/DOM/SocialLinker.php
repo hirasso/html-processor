@@ -10,10 +10,17 @@ use IvoPetkov\HTML5DOMDocument;
 
 final readonly class SocialLinker implements DOMServiceContract
 {
+    public string $baseURL;
+
     public function __construct(
-        protected string $prefix,
-        protected string $baseURL,
+        public string $prefix,
+        string $baseURL,
     ) {
+        $baseURL = trim($baseURL);
+        if (!preg_match('/[@=\/]$/', $baseURL)) {
+            $baseURL = "$baseURL/";
+        }
+        $this->baseURL = $baseURL;
     }
 
     /**
@@ -21,7 +28,6 @@ final readonly class SocialLinker implements DOMServiceContract
      */
     public function run(HTML5DOMDocument $document): void
     {
-        $baseURL = rtrim($this->baseURL, '/');
         $xPath = new DOMXPath($document);
 
         if (!$textNodes = $xPath->query('//text()')) {
@@ -45,9 +51,9 @@ final readonly class SocialLinker implements DOMServiceContract
 
             $result = preg_replace_callback(
                 pattern: "/(?<=^|\s)$quotedPrefix(.*?)(?=\s|$)/",
-                callback: function ($matches) use ($baseURL) {
+                callback: function ($matches) {
                     [, $captured] = $matches;
-                    return "<a href=\"$baseURL/$captured\">{$this->prefix}{$captured}</a>";
+                    return "<a href=\"{$this->baseURL}{$captured}\">{$this->prefix}{$captured}</a>";
                 },
                 subject: $nodeValue
             );
