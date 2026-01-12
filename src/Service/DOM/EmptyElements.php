@@ -16,7 +16,8 @@ final readonly class EmptyElements implements DOMServiceContract
     ) {
     }
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
@@ -32,40 +33,9 @@ final readonly class EmptyElements implements DOMServiceContract
     {
         foreach ($document->querySelectorAll($this->selector ?? 'p') as $el) {
             /** @var HTML5DOMElement $el */
-            if ($this->containsOnlyWhitespace($el)) {
+            if (Helpers::containsOnlyWhitespace($el)) {
                 $el->parentNode?->removeChild($el);
             }
         }
-    }
-
-    /**
-     * Check if an element contains only white space and nothing else
-     */
-    private function containsOnlyWhitespace(HTML5DOMElement $el): bool {
-        if (!$this->containsOnlyText($el)) {
-            return false;
-        }
-
-        $textContent = Helpers::normalizeWhitespace($el->textContent);
-
-        return empty(trim($textContent));
-    }
-
-    /**
-     * Check if an element only contains text
-     */
-    private function containsOnlyText(HTML5DOMElement $el): bool
-    {
-        if (!$el->hasChildNodes()) {
-            return true;
-        }
-
-        foreach ($el->childNodes as $child) {
-            if ($child->nodeType !== XML_TEXT_NODE) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

@@ -196,4 +196,13 @@ final class HTMLProcessor
     {
         return $this->apply();
     }
+
+    /**
+     * Preserve entities explicitly
+     */
+    public function preserveEntities(?bool $preserve = true): self
+    {
+        $this->preserveEntities = $preserve ?? true;
+        return $this;
+    }
 }

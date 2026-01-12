@@ -16,7 +16,8 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
  */
 final readonly class EmailEncoder implements HTMLServiceContract
 {
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
@@ -49,7 +50,7 @@ final readonly class EmailEncoder implements HTMLServiceContract
 
         $result = preg_replace_callback(
             $pattern,
-            fn ($matches) => self::encodeString($matches[0]),
+            fn ($matches) => $this->encodeString($matches[0]),
             $html
         );
 
@@ -68,7 +69,7 @@ final readonly class EmailEncoder implements HTMLServiceContract
      * Whose code is based on a filter by Matthew Wickline, posted to
      * the BBEdit-Talk with some optimizations by Milian Wolff.
      */
-    protected static function encodeString(string $string): string
+    private function encodeString(string $string): string
     {
         $chars = str_split($string);
         $seed = mt_rand(0, (int) abs(crc32($string) / strlen($string)));
