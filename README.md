@@ -35,12 +35,13 @@ echo HTMLProcessor::fromString($html)
         localizeQuotes: true, // format quotes based on locale
         preventWidows: true // prevent widows
     )
-    ->processLinks(function ($el, $type) { // process links by callback
+    ->processLinks(
+        addClasses: true, // automatically add classes by type (mailto:, tel, internal, external, ...)
+        function ($el, $type) { // apply a custom callback to all links
             if ($type === UrlType::External) {
                 $el->setAttribute('target', '_blank');
             }
         },
-        addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
     );
 
 ```
