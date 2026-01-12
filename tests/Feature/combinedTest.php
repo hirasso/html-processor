@@ -104,4 +104,4 @@ test('Works with self-closing tags', function () {
         ->apply();
 
     expect($result)->toBe($expected);
-})->only();
+});
