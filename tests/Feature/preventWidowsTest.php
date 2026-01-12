@@ -52,3 +52,16 @@ test('works without a parent element', function () {
     $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
     expect($result)->toBe($expected);
 });
+
+test('works with nested elements', function () {
+    $string = trimLines(<<<HTML
+    <div><p>this text should have no widow</p> <p>And this shouold also be fixed</p></div>
+    HTML);
+
+    $expected = trimLines(<<<HTML
+    <div><p>this text should have no&nbsp;widow</p> <p>And this shouold also be&nbsp;fixed</p></div>
+    HTML);
+
+    $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
+    expect($result)->toBe($expected);
+});
