@@ -19,7 +19,7 @@ final class Helpers
         $translation_table[chr(38)] = '&';
 
         $result = preg_replace(
-            '/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,3};)/',
+            '/&(?![A-Za-z]+;|#[0-9]+;|#x[0-9a-fA-F]+;)/',
             '&amp;',
             strtr($text, $translation_table)
         );

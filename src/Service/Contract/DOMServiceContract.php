@@ -8,8 +8,6 @@ use IvoPetkov\HTML5DOMDocument;
 
 interface DOMServiceContract
 {
-    /**
-     * Execute the DOM operation
-     */
     public function run(HTML5DOMDocument $document): void;
+    public function prio(): int;
 }

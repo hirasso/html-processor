@@ -6,8 +6,6 @@ namespace Hirasso\HTMLProcessor\Service\Contract;
 
 interface HTMLServiceContract
 {
-    /**
-     * Execute the HTML operation
-     */
     public function run(string $html): string;
+    public function prio(): int;
 }

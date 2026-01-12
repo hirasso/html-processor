@@ -1,19 +1,83 @@
 <?php
 
+use Hirasso\HTMLProcessor\Enum\UrlType;
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 test('Runs various tasks on a string', function () {
-    $html = 'Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more, or follow <a href="https://www.instagram.com/acme">@acme</a> on instagram';
+    $html = trimLines(<<<HTML
+    <p></p><div></div>
+    <p><!-- preserve-me --></p>
+    <p>Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more.</p>
+    <p>Follow @acme on SocialWeb.</p>
+    <p>And some more text that should not have a widow</p>
+    HTML);
 
     $result = HTMLProcessor::fromString($html)
-        ->linkToSocial('@', 'https://www.instagram.com')
-        ->linkToSocial('#', 'https://www.instagram.com/explore/tags/tag')
-        ->autolink()
-        ->localizeQuotes('en_US')
-        ->processLinks(fn ($el) => $el->setAttribute('data-my-attr', ''))
-        ->beautify()
-        ->process();
+        ->autolinkUrls() // wrap raw url strings in `<a>` tags
+        ->typography( // optimize typography
+            'de_DE',
+            localizeQuotes: true, // format quotes based on locale
+            preventWidows: true // prevent widows
+        )
+        ->processLinks(
+            function ($el, $type) { // process links by callback
+                if ($type === UrlType::External) {
+                    $el->setAttribute('target', '_blank');
+                }
+            },
+            addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
+        )
+        ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
+        ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
+        ->removeEmptyElements('p,div') // remove empty paragraphs
+        ->encodeEmails()
+        ->apply();
 
-    expect($result)
-        ->toBe('Please reach out to <a href="mailto:mail@example.com" class="link--mailto" data-my-attr="">mail@example.com</a> to learn more, or follow <a href="https://www.instagram.com/acme" target="_blank" class="link--external" data-my-attr="">@acme</a> on instagram');
+    // Email encoding is randomized, so check for specific patterns instead of exact match
+    expect($result)->not->toContain('<p></p>');
+    expect($result)->not->toContain('<div></div>');
+    expect($result)->not->toContain('<p><!-- preserve me --></p>');
+    expect($result)->toContain('class="link--mailto"');
+    expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
+    expect($result)->toContain('&nbsp;');
+    expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
+    expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
+    expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
+    expect($result)->toContain('a&nbsp;widow'); // widow prevented
+});
+
+
+test('Runs autolinkUrls before processLinks', function () {
+    $html = trimLines(<<<HTML
+    <p>https://example.com</p>
+    HTML);
+
+    $expected = trimLines(<<<HTML
+    <p><a href="https://example.com" class="link--external">example.com</a></p>
+    HTML);
+
+    $result = HTMLProcessor::fromString($html)
+        ->processLinks()
+        ->autolinkUrls()
+        ->apply();
+
+    expect($result)->toBe($expected);
+});
+
+test('Runs autolinkUrls before encodeEmails', function () {
+    $html = trimLines(<<<HTML
+    <p>mail@example.com</p>
+    HTML);
+
+    $expected = trimLines(<<<HTML
+    <p><a href="mailto:mail@example.com">mail@example.com</a></p>
+    HTML);
+
+    $result = HTMLProcessor::fromString($html)
+        ->encodeEmails()
+        ->autolinkUrls()
+        ->apply();
+
+    expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
+    expect(html_entity_decode($result))->toBe($expected);
 });

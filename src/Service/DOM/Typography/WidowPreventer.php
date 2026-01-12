@@ -2,51 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM;
+namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Helpers;
 use IvoPetkov\HTML5DOMDocument;
 
-final readonly class Beautifier implements DOMServiceContract
+final readonly class WidowPreventer implements DOMServiceContract
 {
-    public function __construct(
-        protected ?bool $removeEmptyParagraphs = true,
-        protected ?bool $preventWidows = true,
-    ) {
-    }
-
-    public function run(HTML5DOMDocument $document): void
-    {
-        if ($this->removeEmptyParagraphs) {
-            $this->doRemoveEmptyParagraphs($document);
-        }
-
-        if ($this->preventWidows) {
-            $this->doPreventWidows($document);
-        }
-    }
-
-    /**
-     * Remove empty-looking paragraphs from html
-     */
-    private function doRemoveEmptyParagraphs(HTML5DOMDocument $document): void
-    {
-        foreach ($document->querySelectorAll('p') as $p) {
-
-            $textContent = Helpers::normalizeWhitespace($p->textContent);
-
-            if (empty(trim($textContent))) {
-                $p->parentNode->removeChild($p);
-            }
-        }
+    public function prio(): int {
+        return 0;
     }
 
     /**
      * Prevent widows in html text
      */
-    private function doPreventWidows(HTML5DOMDocument $document): void
+    public function run(HTML5DOMDocument $document): void
     {
         $xPath = new DOMXPath($document);
         $textNodes = $xPath->query('//text()');
