@@ -177,11 +177,12 @@ final class HTMLProcessor
         }
 
         $document = new HTML5DOMDocument();
+
+        // Remove duplicate IDs before loading
+        $html = $this->removeDuplicateIds($html);
+
         $document->loadHTML(
             htmlspecialchars_decode(Helpers::htmlentities($html)),
-            $this->allowDuplicateIDs()
-                ? HTML5DOMDocument::ALLOW_DUPLICATE_IDS
-                : 0,
         );
 
         // Execute all DOM services
@@ -209,12 +210,32 @@ final class HTMLProcessor
     }
 
     /**
-     * Only allow duplicate IDs if libxml is lower then 2.14.6
+     * Remove duplicate id attributes from HTML, keeping only first occurrence
      */
-    private function allowDuplicateIDs(): bool
+    private function removeDuplicateIds(string $html): string
     {
-        return
-            getenv('CI')
-            || version_compare(LIBXML_DOTTED_VERSION, '2.14.6', '<');
+        $seenIds = [];
+
+        // Match id attributes: id="value", id='value', id=value
+        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
+
+        $result = preg_replace_callback(
+            $pattern,
+            function ($matches) use (&$seenIds) {
+                $idValue = $matches[2];
+
+                // First occurrence: keep it
+                if (!isset($seenIds[$idValue])) {
+                    $seenIds[$idValue] = true;
+                    return $matches[0];
+                }
+
+                // Duplicate: remove entire id attribute
+                return '';
+            },
+            $html
+        );
+
+        return $result ?? $html;
     }
 }
