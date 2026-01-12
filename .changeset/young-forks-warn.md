@@ -17,10 +17,11 @@ echo HTMLProcessor::fromString($html)
         preventWidows: true // prevent widows
     )
     ->processLinks(function ($el, $type) { // process links by callback
-        if ($type === UrlType::External) {
-            $el->setAttribute('target', '_blank');
+            if ($type === UrlType::External) {
+                $el->setAttribute('target', '_blank');
+            }
         },
         addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
-    });
+    );
 ```
 
