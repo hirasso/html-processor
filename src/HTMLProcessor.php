@@ -24,9 +24,6 @@ final class HTMLProcessor
     /** track if entities should be decoded */
     protected bool $preserveEntities = false;
 
-    /** Track if duplicate IDs should be allowed in the HTML */
-    private bool $allowDuplicateIDs = LIBXML_VERSION < 21000;
-
     /** used for typography optimizations */
     protected string $locale = 'en_US';
 
@@ -180,11 +177,12 @@ final class HTMLProcessor
         }
 
         $document = new HTML5DOMDocument();
+
+        // Remove duplicate IDs before loading
+        $html = $this->removeDuplicateIds($html);
+
         $document->loadHTML(
             htmlspecialchars_decode(Helpers::htmlentities($html)),
-            $this->allowDuplicateIDs
-                ? HTML5DOMDocument::ALLOW_DUPLICATE_IDS
-                : 0,
         );
 
         // Execute all DOM services
@@ -209,5 +207,35 @@ final class HTMLProcessor
     {
         $this->preserveEntities = $preserve ?? true;
         return $this;
+    }
+
+    /**
+     * Remove duplicate id attributes from HTML, keeping only first occurrence
+     */
+    private function removeDuplicateIds(string $html): string
+    {
+        $seenIds = [];
+
+        // Match id attributes: id="value", id='value', id=value
+        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
+
+        $result = preg_replace_callback(
+            $pattern,
+            function ($matches) use (&$seenIds) {
+                $idValue = $matches[2];
+
+                // First occurrence: keep it
+                if (!isset($seenIds[$idValue])) {
+                    $seenIds[$idValue] = true;
+                    return $matches[0];
+                }
+
+                // Duplicate: remove entire id attribute
+                return '';
+            },
+            $html
+        );
+
+        return $result ?? $html;
     }
 }

@@ -32,11 +32,13 @@ final class QuoteLocalizer implements DOMServiceContract
     /** @var array<string, Closure(string): string> */
     private array $singleQuoteReplacements;
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
-    public function __construct(string $locale) {
+    public function __construct(string $locale)
+    {
 
         $this->setLocale($locale);
 
