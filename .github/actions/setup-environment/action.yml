@@ -16,6 +16,11 @@ runs:
         tools: composer:v2
         coverage: xdebug
 
+    - name: Print Libxml Version
+      shell: bash
+      run: |
+        php -r 'echo "libxml: " . LIBXML_DOTTED_VERSION . PHP_EOL;'
+
     - name: Install Composer Dependencies
       uses: ramsey/composer-install@v3
 
