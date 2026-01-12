@@ -100,7 +100,6 @@ test('Works with self-closing tags', function () {
 
     $result = HTMLProcessor::fromString($html)
         ->removeEmptyElements()
-        ->allowDuplicateIDs(true)
         ->apply();
 
     expect($result)->toBe($expected);

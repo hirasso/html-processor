@@ -25,7 +25,7 @@ final class HTMLProcessor
     protected bool $preserveEntities = false;
 
     /** Track if duplicate IDs should be allowed in the HTML */
-    private bool $allowDuplicateIDs = false;
+    private bool $allowDuplicateIDs = LIBXML_VERSION < 21000;
 
     /** used for typography optimizations */
     protected string $locale = 'en_US';
@@ -208,15 +208,6 @@ final class HTMLProcessor
     public function preserveEntities(?bool $preserve = true): self
     {
         $this->preserveEntities = $preserve ?? true;
-        return $this;
-    }
-
-    /**
-     * Allow duplicate IDs when parsing the DOM
-     */
-    public function allowDuplicateIDs(?bool $allow = true): self
-    {
-        $this->allowDuplicateIDs = $allow ?? true;
         return $this;
     }
 }
