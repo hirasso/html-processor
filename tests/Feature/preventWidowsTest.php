@@ -66,11 +66,23 @@ test('works with nested elements', function () {
     expect($result)->toBe($expected);
 });
 
-// test('should work with this', function() {
-//     $foo = '<p>is first and foremost a curatorial project in which the archive of the IMD is both a resource and a protagonist. Featuring recordings, letters, photos and documents from its 1946 foundation up to the present day, Deutsch&#8217;s deep dive research is striving to offer a coherent anthology of sonic transformations in contemporary music. Due to run over six years, the first edition – <i>the electric guitar diaries</i> – offers a compilation of 27 compositions available both on digital platforms and in physical format coming in the shape of a box set (3 vinyls and a booklet) filled with essays, photos and other deep cut rarities.</p>';
-//     $bar = '<p>is first and foremost a curatorial project in which the archive of the IMD is both a resource and a protagonist. Featuring recordings, letters, photos and documents from its 1946 foundation up to the present day, Deutsch’s deep dive research is striving to offer a coherent anthology of sonic transformations in contemporary music. Due to run over six years, the first edition – <i>the electric guitar diaries</i> – offers a compilation of 27 compositions available both on digital platforms and in physical format coming in the shape of a box set (3 vinyls and a booklet) filled with essays, photos and other deep cut&nbsp;rarities.</p>';
-//     $result = HTMLProcessor::fromString($foo)
-//         ->typography(localizeQuotes: false)
-//         ->apply();
-//     expect($result)->toBe($bar);
-// });
+test('should work with this', function () {
+    $foo = trimLines(<<<HTML
+    <p>Die Zukunft der Stadt ist kleinräumig durchmischt, möglichst dicht bespielt und klimagerecht. Das Rohmaterial aus dem sie immer wieder neu entsteht, wird in den meisten Fällen mit den bestehenden Bauten bereits vorhanden sein.</p>
+    <p>https://google.com</p>
+    <p>Für die Umnutzung des bisherigen Bürogebäudes an der Schärenmoosstrasse in Zürich Leutschenbach für die Stiftung PWG schlagen wir daher eine Wohntypologie vor, die Wohnen und Arbeiten räumlich und zeitlich flexibel miteinander vereinbart: Kompakt geschnittene, private Wohneinheiten werden durch vorgelagerte «Shared Spaces» erweitert. Was hier stattfinden soll, bestimmen die sechs bis zwölf direkten Anrainer:innen selbst!</p>
+    <p>Die zur Verfügung stehende Gesamtfläche wird also nur zum Teil von primärem Wohnraum belegt, die verbleibende Fläche bildet den Spielraum auf dem die Nutzungsdichte – auch um Arbeitsplätze – erhöht werden kann. Die Nutzung kann und soll immer wieder neu verhandelt werden und die räumlichen Anliegen der Bewohner:innen heute und in Zukunft erfüllen können.</p>
+    HTML);
+
+    $bar = trimLines(<<<HTML
+    <p>Die Zukunft der Stadt ist kleinräumig durchmischt, möglichst dicht bespielt und klimagerecht. Das Rohmaterial aus dem sie immer wieder neu entsteht, wird in den meisten Fällen mit den bestehenden Bauten bereits vorhanden&nbsp;sein.</p>
+    <p>https://google.com</p>
+    <p>Für die Umnutzung des bisherigen Bürogebäudes an der Schärenmoosstrasse in Zürich Leutschenbach für die Stiftung PWG schlagen wir daher eine Wohntypologie vor, die Wohnen und Arbeiten räumlich und zeitlich flexibel miteinander vereinbart: Kompakt geschnittene, private Wohneinheiten werden durch vorgelagerte «Shared Spaces» erweitert. Was hier stattfinden soll, bestimmen die sechs bis zwölf direkten Anrainer:innen&nbsp;selbst!</p>
+    <p>Die zur Verfügung stehende Gesamtfläche wird also nur zum Teil von primärem Wohnraum belegt, die verbleibende Fläche bildet den Spielraum auf dem die Nutzungsdichte – auch um Arbeitsplätze – erhöht werden kann. Die Nutzung kann und soll immer wieder neu verhandelt werden und die räumlichen Anliegen der Bewohner:innen heute und in Zukunft erfüllen&nbsp;können.</p>
+    HTML);
+
+    $result = HTMLProcessor::fromString($foo)
+        ->typography(localizeQuotes: false)
+        ->apply();
+    expect($result)->toBe($bar);
+});
