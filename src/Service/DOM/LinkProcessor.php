@@ -29,7 +29,8 @@ final readonly class LinkProcessor implements DOMServiceContract
     ) {
     }
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
@@ -44,8 +45,8 @@ final readonly class LinkProcessor implements DOMServiceContract
                 continue;
             }
 
-            $type = self::detectUrlType($href);
-            $extension = self::getFileLinkExtension($href);
+            $type = $this->detectUrlType($href);
+            $extension = $this->getFileLinkExtension($href);
 
             $this->addLinkClasses($el, $type, $extension);
 
@@ -118,7 +119,7 @@ final readonly class LinkProcessor implements DOMServiceContract
      * Check if a URL points to a file. If so, return the extension.
      * Ignore "web" extensions like ".html", ".php" ect.
      */
-    protected static function getFileLinkExtension(string $url): ?string
+    public static function getFileLinkExtension(string $url): ?string
     {
         $scheme = parse_url($url, PHP_URL_SCHEME);
 

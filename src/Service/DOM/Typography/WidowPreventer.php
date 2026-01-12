@@ -11,9 +11,20 @@ use IvoPetkov\HTML5DOMDocument;
 
 final readonly class WidowPreventer implements DOMServiceContract
 {
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
+
+    /**
+     * Block-level elements
+     */
+    private const BLOCK_ELEMENTS = [
+        'body', 'address', 'article', 'aside', 'blockquote', 'dd', 'div', 'dl', 'dt',
+        'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
+        'h4', 'h5', 'h6', 'header', 'hgroup', 'li', 'main', 'nav', 'ol', 'p',
+        'pre', 'section', 'td', 'th', 'ul'
+    ];
 
     /**
      * Prevent widows in html text
@@ -28,12 +39,20 @@ final readonly class WidowPreventer implements DOMServiceContract
         }
 
         /**
-         * Traverse the DOMNodeList backwards, prevent widows on the first textNode that is not empty
+         * Process each text node that is a direct child of a block element
          */
-        for ($i = $textNodes->length; $i--; $i >= 0) {
-            $node = $textNodes[$i];
-            $node->textContent = $this->maybePreventWidows($node->textContent);
-            break;
+        foreach ($textNodes as $node) {
+            $parentNode = $node->parentNode;
+
+            if ($parentNode === null) {
+                continue;
+            }
+
+            $parentTagName = strtolower($parentNode->nodeName);
+
+            if (in_array($parentTagName, self::BLOCK_ELEMENTS, true)) {
+                $node->textContent = $this->maybePreventWidows($node->textContent);
+            }
         }
     }
 
@@ -42,10 +61,14 @@ final readonly class WidowPreventer implements DOMServiceContract
      *
      * @see http://davidwalsh.name/prevent-widows-php-javascript
      */
-    private function maybePreventWidows(string $string): string
+    private function maybePreventWidows(string $textContent): string
     {
         // first remove any eventual white space
-        $string = Helpers::normalizeWhitespace($string);
+        $string = Helpers::normalizeWhitespace($textContent);
+
+        if (empty(trim($string))) {
+            return $textContent;
+        }
 
         // count the words
         $words = explode(" ", $string);
@@ -56,8 +79,8 @@ final readonly class WidowPreventer implements DOMServiceContract
             return $string;
         }
 
-        $lastWord = self::placeholdersToEntities($words[$wordCount - 1]);
-        $secondLastWord = self::placeholdersToEntities($words[$wordCount - 2]);
+        $lastWord = $this->placeholdersToEntities($words[$wordCount - 1]);
+        $secondLastWord = $this->placeholdersToEntities($words[$wordCount - 2]);
 
         // bail early if the last two words together are longer then 25 characters
         if (strlen("$lastWord $secondLastWord") > 25) {
@@ -72,7 +95,7 @@ final readonly class WidowPreventer implements DOMServiceContract
     /**
      * Convert internal entity placeholders from HTML5DOMDocument back to the real entity
      */
-    protected static function placeholdersToEntities(string $html): string
+    private function placeholdersToEntities(string $html): string
     {
         if (strpos($html, 'html5-dom-document-internal-entity') === false) {
             return $html;

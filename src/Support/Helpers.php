@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Support;
 
 use IvoPetkov\HTML5DOMDocument;
+use IvoPetkov\HTML5DOMElement;
 
 final class Helpers
 {
@@ -51,5 +52,37 @@ final class Helpers
         $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
         $string = preg_replace('/\s+/', ' ', $string) ?? $string;
         return $string;
+    }
+
+    /**
+     * Check if an element contains only white space and nothing else
+     */
+    public static function containsOnlyWhitespace(HTML5DOMElement $el): bool
+    {
+        if (!self::containsOnlyText($el)) {
+            return false;
+        }
+
+        $textContent = Helpers::normalizeWhitespace($el->textContent);
+
+        return empty(trim($textContent));
+    }
+
+    /**
+     * Check if an element only contains text
+     */
+    public static function containsOnlyText(HTML5DOMElement $el): bool
+    {
+        if (!$el->hasChildNodes()) {
+            return true;
+        }
+
+        foreach ($el->childNodes as $child) {
+            if ($child->nodeType !== XML_TEXT_NODE) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
