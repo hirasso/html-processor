@@ -76,7 +76,7 @@ final class PrefixLinker implements DOMServiceContract
 
         $result = preg_replace_callback(
             pattern: "/(?<=^|\s)$quotedPrefix(.*?)(?=\s|$)/",
-            callback: function ($matches) use ($text, $prefix, $url) {
+            callback: function ($matches) use ($prefix, $url) {
                 [, $captured] = $matches;
                 return "<a href=\"{$url}{$captured}\">{$prefix}{$captured}</a>";
             },

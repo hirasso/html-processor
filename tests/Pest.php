@@ -49,6 +49,6 @@ function trimLines(string $input): string
 {
     return implode("\n", array_map(
         'trim',
-        preg_split("/\R/", $input)
+        preg_split("/\R/", $input) ?: []
     ));
 }
