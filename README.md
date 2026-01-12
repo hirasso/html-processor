@@ -32,7 +32,7 @@ echo HTMLProcessor::fromString($html)
     ->removeEmptyElements('p') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
     ->typography( // optimize typography
-        'de_DE',
+        'de_DE', // currently supported: 'en', 'de', 'fr'
         localizeQuotes: true, // format quotes based on locale
         preventWidows: true // prevent widows
     )
