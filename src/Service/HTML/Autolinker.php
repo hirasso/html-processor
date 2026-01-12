@@ -18,6 +18,10 @@ final readonly class Autolinker implements HTMLServiceContract
     ) {
     }
 
+    public function prio(): int {
+        return -100;
+    }
+
     public function run(string $html): string
     {
         $autolink = new Autolink($this->options);

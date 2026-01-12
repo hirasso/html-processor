@@ -13,6 +13,10 @@ final class PrefixLinker implements DOMServiceContract
     /** @var array<string, string> */
     private array $entries;
 
+    public function prio(): int {
+        return 0;
+    }
+
     /** Register an entry for linking */
     public function register(string $prefix, string $url): void
     {

@@ -29,6 +29,10 @@ final readonly class LinkProcessor implements DOMServiceContract
     ) {
     }
 
+    public function prio(): int {
+        return 0;
+    }
+
     public function run(HTML5DOMDocument $document): void
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {

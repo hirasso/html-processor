@@ -4,7 +4,7 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 function encode(string $string): string
 {
-    return HTMLProcessor::fromString($string)->encodeEmails()->process();
+    return HTMLProcessor::fromString($string)->encodeEmails()->apply();
 }
 function expectEncoded(string $string): void
 {

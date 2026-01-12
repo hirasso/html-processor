@@ -3,22 +3,22 @@
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 test('Links @mentions to Instagram', function () {
-    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://www.instagram.com/')->process();
+    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://www.instagram.com/')->apply();
     expect($result)->toBe('<a href="https://www.instagram.com/hirasso">@hirasso</a>');
 });
 
 test('Links #tags to Instagram', function () {
-    $result = HTMLProcessor::fromString("#tag")->autolinkPrefix('#', 'https://www.instagram.com/explore/tags/')->process();
+    $result = HTMLProcessor::fromString("#tag")->autolinkPrefix('#', 'https://www.instagram.com/explore/tags/')->apply();
     expect($result)->toBe('<a href="https://www.instagram.com/explore/tags/tag">#tag</a>');
 });
 
 test('Links @mentions to custom url', function () {
-    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://your-instance.social/@')->process();
+    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://your-instance.social/@')->apply();
     expect($result)->toBe('<a href="https://your-instance.social/@hirasso">@hirasso</a>');
 });
 
 test('Links #tags to custom url', function () {
-    $result = HTMLProcessor::fromString("#php")->autolinkPrefix('#', 'https://your-instance.social/tags')->process();
+    $result = HTMLProcessor::fromString("#php")->autolinkPrefix('#', 'https://your-instance.social/tags')->apply();
     expect($result)->toBe('<a href="https://your-instance.social/tags/php">#php</a>');
 });
 
@@ -32,7 +32,7 @@ test('Works in complex HTML', function () {
 
     $result = HTMLProcessor::fromString($html)
         ->autolinkPrefix('@', 'https://your-instance.social/@')
-        ->process();
+        ->apply();
 
     expect($result)->toBe(<<<HTML
     <p></p><!-- delete me -->
@@ -56,7 +56,7 @@ test('Works with repeated calls', function () {
     $result = HTMLProcessor::fromString($html)
         ->autolinkPrefix('@', 'https://your-instance.social/@')
         ->autolinkPrefix('#', 'https://your-instance.social/tags')
-        ->process();
+        ->apply();
 
     expect($result)->toBe($expected);
 });

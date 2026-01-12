@@ -11,6 +11,10 @@ use IvoPetkov\HTML5DOMDocument;
 
 final readonly class WidowPreventer implements DOMServiceContract
 {
+    public function prio(): int {
+        return 0;
+    }
+
     /**
      * Prevent widows in html text
      */

@@ -16,6 +16,10 @@ final readonly class EmptyElements implements DOMServiceContract
     ) {
     }
 
+    public function prio(): int {
+        return 0;
+    }
+
     public function run(HTML5DOMDocument $document): void
     {
         $this->removeEmptyElements($document);

@@ -31,7 +31,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
         ->encodeEmails()
-        ->process();
+        ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
     expect($result)->not->toContain('<p></p>');
@@ -44,4 +44,40 @@ test('Runs various tasks on a string', function () {
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
     expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
     expect($result)->toContain('a&nbsp;widow'); // widow prevented
+});
+
+
+test('Runs autolinkUrls before processLinks', function () {
+    $html = trimLines(<<<HTML
+    <p>https://example.com</p>
+    HTML);
+
+    $expected = trimLines(<<<HTML
+    <p><a href="https://example.com" class="link--external">example.com</a></p>
+    HTML);
+
+    $result = HTMLProcessor::fromString($html)
+        ->processLinks()
+        ->autolinkUrls()
+        ->apply();
+
+    expect($result)->toBe($expected);
+});
+
+test('Runs autolinkUrls before encodeEmails', function () {
+    $html = trimLines(<<<HTML
+    <p>mail@example.com</p>
+    HTML);
+
+    $expected = trimLines(<<<HTML
+    <p><a href="mailto:mail@example.com">mail@example.com</a></p>
+    HTML);
+
+    $result = HTMLProcessor::fromString($html)
+        ->encodeEmails()
+        ->autolinkUrls()
+        ->apply();
+
+    expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
+    expect(html_entity_decode($result))->toBe($expected);
 });

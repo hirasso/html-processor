@@ -136,7 +136,7 @@ final class HTMLProcessor
      *
      * @return string – the processed HTML string
      */
-    public function process(): string
+    public function apply(): string
     {
         if (empty($this->originalHTML) || !$this->hasOperations()) {
             return $this->originalHTML;
@@ -194,6 +194,6 @@ final class HTMLProcessor
      */
     public function __toString(): string
     {
-        return $this->process();
+        return $this->apply();
     }
 }
