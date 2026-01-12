@@ -23,6 +23,6 @@ test('Preserves elements containing comments', function () {
 });
 
 test('Preserves elements containing other elements', function () {
-    $result = HTMLProcessor::fromString("<p><div></div></p>")->removeEmptyElements()->apply();
-    expect($result)->toBe('<p><div></div></p>');
+    $result = HTMLProcessor::fromString("<p><span></span></p>")->removeEmptyElements()->apply();
+    expect($result)->toBe('<p><span></span></p>');
 });
