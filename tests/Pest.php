@@ -44,11 +44,13 @@ function getMaliciousAttributeValue(): string
     return '" onload="alert(\'Hacked!\')"';
 }
 
-
-function trimLines(string $input): string
+/**
+ * Trim lines from a string of text
+ */
+function trimLines(string $text): string
 {
     return implode("\n", array_map(
         'trim',
-        preg_split("/\R/", $input) ?: []
+        preg_split("/\R/", $text) ?: []
     ));
 }
