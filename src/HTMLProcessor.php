@@ -214,7 +214,7 @@ final class HTMLProcessor
     private function allowDuplicateIDs(): bool
     {
         return
-            version_compare(LIBXML_DOTTED_VERSION, '2.14.6', '<')
-            || version_compare(LIBXML_DOTTED_VERSION, '2.16', '>');
+            getenv('CI')
+            || version_compare(LIBXML_DOTTED_VERSION, '2.14.6', '<');
     }
 }
