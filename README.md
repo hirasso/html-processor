@@ -27,8 +27,8 @@ use Hirasso\HTMLProcessor\Enum\UrlType;
 
 echo HTMLProcessor::fromString($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
-    ->autolinkSocial('@', 'https://your-instance.social/@') // link @profileName to Mastodon
-    ->autolinkSocial('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
+    ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
+    ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
     ->removeEmptyElements('p') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
     ->typography( // optimize typography

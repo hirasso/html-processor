@@ -13,12 +13,11 @@ use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\SocialLinker;
+use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
 use Hirasso\HTMLProcessor\Service\DOM\Typography\WidowPreventer;
 use Hirasso\HTMLProcessor\Service\DOM\Typography\QuoteLocalizer;
-
 
 final class HTMLProcessor
 {
@@ -53,8 +52,7 @@ final class HTMLProcessor
         ?AutolinkOptions $options = null,
         ?string $atMentions = null,
         ?string $hashTags = null,
-    ): self
-    {
+    ): self {
         $this->htmlQueue->add(new Autolinker($options));
 
         return $this;
@@ -63,9 +61,14 @@ final class HTMLProcessor
     /**
      * Automatically link @foobar or #hashtag to a social network (or anywhere)
      */
-    public function autolinkSocial(string $prefix, string $url): self
+    public function autolinkPrefix(string $prefix, string $url): self
     {
-        $this->domQueue->add(new SocialLinker($prefix, $url));
+        $linker = $this->domQueue->get(PrefixLinker::class) ?? new PrefixLinker();
+
+        $linker->register($prefix, $url);
+
+        $this->domQueue->add($linker);
+
         return $this;
     }
 
@@ -77,8 +80,7 @@ final class HTMLProcessor
     public function processLinks(
         ?Closure $postProcess = null,
         ?bool $addClasses = null,
-    ): self
-    {
+    ): self {
         $this->domQueue->add(new LinkProcessor($postProcess, $addClasses ?? true));
         return $this;
     }

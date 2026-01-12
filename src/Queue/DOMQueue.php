@@ -27,4 +27,15 @@ final class DOMQueue implements DOMQueueContract
     {
         return $this->services;
     }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @return T|null
+     */
+    public function get(string $className): ?object
+    {
+        /** @var T|null */
+        return $this->services[$className] ?? null;
+    }
 }

@@ -10,4 +10,11 @@ interface QueueContract
 
     /** @return array<string, mixed> */
     public function all(): array;
+
+    /**
+     * @template T of object
+     * @param class-string<T> $className
+     * @return T|null
+     */
+    public function get(string $className): ?object;
 }
