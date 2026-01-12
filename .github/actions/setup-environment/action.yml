@@ -1,4 +1,5 @@
 name: Setup Environment
+description: Setup the environment for CI and the version-or-publish workflows
 
 inputs:
   php-version:

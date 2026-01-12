@@ -81,3 +81,26 @@ test('Runs autolinkUrls before encodeEmails', function () {
     expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
     expect(html_entity_decode($result))->toBe($expected);
 });
+
+test('Works with self-closing tags', function () {
+    $html = <<<HTML
+    <p>
+        <strong>Kategorie</strong> Umnutzung Büro zu Wohnen<br />
+        <strong>Auftragsart</strong> einstufiger Projektwettbewerb im selektiven Verfahren
+    </p>
+    HTML;
+
+    // DOM processing normalizes HTML: <br /> → <br>, &amp; → &
+    $expected = <<<HTML
+    <p>
+        <strong>Kategorie</strong> Umnutzung Büro zu Wohnen<br>
+        <strong>Auftragsart</strong> einstufiger Projektwettbewerb im selektiven Verfahren
+    </p>
+    HTML;
+
+    $result = HTMLProcessor::fromString($html)
+        ->removeEmptyElements()
+        ->apply();
+
+    expect($result)->toBe($expected);
+});
