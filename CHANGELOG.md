@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- a45f63a: Only allow duplicate IDs with a LIBXML_VERSION lower then 21000.
+
+  Otherwise, HTML might not be parsed correctly (observed with
+  tags and multiple lines)
+
 ## 0.1.2
 
 ### Patch Changes
