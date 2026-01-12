@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+### Patch Changes
+
+- 3d43518: Fix very specific issues with libxml in certain versions
+
 ## 0.1.3
 
 ### Patch Changes
