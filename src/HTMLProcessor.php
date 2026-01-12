@@ -24,9 +24,6 @@ final class HTMLProcessor
     /** track if entities should be decoded */
     protected bool $preserveEntities = false;
 
-    /** Track if duplicate IDs should be allowed in the HTML */
-    private bool $allowDuplicateIDs = LIBXML_VERSION < 21000;
-
     /** used for typography optimizations */
     protected string $locale = 'en_US';
 
@@ -182,7 +179,7 @@ final class HTMLProcessor
         $document = new HTML5DOMDocument();
         $document->loadHTML(
             htmlspecialchars_decode(Helpers::htmlentities($html)),
-            $this->allowDuplicateIDs
+            $this->allowDuplicateIDs()
                 ? HTML5DOMDocument::ALLOW_DUPLICATE_IDS
                 : 0,
         );
@@ -209,5 +206,14 @@ final class HTMLProcessor
     {
         $this->preserveEntities = $preserve ?? true;
         return $this;
+    }
+
+    /**
+     * Only allow duplicate IDs if libxml is lower then 2.14.6
+     */
+    private function allowDuplicateIDs(): bool {
+        return
+            version_compare(LIBXML_DOTTED_VERSION, '2.14.6', '<')
+            || version_compare(LIBXML_DOTTED_VERSION, '2.16', '>');
     }
 }
