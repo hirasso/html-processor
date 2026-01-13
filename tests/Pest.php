@@ -2,7 +2,8 @@
 
 require_once(dirname(__DIR__) . '/vendor/autoload.php');
 
-function dumpEnvironment(): void {
+function dumpEnvironment(): void
+{
     $phpVersion = PHP_VERSION;
     $libxmlVersion = LIBXML_DOTTED_VERSION;
     $isCI = getenv('CI') === 'true';
