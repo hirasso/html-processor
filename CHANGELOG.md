@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- bb7db84: Use a fluid API for registering the Typography options
+
+  ```php
+  echo HTMLProcessor::fromString($html)
+      ->typography(
+          Typography::make('de_DE')
+              ->localizeQuotes()
+              ->preventWidows()
+      );
+  ```
+
 ## 0.1.4
 
 ### Patch Changes
