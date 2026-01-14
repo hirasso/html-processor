@@ -1,6 +1,7 @@
 <?php
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 
 test('Removes duplicate ID attributes', function () {
     $html = '<div id="test">First</div><div id="test">Second</div>';
@@ -20,7 +21,9 @@ test('Keeps first occurrence of duplicate IDs', function () {
 
 test('Handles different quote styles', function () {
     $html = '<div id="test">A</div><div id=\'test\'>B</div><div id=test>C</div>';
-    $result = HTMLProcessor::fromString($html)->typography()->apply();
+    $result = HTMLProcessor::fromString($html)
+        ->typography(Typography::make()->localizeQuotes())
+        ->apply();
 
     // Only first occurrence should have id attribute
     expect(substr_count($result, 'id='))->toBe(1);

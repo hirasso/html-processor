@@ -17,4 +17,6 @@ interface QueueContract
      * @return T|null
      */
     public function get(string $className): ?object;
+
+    public function applyTo(string $html): string;
 }

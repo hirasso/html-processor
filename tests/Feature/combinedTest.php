@@ -2,6 +2,7 @@
 
 use Hirasso\HTMLProcessor\Enum\UrlType;
 use Hirasso\HTMLProcessor\HTMLProcessor;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 use Hirasso\HTMLProcessor\Support\Helpers;
 
 test('Runs various tasks on a string', function () {
@@ -15,11 +16,9 @@ test('Runs various tasks on a string', function () {
 
     $result = HTMLProcessor::fromString($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography( // optimize typography
-            'de_DE',
-            localizeQuotes: true, // format quotes based on locale
-            preventWidows: true // prevent widows
-        )
+        ->typography(Typography::make('de_DE')
+                ->localizeQuotes()
+                ->preventWidows())
         ->processLinks(
             function ($el, $type) { // process links by callback
                 if ($type === UrlType::External) {

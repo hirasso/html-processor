@@ -7,8 +7,6 @@ namespace Hirasso\HTMLProcessor;
 use Asika\Autolink\AutolinkOptions;
 use Closure;
 use Hirasso\HTMLProcessor\Enum\UrlType;
-use IvoPetkov\HTML5DOMDocument;
-use Hirasso\HTMLProcessor\Support\Helpers;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
@@ -16,8 +14,7 @@ use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\WidowPreventer;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 
 final class HTMLProcessor
 {
@@ -102,13 +99,14 @@ final class HTMLProcessor
      * Optimize typography
      */
     public function typography(
-        ?string $locale = null,
-        ?bool $localizeQuotes = true,
-        ?bool $preventWidows = true,
+        null|string|Typography $value = null,
     ): self {
 
-        $localizeQuotes && $this->domQueue->add(new QuoteLocalizer($locale ?? 'en_US'));
-        $preventWidows && $this->domQueue->add(new WidowPreventer());
+        $instance = !($value instanceof Typography)
+            ? Typography::make($value)->applyDefaults()
+            : $value;
+
+        $this->domQueue->add($instance);
 
         return $this;
     }
@@ -143,8 +141,8 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->runHTMLQueue($html);
-        $html = $this->runDOMQueue($html);
+        $html = $this->htmlQueue->applyTo($html);
+        $html = $this->domQueue->applyTo($html);
 
         if (!$this->preserveEntities) {
             return html_entity_decode($html);
@@ -153,48 +151,6 @@ final class HTMLProcessor
         // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)
         // while keeping numeric entities (&#109; &#x6d; &nbsp; etc.)
         return htmlspecialchars_decode($html);
-    }
-
-    /**
-     * Run operations against the raw HTML
-     */
-    protected function runHTMLQueue(string $html): string
-    {
-        foreach ($this->htmlQueue->all() as $service) {
-            $html = $service->run($html);
-        }
-
-        return $html;
-    }
-
-    /**
-     * Run operations against DOMDocument
-     */
-    protected function runDOMQueue(string $html): string
-    {
-        if ($this->domQueue->isEmpty()) {
-            return $html;
-        }
-
-        $document = new HTML5DOMDocument();
-
-        // Remove duplicate IDs before loading
-        $html = $this->removeDuplicateIds($html);
-
-        $document->loadHTML(
-            htmlspecialchars_decode(Helpers::htmlentities($html)),
-            /**
-             * @TODO reactivate this if it is fixed upstream
-             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
-             */
-            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
-        );
-
-        // Execute all DOM services
-        foreach ($this->domQueue->all() as $service) {
-            $service->run($document);
-        }
-        return Helpers::extractBodyHTML($document);
     }
 
     /**
@@ -212,35 +168,5 @@ final class HTMLProcessor
     {
         $this->preserveEntities = $preserve ?? true;
         return $this;
-    }
-
-    /**
-     * Remove duplicate id attributes from HTML, keeping only first occurrence
-     */
-    private function removeDuplicateIds(string $html): string
-    {
-        $seenIds = [];
-
-        // Match id attributes: id="value", id='value', id=value
-        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
-
-        $result = preg_replace_callback(
-            $pattern,
-            function ($matches) use (&$seenIds) {
-                $idValue = $matches[2];
-
-                // First occurrence: keep it
-                if (!isset($seenIds[$idValue])) {
-                    $seenIds[$idValue] = true;
-                    return $matches[0];
-                }
-
-                // Duplicate: remove entire id attribute
-                return '';
-            },
-            $html
-        );
-
-        return $result ?? $html;
     }
 }
