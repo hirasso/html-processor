@@ -6,6 +6,8 @@ namespace Hirasso\HTMLProcessor\Queue;
 
 use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Support\Helpers;
+use IvoPetkov\HTML5DOMDocument;
 
 final class DOMQueue implements DOMQueueContract
 {
@@ -37,5 +39,71 @@ final class DOMQueue implements DOMQueueContract
     {
         /** @var T|null */
         return $this->services[$className] ?? null;
+    }
+
+    /**
+     * Run all registered services against a document
+     */
+    public function applyTo(string $html): string {
+        if ($this->isEmpty()) {
+            return $html;
+        }
+
+        // Remove duplicate IDs before loading
+        $html = $this->removeDuplicateIds($html);
+
+        $document = new HTML5DOMDocument();
+        $document->loadHTML(
+            htmlspecialchars_decode(Helpers::htmlentities($html)),
+            /**
+             * @TODO reactivate this if it is fixed upstream
+             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
+             */
+            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
+        );
+
+        $this->runServices($document);
+
+        return Helpers::extractBodyHTML($document);
+    }
+
+    /**
+     * Apply all registered services against a provided $document
+     */
+    public function runServices(HTML5DOMDocument $document): void {
+        // Execute all DOM services
+        foreach ($this->all() as $service) {
+            $service->run($document);
+        }
+    }
+
+    /**
+     * Remove duplicate id attributes from HTML, keeping only first occurrence
+     */
+    private function removeDuplicateIds(string $html): string
+    {
+        $seenIds = [];
+
+        // Match id attributes: id="value", id='value', id=value
+        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
+
+        $result = preg_replace_callback(
+            $pattern,
+            function ($matches) use (&$seenIds) {
+                $idValue = $matches[2];
+
+                // First occurrence: keep it
+                if (!isset($seenIds[$idValue])) {
+                    $seenIds[$idValue] = true;
+                    return $matches[0];
+                }
+
+                // Duplicate: remove entire id attribute
+                return '';
+            },
+            $html
+        );
+
+        return $result ?? $html;
     }
 }

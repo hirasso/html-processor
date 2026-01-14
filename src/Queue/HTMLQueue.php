@@ -42,4 +42,14 @@ final class HTMLQueue implements HTMLQueueContract
         /** @var T|null */
         return $this->services[$className] ?? null;
     }
+
+    /**
+     * Apply all services against an HTML string
+     */
+    public function applyTo(string $html): string {
+        foreach ($this->all() as $service) {
+            $html = $service->run($html);
+        }
+        return $html;
+    }
 }

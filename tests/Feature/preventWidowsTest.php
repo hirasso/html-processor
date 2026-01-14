@@ -1,6 +1,7 @@
 <?php
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
+use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 
 test('Prevents widows', function () {
     $result = HTMLProcessor::fromString("<p>I don't want to be a widow</p>")->typography()->apply();
@@ -23,7 +24,9 @@ test('Works on multiple paragraphs', function () {
     <p>This is the second&nbsp;paragraph</p>
     HTML);
 
-    $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
+    $result = HTMLProcessor::fromString($string)
+        ->typography(Typography::make()->preventWidows())
+        ->apply();
     expect($result)->toBe($expected);
 });
 
@@ -36,7 +39,9 @@ test('only prevents widows at the very end of block elements', function () {
     <p>Basel and tutor at the Darmstadt Summer Course, the<i>Darmstadt Sonicals</i> is first and&nbsp;foremost.</p>
     HTML);
 
-    $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
+    $result = HTMLProcessor::fromString($string)
+        ->typography(Typography::make()->preventWidows())
+        ->apply();
     expect($result)->toBe($expected);
 });
 
@@ -49,7 +54,9 @@ test('works without a parent element', function () {
     this text should have no&nbsp;widow
     HTML);
 
-    $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
+    $result = HTMLProcessor::fromString($string)
+        ->typography(Typography::make()->preventWidows())
+        ->apply();
     expect($result)->toBe($expected);
 });
 
@@ -62,7 +69,9 @@ test('works with nested elements', function () {
     <div><p>this text should have no&nbsp;widow</p> <p>And this shouold also be&nbsp;fixed</p></div>
     HTML);
 
-    $result = HTMLProcessor::fromString($string)->typography(localizeQuotes: false)->apply();
+    $result = HTMLProcessor::fromString($string)
+        ->typography(Typography::make()->preventWidows())
+        ->apply();
     expect($result)->toBe($expected);
 });
 
@@ -82,7 +91,7 @@ test('should work with this', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($foo)
-        ->typography(localizeQuotes: false)
+        ->typography(Typography::make()->preventWidows())
         ->apply();
     expect($result)->toBe($bar);
 });
