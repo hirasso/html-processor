@@ -183,6 +183,11 @@ final class HTMLProcessor
 
         $document->loadHTML(
             htmlspecialchars_decode(Helpers::htmlentities($html)),
+            /**
+             * @TODO reactivate this if it is fixed upstream
+             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
+             */
+            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
         );
 
         // Execute all DOM services

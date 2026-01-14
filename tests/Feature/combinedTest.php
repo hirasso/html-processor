@@ -2,6 +2,7 @@
 
 use Hirasso\HTMLProcessor\Enum\UrlType;
 use Hirasso\HTMLProcessor\HTMLProcessor;
+use Hirasso\HTMLProcessor\Support\Helpers;
 
 test('Runs various tasks on a string', function () {
     $html = trimLines(<<<HTML
@@ -85,22 +86,27 @@ test('Runs autolinkUrls before encodeEmails', function () {
 test('Works with self-closing tags', function () {
     $html = <<<HTML
     <p>
-        <strong>Kategorie</strong> Umnutzung Büro zu Wohnen<br />
-        <strong>Auftragsart</strong> einstufiger Projektwettbewerb im selektiven Verfahren
+        Foo<br />
+        bar
     </p>
     HTML;
 
     // DOM processing normalizes HTML: <br /> → <br>, &amp; → &
     $expected = <<<HTML
     <p>
-        <strong>Kategorie</strong> Umnutzung Büro zu Wohnen<br>
-        <strong>Auftragsart</strong> einstufiger Projektwettbewerb im selektiven Verfahren
+        Foo<br>
+        bar
     </p>
     HTML;
 
-    $result = HTMLProcessor::fromString($html)
-        ->removeEmptyElements()
-        ->apply();
+    expect(
+        HTMLProcessor::fromString($html)
+            ->removeEmptyElements()
+            ->apply()
+    )->toBe($expected);
 
-    expect($result)->toBe($expected);
+    /** compare  to native DOMDocument */
+    $doc = new \DOMDocument();
+    $doc->loadHTML($html);
+    expect(Helpers::extractBodyHTML($doc))->toBe($expected);
 });

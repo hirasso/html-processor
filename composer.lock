@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5301f2da359e9814d17f8ef476270732",
+    "content-hash": "cfcf28999fe8bd0c1f88d088b98b0262",
     "packages": [
         {
             "name": "asika/autolink",
@@ -4665,7 +4665,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2"
+        "php": ">=8.1"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"

@@ -31,9 +31,9 @@ final class Helpers
     /**
      * Extract HTML from body
      */
-    public static function extractBodyHTML(HTML5DOMDocument $document): string
+    public static function extractBodyHTML(\DOMDocument|HTML5DOMDocument $document): string
     {
-        $html = $document->saveHTML();
+        $html = $document->saveHTML() ?: '';
         preg_match('/<body[^>]*>(?<content>.*?)<\/body>/is', $html, $matches);
         $html = $matches['content'] ?? '';
         $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
