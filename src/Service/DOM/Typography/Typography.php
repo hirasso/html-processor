@@ -17,32 +17,50 @@ final class Typography implements DOMServiceContract
 {
     private DOMQueue $queue;
 
+    private string $locale = 'en_US';
+
     public function prio(): int
     {
         return 0;
     }
 
-    private function __construct(
-        private string $locale
+    public function __construct(
     ) {
         $this->queue = new DOMQueue();
     }
 
-    public static function make(?string $locale = null): self
+    public function setLocale(string $locale): self
     {
-        return new self($locale ?? 'en_US');
+        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
+            throw new \InvalidArgumentException(
+                "Invalid locale format: '{$locale}'. Expected format: 'en', 'en_US' or 'en-US'"
+            );
+        }
+
+        $this->locale = $locale;
+
+        return $this;
     }
 
-    public function applyDefaults(): self
+    public function getLocale(): string {
+        return $this->locale;
+    }
+
+    public function getLanguageCode(): ?string {
+        $separator = str_contains($this->locale, '_') ? '_' : '-';
+        return explode($separator, $this->locale)[0] ?: null;
+    }
+
+    private function applyDefaults(): self
     {
-        $this->queue->add(new QuoteLocalizer($this->locale));
+        $this->queue->add(new QuoteLocalizer($this));
         $this->queue->add(new WidowPreventer());
         return $this;
     }
 
     public function localizeQuotes(): self
     {
-        $this->queue->add(new QuoteLocalizer($this->locale));
+        $this->queue->add(new QuoteLocalizer($this));
         return $this;
     }
 
@@ -60,6 +78,7 @@ final class Typography implements DOMServiceContract
         if ($this->queue->isEmpty()) {
             $this->applyDefaults();
         }
+
         $this->queue->runServices($document);
     }
 }

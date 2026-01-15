@@ -95,14 +95,25 @@ final class HTMLProcessor
 
     /**
      * Optimize typography
+     *
+     * @param null|string|Closure(Typography): mixed $localeOrCallback
      */
     public function typography(
-        null|string|Typography $value = null,
+        null|Closure|string $localeOrCallback = null,
     ): self {
+        $instance = new Typography();
+        $this->domQueue->add($instance);
 
-        $instance = !($value instanceof Typography)
-            ? Typography::make($value)->applyDefaults()
-            : $value;
+        /** callback provided. leave everything to the user */
+        if ($localeOrCallback instanceof Closure) {
+            ($localeOrCallback)($instance);
+            return $this;
+        }
+
+        /** Must be a locale string at this point */
+        if(!empty($localeOrCallback)) {
+            $instance->setLocale($localeOrCallback);
+        }
 
         $this->domQueue->add($instance);
 

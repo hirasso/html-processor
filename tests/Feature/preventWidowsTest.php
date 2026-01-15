@@ -1,10 +1,11 @@
 <?php
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 
 test('Prevents widows', function () {
-    $result = HTMLProcessor::fromString("<p>I don't want to be a widow</p>")->typography()->apply();
+    $result = HTMLProcessor::fromString("<p>I don't want to be a widow</p>")
+        ->typography()
+        ->apply();
     expect($result)->toBe('<p>I don\'t want to be a&nbsp;widow</p>');
 });
 
@@ -25,7 +26,9 @@ test('Works on multiple paragraphs', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(Typography::make()->preventWidows())
+        ->typography(fn ($typo) => $typo
+            ->setLocale('de_DE')
+            ->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -40,7 +43,7 @@ test('only prevents widows at the very end of block elements', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(Typography::make()->preventWidows())
+        ->typography(fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -55,22 +58,22 @@ test('works without a parent element', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(Typography::make()->preventWidows())
+        ->typography(fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
 
 test('works with nested elements', function () {
     $string = trimLines(<<<HTML
-    <div><p>this text should have no widow</p> <p>And this shouold also be fixed</p></div>
+    <div><p>this text should have a widow</p> <p>And this shouold also have one</p></div>
     HTML);
 
     $expected = trimLines(<<<HTML
-    <div><p>this text should have no&nbsp;widow</p> <p>And this shouold also be&nbsp;fixed</p></div>
+    <div><p>this text should have a&nbsp;widow</p> <p>And this shouold also have&nbsp;one</p></div>
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(Typography::make()->preventWidows())
+        ->typography(fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -91,7 +94,7 @@ test('should work with this', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($foo)
-        ->typography(Typography::make()->preventWidows())
+        ->typography(fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($bar);
 });

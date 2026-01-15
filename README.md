@@ -30,10 +30,10 @@ echo HTMLProcessor::fromString($html)
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
     ->removeEmptyElements('p') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
-    ->typography(
-        Typography::make('de_DE') // optimize typography. currently supported: 'en', 'de', 'fr'
-            ->localizeQuotes() // format quotes based on locale
-            ->preventWidows() // prevent widows
+    ->typography(fn ($typo) => $typo
+        ->setLocale('de_DE') // currently supported: 'en', 'de', 'fr'
+        ->localizeQuotes() // format quotes based on locale
+        ->preventWidows() // prevent widows
     )
     ->processLinks(function ($link, $defaultHandler) { // process links by callback
         if ($link->type->value === 'external') {
