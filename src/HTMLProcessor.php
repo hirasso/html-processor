@@ -77,12 +77,10 @@ final class HTMLProcessor
     /**
      * Add classes to links, open external links in a new tab, etc.
      *
-     * @param ?Closure(Link $link, Closure(?string $prefix) $defaultHandler): mixed $process – process links with information
+     * @param ?Closure(Link $link, Closure(?string): mixed $defaultHandler): mixed $callback
      */
-    public function processLinks(
-        ?Closure $process = null,
-    ): self {
-        $this->domQueue->add(new LinkProcessor($process));
+    public function processLinks(?Closure $callback = null): self {
+        $this->domQueue->add(new LinkProcessor($callback));
         return $this;
     }
 
