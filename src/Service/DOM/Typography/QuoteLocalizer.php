@@ -118,7 +118,7 @@ final class QuoteLocalizer implements DOMServiceContract
 
         // Return the text unchainged if the provided language doesn't have replacements
         if (!isset($replacements[$lang])) {
-            return $text;
+            return $lang;
         }
 
         /**
