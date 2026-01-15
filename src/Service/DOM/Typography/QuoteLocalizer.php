@@ -116,9 +116,9 @@ final class QuoteLocalizer implements DOMServiceContract
         string $lang
     ): string {
 
-        // Fallback to default language if current language is not supported
+        // Return the text unchainged if the provided language doesn't have replacements
         if (!isset($replacements[$lang])) {
-            $lang = self::FALLBACK_LANGUAGE;
+            return $text;
         }
 
         /**
