@@ -19,7 +19,20 @@
 composer require hirasso/html-processor
 ```
 
-## Usage Example
+## Minimal Example
+
+```php
+use Hirasso\HTMLProcessor\HTMLProcessor;
+
+echo HTMLProcessor::fromString($html)
+    ->autolinkUrls() // wrap raw url strings in `<a>` tags
+    ->removeEmptyElements() // remove empty paragraphs
+    ->encodeEmails() // encode emails to confuse spam bots
+    ->typography('de_DE') // fix typography based on locale
+    ->processLinks(); // add classes based on link type
+```
+
+## Maximal Example
 
 ```php
 use Hirasso\HTMLProcessor\HTMLProcessor;
@@ -28,7 +41,7 @@ echo HTMLProcessor::fromString($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
     ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
-    ->removeEmptyElements('p') // remove empty paragraphs
+    ->removeEmptyElements('p,div') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
     ->typography(fn ($typo) => $typo
         ->setLocale('de_DE') // currently supported: 'en', 'de', 'fr'
@@ -39,7 +52,7 @@ echo HTMLProcessor::fromString($html)
         if ($link->type->value === 'external') {
             $link->el->setAttribute('target', '_blank');
         }
-        $defaultHandler(); // run the default handler (adds classes based on type)
+        $defaultHandler(); // run the default handler
     });
 
 ```
