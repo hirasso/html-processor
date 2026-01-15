@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- 29c68b7: Provide a helper function:
+
+  ```php
+  use function Hirasso\HTMLProcessor\html;
+
+  echo html($html)->autolinkUrls();
+  ```
+
 ## 0.4.0
 
 ### Minor Changes
