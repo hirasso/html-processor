@@ -6,10 +6,13 @@ function runTest(string $str, string $locale, string $expected): void
 {
     $result = HTMLProcessor::fromString($str)
         ->typography(
+            $locale,
             fn ($typo) => $typo
-            ->setLocale($locale)
             ->localizeQuotes()
+            ->preventWidows()
         )->apply();
+
+
     expect($result)->toBe($expected);
 }
 
@@ -63,6 +66,7 @@ test('Works when setting the locale late', function () {
 
     $result = HTMLProcessor::fromString($str)
         ->typography(
+            'en_EN',
             fn ($typo) => $typo
             ->localizeQuotes()
             ->setLocale('de_DE')

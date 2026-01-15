@@ -8,8 +8,7 @@ Change the API for `->typography()`:
 use Hirasso\HTMLProcessor\HTMLProcessor;
 
 echo HTMLProcessor::fromString($html)
-    ->typography(fn ($typo) => $typo
-        ->setLocale('de_DE') // currently supported: 'en', 'de', 'fr'
+    ->typography('de_DE', fn ($typo) => $typo
         ->localizeQuotes() // format quotes based on locale
         ->preventWidows() // prevent widows
     )

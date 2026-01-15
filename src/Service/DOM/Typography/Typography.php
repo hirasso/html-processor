@@ -24,9 +24,17 @@ final class Typography implements DOMServiceContract
         return 0;
     }
 
-    public function __construct(
+    private function __construct(
     ) {
         $this->queue = new DOMQueue();
+    }
+
+    public static function fromLocale(string $locale): self
+    {
+        $instance = new self();
+        $instance->setLocale($locale);
+
+        return $instance;
     }
 
     public function setLocale(string $locale): self

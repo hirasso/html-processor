@@ -21,7 +21,7 @@ test('Keeps first occurrence of duplicate IDs', function () {
 test('Handles different quote styles', function () {
     $html = '<div id="test">A</div><div id=\'test\'>B</div><div id=test>C</div>';
     $result = HTMLProcessor::fromString($html)
-        ->typography(fn ($typo) => $typo->localizeQuotes())
+        ->typography('en_US', fn ($typo) => $typo->localizeQuotes())
         ->apply();
 
     // Only first occurrence should have id attribute

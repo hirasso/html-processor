@@ -4,13 +4,13 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 test('Prevents widows', function () {
     $result = HTMLProcessor::fromString("<p>I don't want to be a widow</p>")
-        ->typography()
+        ->typography('en_US')
         ->apply();
     expect($result)->toBe('<p>I don\'t want to be a&nbsp;widow</p>');
 });
 
 test('Doesn\'t prevent widows in short strings', function () {
-    $result = HTMLProcessor::fromString("<p>one two three</p>")->typography()->apply();
+    $result = HTMLProcessor::fromString("<p>one two three</p>")->typography('en_US')->apply();
     expect($result)->toBe('<p>one two three</p>'); // no "&nbsp;"
 });
 
@@ -26,8 +26,7 @@ test('Works on multiple paragraphs', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(fn ($typo) => $typo
-            ->setLocale('de_DE')
+        ->typography('de_DE', fn ($typo) => $typo
             ->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
@@ -43,7 +42,7 @@ test('only prevents widows at the very end of block elements', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -58,7 +57,7 @@ test('works without a parent element', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -73,7 +72,7 @@ test('works with nested elements', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($string)
-        ->typography(fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -94,7 +93,7 @@ test('should work with this', function () {
     HTML);
 
     $result = HTMLProcessor::fromString($foo)
-        ->typography(fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->preventWidows())
         ->apply();
     expect($result)->toBe($bar);
 });
