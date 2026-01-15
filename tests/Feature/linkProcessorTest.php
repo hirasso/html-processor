@@ -77,10 +77,10 @@ test('Provides the default handler in the custom callback', function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
         function ($link, $defaultHandler) {
             $link->el->setAttribute('my:custom.attribute', '');
-            $defaultHandler();
+            $defaultHandler('foo');
         }
     );
-    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="" class="link--internal">example.com</a>');
+    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="" class="foo--internal">example.com</a>');
 });
 
 test('Allows to customize the prefix in the default handler', function () {
