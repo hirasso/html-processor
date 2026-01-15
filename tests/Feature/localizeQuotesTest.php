@@ -59,6 +59,14 @@ test('Ignores quotes in tags', function () {
     runTest('<p><a href="example.com">should be ignored</a></p>', 'de_DE', '<p><a href="example.com">should be ignored</a></p>');
 });
 
+test('Does nothing if the language is unknonwn', function () {
+    runTest(
+        '<p>"foo"</p>',
+        'es_ES',
+        '<p>"foo"</p>',
+    );
+});
+
 
 test('Works when setting the locale late', function () {
     $str = "<p>\"Hallo\"</p>";

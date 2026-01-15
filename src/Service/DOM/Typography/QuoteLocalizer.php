@@ -22,8 +22,6 @@ use IvoPetkov\HTML5DOMDocument;
  */
 final class QuoteLocalizer implements DOMServiceContract
 {
-    private const FALLBACK_LANGUAGE = 'en';
-
     /** @var array<string, Closure(string): string> */
     private array $doubleQuoteReplacements;
 
@@ -37,7 +35,6 @@ final class QuoteLocalizer implements DOMServiceContract
 
     public function __construct(private Typography $typography)
     {
-
         $this->doubleQuoteReplacements = [
             'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
             'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
@@ -54,11 +51,24 @@ final class QuoteLocalizer implements DOMServiceContract
     }
 
     /**
+     * Check if a language is supported
+     */
+    private function isLanguageSupported(string $lang): bool
+    {
+        return array_key_exists($lang, $this->doubleQuoteReplacements)
+            && array_key_exists($lang, $this->singleQuoteReplacements);
+    }
+
+    /**
      * Run the normalizer
      */
     public function run(HTML5DOMDocument $document): void
     {
-        $lang = $this->typography->getLanguageCode() ?? self::FALLBACK_LANGUAGE;
+        $lang = $this->typography->getLanguageCode();
+
+        if (!$lang || !$this->isLanguageSupported($lang)) {
+            return;
+        }
 
         $doubleQuoteChars = ['“', '”', '„', '«', '»'];
         $singleQuoteChars = ['‘', '’', '‚', '‹', '›'];
