@@ -56,12 +56,4 @@ echo html($html)
 
 ```
 
-## Global helper function `html()`
-
-```php
-use function Hirasso\HTMLProcessor\html;
-
-echo html($html)->autolinkUrls()->encodeEmails();
-```
-
 Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
