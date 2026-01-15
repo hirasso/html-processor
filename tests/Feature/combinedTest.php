@@ -1,7 +1,6 @@
 <?php
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 use Hirasso\HTMLProcessor\Support\Helpers;
 
 test('Runs various tasks on a string', function () {
@@ -15,7 +14,7 @@ test('Runs various tasks on a string', function () {
 
     $result = HTMLProcessor::fromString($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography(Typography::make('de_DE')
+        ->typography('de_DE', fn ($typo) => $typo
                 ->localizeQuotes()
                 ->preventWidows())
         ->processLinks(function ($link, $defaultHandler) { // process links by callback

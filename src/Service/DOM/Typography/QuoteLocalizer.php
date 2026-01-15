@@ -22,10 +22,6 @@ use IvoPetkov\HTML5DOMDocument;
  */
 final class QuoteLocalizer implements DOMServiceContract
 {
-    private const FALLBACK_LANGUAGE = 'en';
-
-    private string $languageCode;
-
     /** @var array<string, Closure(string): string> */
     private array $doubleQuoteReplacements;
 
@@ -37,11 +33,8 @@ final class QuoteLocalizer implements DOMServiceContract
         return 0;
     }
 
-    public function __construct(string $locale)
+    public function __construct(private Typography $typography)
     {
-
-        $this->setLocale($locale);
-
         $this->doubleQuoteReplacements = [
             'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
             'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
@@ -58,27 +51,12 @@ final class QuoteLocalizer implements DOMServiceContract
     }
 
     /**
-     * Set a custom locale. Valid formats:
-     *
-     * - de
-     * - de_DE
-     * - or de-DE
-     * - or de_DE_formal
+     * Check if a language is supported
      */
-    public function setLocale(string $locale): self
+    private function isLanguageSupported(string $lang): bool
     {
-        $locale = strtolower($locale);
-
-        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
-            throw new \InvalidArgumentException(
-                "Invalid locale format: '{$locale}'. Expected format: 'en', 'en_US' or 'en-US'"
-            );
-        }
-
-        $separator = str_contains($locale, '_') ? '_' : '-';
-        [$this->languageCode] = explode($separator, $locale);
-
-        return $this;
+        return array_key_exists($lang, $this->doubleQuoteReplacements)
+            && array_key_exists($lang, $this->singleQuoteReplacements);
     }
 
     /**
@@ -86,6 +64,12 @@ final class QuoteLocalizer implements DOMServiceContract
      */
     public function run(HTML5DOMDocument $document): void
     {
+        $lang = $this->typography->getLanguageCode();
+
+        if (!$lang || !$this->isLanguageSupported($lang)) {
+            return;
+        }
+
         $doubleQuoteChars = ['“', '”', '„', '«', '»'];
         $singleQuoteChars = ['‘', '’', '‚', '‹', '›'];
 
@@ -113,8 +97,8 @@ final class QuoteLocalizer implements DOMServiceContract
             $text = str_replace($singleQuoteSearch, $singleQuoteEntity, $text);
 
             // Localize the quotes
-            $text = $this->replaceQuoted($text, $doubleQuoteEntity, $this->doubleQuoteReplacements);
-            $text = $this->replaceQuoted($text, $singleQuoteEntity, $this->singleQuoteReplacements);
+            $text = $this->replaceQuoted($text, $doubleQuoteEntity, $this->doubleQuoteReplacements, $lang);
+            $text = $this->replaceQuoted($text, $singleQuoteEntity, $this->singleQuoteReplacements, $lang);
 
             $textNode->nodeValue = $text;
         }
@@ -128,13 +112,13 @@ final class QuoteLocalizer implements DOMServiceContract
     private function replaceQuoted(
         string $text,
         string $quoteEntity,
-        array $replacements
+        array $replacements,
+        string $lang
     ): string {
-        $lang = $this->languageCode;
 
-        // Fallback to default language if current language is not supported
+        // Return the text unchainged if the provided language doesn't have replacements
         if (!isset($replacements[$lang])) {
-            $lang = self::FALLBACK_LANGUAGE;
+            return $lang;
         }
 
         /**

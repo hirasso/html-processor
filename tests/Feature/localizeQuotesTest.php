@@ -4,7 +4,15 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 
 function runTest(string $str, string $locale, string $expected): void
 {
-    $result = HTMLProcessor::fromString($str)->typography($locale)->apply();
+    $result = HTMLProcessor::fromString($str)
+        ->typography(
+            $locale,
+            fn ($typo) => $typo
+            ->localizeQuotes()
+            ->preventWidows()
+        )->apply();
+
+
     expect($result)->toBe($expected);
 }
 
@@ -30,7 +38,6 @@ test('Localizes english quotes', function () {
     runTest("<p>\"Hello\"</p>", $locale, '<p>“Hello”</p>');
     runTest("<p>'Hello'</p>", $locale, '<p>‘Hello’</p>');
     runTest("<p>\"'Hello', she said\"</p>", $locale, '<p>“‘Hello’, she said”</p>');
-
 });
 
 test('Localizes french quotes', function () {
@@ -50,4 +57,27 @@ test('Parses locales robustly', function () {
 
 test('Ignores quotes in tags', function () {
     runTest('<p><a href="example.com">should be ignored</a></p>', 'de_DE', '<p><a href="example.com">should be ignored</a></p>');
+});
+
+test('Does nothing if the language is unknonwn', function () {
+    runTest(
+        '<p>"foo"</p>',
+        'es_ES',
+        '<p>"foo"</p>',
+    );
+});
+
+
+test('Works when setting the locale late', function () {
+    $str = "<p>\"Hallo\"</p>";
+    $expected = '<p>„Hallo“</p>';
+
+    $result = HTMLProcessor::fromString($str)
+        ->typography(
+            'en_EN',
+            fn ($typo) => $typo
+            ->localizeQuotes()
+            ->setLocale('de_DE')
+        )->apply();
+    expect($result)->toBe($expected);
 });

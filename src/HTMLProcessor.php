@@ -95,14 +95,22 @@ final class HTMLProcessor
 
     /**
      * Optimize typography
+     *
+     * @param string $locale – e.g. 'en_EN', 'de_DE' or even 'de_DE_formal' Only the first bit will be used
+     * @param null|Closure(Typography): mixed $callback – customize via callback
      */
     public function typography(
-        null|string|Typography $value = null,
+        string $locale,
+        ?Closure $callback = null,
     ): self {
+        $instance = Typography::fromLocale($locale);
+        $this->domQueue->add($instance);
 
-        $instance = !($value instanceof Typography)
-            ? Typography::make($value)->applyDefaults()
-            : $value;
+        /** Apply the callback */
+        if ($callback instanceof Closure) {
+            ($callback)($instance);
+            return $this;
+        }
 
         $this->domQueue->add($instance);
 
