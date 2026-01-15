@@ -11,5 +11,5 @@ echo HTMLProcessor::fromString($html)
     ->typography('de_DE', fn ($typo) => $typo
         ->localizeQuotes() // format quotes based on locale
         ->preventWidows() // prevent widows
-    )
+    );
 ```
