@@ -1,8 +1,8 @@
 # hirasso/html-processor
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/hirasso/html-processor.svg?color=7c3aed)](https://packagist.org/packages/hirasso/html-processor)
-[![Test Status](https://img.shields.io/github/actions/workflow/status/hirasso/html-processor/ci.yml?label=tests&color=7c3aed)](https://github.com/hirasso/html-processor/actions/workflows/ci.yml)
-[![Code Coverage](https://img.shields.io/codecov/c/github/hirasso/html-processor?color=7c3aed)](https://app.codecov.io/gh/hirasso/html-processor)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/hirasso/html-processor.svg?color=F5D350)](https://packagist.org/packages/hirasso/html-processor)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/hirasso/html-processor/ci.yml?label=tests&color=F5D350)](https://github.com/hirasso/html-processor/actions/workflows/ci.yml)
+[![Code Coverage](https://img.shields.io/codecov/c/github/hirasso/html-processor?color=F5D350)](https://app.codecov.io/gh/hirasso/html-processor)
 
 **A tiny HTML processor written in PHP 🐘**
 
