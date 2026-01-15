@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- 6564cae: Change the API for `->typography()`:
+
+  ```php
+  use Hirasso\HTMLProcessor\HTMLProcessor;
+
+  echo HTMLProcessor::fromString($html)
+      ->typography('de_DE', fn ($typo) => $typo
+          ->localizeQuotes() // format quotes based on locale
+          ->preventWidows() // prevent widows
+      );
+  ```
+
 ## 0.3.0
 
 ### Minor Changes
