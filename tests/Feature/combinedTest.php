@@ -50,7 +50,7 @@ test('Runs autolinkUrls before processLinks', function () {
     HTML);
 
     $expected = trimLines(<<<HTML
-    <p><a href="https://example.com" class="link--external">example.com</a></p>
+    <p><a href="https://example.com" class="link--internal">example.com</a></p>
     HTML);
 
     $result = html($html)

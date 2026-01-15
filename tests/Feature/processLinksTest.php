@@ -2,11 +2,11 @@
 
 use function Hirasso\HTMLProcessor\html;
 
-beforeAll(function () {
+beforeEach(function () {
     $_SERVER['HTTP_HOST'] = 'example.com';
 });
 
-afterAll(function () {
+afterEach(function () {
     $_SERVER['HTTP_HOST'] = null;
 });
 
@@ -88,4 +88,22 @@ test('Allows to customize the prefix in the default handler', function () {
         fn ($link, $defaultHandler) => $defaultHandler('foo')
     );
     expect($result->apply())->toBe('<a href="https://example.com" class="foo--internal">example.com</a>');
+});
+
+test('Reliably detects URL types with port', function () {
+    $_SERVER['HTTP_HOST'] = 'example.com.ddev.site:33003';
+
+    $input = '<a href="https://example.com.ddev.site:33003">example.com.ddev.site</a>';
+    $expected = '<a href="https://example.com.ddev.site:33003" class="link--internal">example.com.ddev.site</a>';
+
+    expect(html($input)->processLinks()->apply())->toBe($expected);
+});
+
+test('Gracefully handles an empty $_SERVER host', function () {
+    $_SERVER['HTTP_HOST'] = null;
+
+    $input = '<a href="https://example.com.ddev.site:33003">example.com.ddev.site</a>';
+    $expected = '<a href="https://example.com.ddev.site:33003" class="link--internal">example.com.ddev.site</a>';
+
+    expect(html($input)->processLinks()->apply())->toBe($expected);
 });
