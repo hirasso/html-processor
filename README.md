@@ -59,9 +59,9 @@ echo HTMLProcessor::fromString($html)
 ## Global helper function `html()`
 
 ```php
-echo html($html)
-    ->autolinkUrls()
-    ->encodeEmails();
+use function Hirasso\HTMLProcessor\html;
+
+echo html($html)->autolinkUrls()->encodeEmails();
 ```
 
 Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
