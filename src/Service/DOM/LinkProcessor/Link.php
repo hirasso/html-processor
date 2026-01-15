@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 
+use Exception;
 use Hirasso\HTMLProcessor\Enum\LinkType;
 use IvoPetkov\HTML5DOMElement;
+use League\Uri\Uri;
 
 final readonly class Link
 {
@@ -30,35 +32,62 @@ final readonly class Link
             return LinkType::Invalid;
         }
 
-        $baseDomain = $_SERVER['HTTP_HOST'] ?? '';
+        if (!$linkUri = $this->getUri($url)) {
+            return LinkType::Invalid;
+        }
 
-        $parsed = parse_url($url);
-        $host = strtolower($parsed['host'] ?? '');
-        $scheme = strtolower($parsed['scheme'] ?? '');
-        $isCustomScheme = !!$scheme && !in_array($scheme, ['http', 'https'], true);
+        $scheme = $linkUri->getScheme();
+
+        $isCustomScheme = $scheme && !in_array($scheme, ['http', 'https'], true);
         $isAnchorToCurrentPage = str_starts_with(trim($url), '#');
 
         return match(true) {
-            !$parsed => LinkType::Invalid,
             $scheme === 'mailto' => LinkType::Mailto,
             $scheme === 'tel' => LinkType::Tel,
             $isCustomScheme => LinkType::External,
             $isAnchorToCurrentPage => LinkType::Anchor,
-            !$host => LinkType::Internal,
-            default => (function () use ($parsed, $baseDomain): LinkType {
-                $host = strtolower($parsed['host']);
-                $base = strtolower($baseDomain);
+            !$linkUri->getHost() => LinkType::Internal,
+            default => (function () use ($linkUri): LinkType {
+                $currentUri = $this->getUri('//' . ($_SERVER['HTTP_HOST'] ?? ''));
 
-                // Strip www. from both for comparison
-                $hostNormalized = preg_replace('/^www\./', '', $host);
-                $baseNormalized = preg_replace('/^www\./', '', $base);
+                $linkHostname = $this->removeWWW($this->getHostname($linkUri));
+                $currentHostname = $this->removeWWW($this->getHostname($currentUri));
 
                 // Only match exact domains (with or without www.)
-                return ($hostNormalized === $baseNormalized)
+                return (!$currentHostname || $linkHostname  === $currentHostname)
                     ? LinkType::Internal
                     : LinkType::External;
             })()
         };
+    }
+
+    private function getUri(string $uri): ?Uri
+    {
+        try {
+            return Uri::new($uri);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    private function removeWWW(?string $uri = null): ?string
+    {
+        return preg_replace('/^www\./', '', $uri ?? '') ?? $uri;
+    }
+
+    private function getHostname(?Uri $uri = null): ?string
+    {
+        if (!$uri) {
+            return null;
+        }
+
+        $hostname = $uri->getHost();
+
+        if (!$port = $uri->getPort()) {
+            return $hostname;
+        }
+
+        return "$hostname:$port";
     }
 
     /**

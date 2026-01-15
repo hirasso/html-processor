@@ -26,7 +26,8 @@
     "php": ">=8.1",
     "asika/autolink": "^2.2",
     "illuminate/collections": "^11",
-    "ivopetkov/html5-dom-document-php": "^2.10"
+    "ivopetkov/html5-dom-document-php": "^2.10",
+    "league/uri": "^7.7"
   },
   "require-dev": {
     "laravel/pint": "^1.20",
