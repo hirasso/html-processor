@@ -1,7 +1,8 @@
 <?php
 
-use Hirasso\HTMLProcessor\HTMLProcessor;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Support\Support;
+
+use function Hirasso\HTMLProcessor\html;
 
 test('Runs various tasks on a string', function () {
     $html = trimLines(<<<HTML
@@ -12,7 +13,7 @@ test('Runs various tasks on a string', function () {
     <p>And some more text that should not have a widow</p>
     HTML);
 
-    $result = HTMLProcessor::fromString($html)
+    $result = html($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
         ->typography('de_DE', fn ($typo) => $typo
                 ->localizeQuotes()
@@ -52,7 +53,7 @@ test('Runs autolinkUrls before processLinks', function () {
     <p><a href="https://example.com" class="link--external">example.com</a></p>
     HTML);
 
-    $result = HTMLProcessor::fromString($html)
+    $result = html($html)
         ->processLinks()
         ->autolinkUrls()
         ->apply();
@@ -69,7 +70,7 @@ test('Runs autolinkUrls before encodeEmails', function () {
     <p><a href="mailto:mail@example.com">mail@example.com</a></p>
     HTML);
 
-    $result = HTMLProcessor::fromString($html)
+    $result = html($html)
         ->encodeEmails()
         ->autolinkUrls()
         ->apply();
@@ -95,7 +96,7 @@ test('Works with self-closing tags', function () {
     HTML;
 
     expect(
-        HTMLProcessor::fromString($html)
+        html($html)
             ->removeEmptyElements()
             ->apply()
     )->toBe($expected);
@@ -103,5 +104,5 @@ test('Works with self-closing tags', function () {
     /** compare  to native DOMDocument */
     $doc = new \DOMDocument();
     $doc->loadHTML($html);
-    expect(Helpers::extractBodyHTML($doc))->toBe($expected);
+    expect(Support::extractBodyHTML($doc))->toBe($expected);
 });

@@ -7,7 +7,7 @@ namespace Hirasso\HTMLProcessor\Support;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
-final class Helpers
+final class Support
 {
     /**
      * Convert entities, while preserving already-encoded entities.
@@ -63,7 +63,7 @@ final class Helpers
             return false;
         }
 
-        $textContent = Helpers::normalizeWhitespace($el->textContent);
+        $textContent = Support::normalizeWhitespace($el->textContent);
 
         return empty(trim($textContent));
     }

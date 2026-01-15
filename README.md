@@ -22,9 +22,9 @@ composer require hirasso/html-processor
 ## Minimal Example
 
 ```php
-use Hirasso\HTMLProcessor\HTMLProcessor;
+use function Hirasso\HTMLProcessor\html;
 
-echo HTMLProcessor::fromString($html)
+echo html($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
     ->removeEmptyElements() // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
@@ -35,9 +35,9 @@ echo HTMLProcessor::fromString($html)
 ## Maximal Example
 
 ```php
-use Hirasso\HTMLProcessor\HTMLProcessor;
+use function Hirasso\HTMLProcessor\html;
 
-echo HTMLProcessor::fromString($html)
+echo html($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
     ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
@@ -54,6 +54,14 @@ echo HTMLProcessor::fromString($html)
         $defaultHandler(); // run the default handler
     });
 
+```
+
+## Global helper function `html()`
+
+```php
+use function Hirasso\HTMLProcessor\html;
+
+echo html($html)->autolinkUrls()->encodeEmails();
 ```
 
 Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.

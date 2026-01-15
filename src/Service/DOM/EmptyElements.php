@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
@@ -33,7 +33,7 @@ final readonly class EmptyElements implements DOMServiceContract
     {
         foreach ($document->querySelectorAll($this->selector ?? 'p') as $el) {
             /** @var HTML5DOMElement $el */
-            if (Helpers::containsOnlyWhitespace($el)) {
+            if (Support::containsOnlyWhitespace($el)) {
                 $el->parentNode?->removeChild($el);
             }
         }
