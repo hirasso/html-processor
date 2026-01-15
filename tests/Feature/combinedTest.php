@@ -14,7 +14,7 @@ test('Runs various tasks on a string', function () {
 
     $result = HTMLProcessor::fromString($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography(fn($typo) => $typo
+        ->typography(fn ($typo) => $typo
                 ->setLocale('de_DE')
                 ->localizeQuotes()
                 ->preventWidows())
