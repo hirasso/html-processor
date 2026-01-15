@@ -12,7 +12,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 use Closure;
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
 /**
@@ -141,7 +141,7 @@ final class QuoteLocalizer implements DOMServiceContract
      */
     protected function entitiesToPlaceholders(string $str): string
     {
-        $str = Helpers::htmlentities($str);
+        $str = Support::htmlentities($str);
         $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str) ?? $str;
         $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str) ?? $str;
         return $str;

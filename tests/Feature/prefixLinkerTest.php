@@ -1,24 +1,24 @@
 <?php
 
-use Hirasso\HTMLProcessor\HTMLProcessor;
+use function Hirasso\HTMLProcessor\html;
 
 test('Links @mentions to Instagram', function () {
-    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://www.instagram.com/')->apply();
+    $result = html("@hirasso")->autolinkPrefix('@', 'https://www.instagram.com/')->apply();
     expect($result)->toBe('<a href="https://www.instagram.com/hirasso">@hirasso</a>');
 });
 
 test('Links #tags to Instagram', function () {
-    $result = HTMLProcessor::fromString("#tag")->autolinkPrefix('#', 'https://www.instagram.com/explore/tags/')->apply();
+    $result = html("#tag")->autolinkPrefix('#', 'https://www.instagram.com/explore/tags/')->apply();
     expect($result)->toBe('<a href="https://www.instagram.com/explore/tags/tag">#tag</a>');
 });
 
 test('Links @mentions to custom url', function () {
-    $result = HTMLProcessor::fromString("@hirasso")->autolinkPrefix('@', 'https://your-instance.social/@')->apply();
+    $result = html("@hirasso")->autolinkPrefix('@', 'https://your-instance.social/@')->apply();
     expect($result)->toBe('<a href="https://your-instance.social/@hirasso">@hirasso</a>');
 });
 
 test('Links #tags to custom url', function () {
-    $result = HTMLProcessor::fromString("#php")->autolinkPrefix('#', 'https://your-instance.social/tags')->apply();
+    $result = html("#php")->autolinkPrefix('#', 'https://your-instance.social/tags')->apply();
     expect($result)->toBe('<a href="https://your-instance.social/tags/php">#php</a>');
 });
 
@@ -30,7 +30,7 @@ test('Works in complex HTML', function () {
     <p>And some more text that should not have a widow</p>
     HTML;
 
-    $result = HTMLProcessor::fromString($html)
+    $result = html($html)
         ->autolinkPrefix('@', 'https://your-instance.social/@')
         ->apply();
 
@@ -53,7 +53,7 @@ test('Works with repeated calls', function () {
         <p>Learn more about <a href="https://your-instance.social/tags/php">#php</a> on SocialWeb.</p>
     HTML);
 
-    $result = HTMLProcessor::fromString($html)
+    $result = html($html)
         ->autolinkPrefix('@', 'https://your-instance.social/@')
         ->autolinkPrefix('#', 'https://your-instance.social/tags')
         ->apply();

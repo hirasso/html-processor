@@ -1,10 +1,10 @@
 <?php
 
-use Hirasso\HTMLProcessor\HTMLProcessor;
+use function Hirasso\HTMLProcessor\html;
 
 function encode(string $string): string
 {
-    return HTMLProcessor::fromString($string)->encodeEmails()->apply();
+    return html($string)->encodeEmails()->apply();
 }
 function expectEncoded(string $string): void
 {

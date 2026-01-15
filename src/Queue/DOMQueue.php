@@ -6,7 +6,7 @@ namespace Hirasso\HTMLProcessor\Queue;
 
 use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
 final class DOMQueue implements DOMQueueContract
@@ -55,7 +55,7 @@ final class DOMQueue implements DOMQueueContract
 
         $document = new HTML5DOMDocument();
         $document->loadHTML(
-            htmlspecialchars_decode(Helpers::htmlentities($html)),
+            htmlspecialchars_decode(Support::htmlentities($html)),
             /**
              * @TODO reactivate this if it is fixed upstream
              * https://github.com/ivopetkov/html5-dom-document-php/pull/65
@@ -65,7 +65,7 @@ final class DOMQueue implements DOMQueueContract
 
         $this->runServices($document);
 
-        return Helpers::extractBodyHTML($document);
+        return Support::extractBodyHTML($document);
     }
 
     /**

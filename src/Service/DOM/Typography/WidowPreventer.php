@@ -6,7 +6,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Support\Helpers;
+use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
 final readonly class WidowPreventer implements DOMServiceContract
@@ -115,7 +115,7 @@ final readonly class WidowPreventer implements DOMServiceContract
     private function maybePreventWidows(string $textContent): string
     {
         // first remove any eventual white space
-        $string = Helpers::normalizeWhitespace($textContent);
+        $string = Support::normalizeWhitespace($textContent);
 
         if (empty(trim($string))) {
             return $textContent;

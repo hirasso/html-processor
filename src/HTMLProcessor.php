@@ -20,15 +20,6 @@ use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
  * Process a HTML string using a fluent API
  * @see https://github.com/hirasso/html-processor
  */
-function html(string $html): HTMLProcessor
-{
-    return HTMLProcessor::fromString($html);
-}
-
-/**
- * Process a HTML string using a fluent API
- * @see https://github.com/hirasso/html-processor
- */
 final class HTMLProcessor
 {
     /** track if entities should be decoded */
