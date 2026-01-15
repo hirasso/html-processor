@@ -80,6 +80,9 @@ final class Typography implements DOMServiceContract
         return $this;
     }
 
+    /**
+     * Run the registered Typography Services against a document
+     */
     public function run(HTML5DOMDocument $document): void
     {
         /**
