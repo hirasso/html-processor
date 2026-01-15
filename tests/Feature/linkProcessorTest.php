@@ -64,7 +64,7 @@ test('Treats subdomains as external links', function () {
 
 test('Provides a callback for link processing', function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
-        postProcess: fn (HTML5DOMElement $el) => $el->setAttribute('x-typowave.notouch.minvw.768', '')
+        fn ($link) => $link->el->setAttribute('x-typowave.notouch.minvw.768', '')
     );
     expect($result->apply())->toBe('<a href="https://example.com" class="link--internal" x-typowave.notouch.minvw.768="">example.com</a>');
 });

@@ -1,6 +1,6 @@
 <?php
 
-use Hirasso\HTMLProcessor\Enum\UrlType;
+use Hirasso\HTMLProcessor\Enum\LinkType;
 use Hirasso\HTMLProcessor\HTMLProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 use Hirasso\HTMLProcessor\Support\Helpers;
@@ -20,12 +20,12 @@ test('Runs various tasks on a string', function () {
                 ->localizeQuotes()
                 ->preventWidows())
         ->processLinks(
-            function ($el, $type) { // process links by callback
-                if ($type === UrlType::External) {
-                    $el->setAttribute('target', '_blank');
+            function ($link, $defaultHandler) { // process links by callback
+                if ($link->type === LinkType::External) {
+                    $link->el->setAttribute('target', '_blank');
                 }
-            },
-            addClasses: true // automatically add classes by type (mailto:, tel, internal, external, ...)
+                $defaultHandler(); // add links and whatnot
+            }
         )
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon

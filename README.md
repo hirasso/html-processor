@@ -23,7 +23,7 @@ composer require hirasso/html-processor
 
 ```php
 use Hirasso\HTMLProcessor\HTMLProcessor;
-use Hirasso\HTMLProcessor\Enum\UrlType;
+use Hirasso\HTMLProcessor\Enum\LinkType;
 
 echo HTMLProcessor::fromString($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
@@ -39,7 +39,7 @@ echo HTMLProcessor::fromString($html)
     ->processLinks(
         addClasses: true, // automatically add classes by type (mailto:, tel, internal, external, ...)
         function ($el, $type) { // apply a custom callback to all links
-            if ($type === UrlType::External) {
+            if ($type === LinkType::External) {
                 $el->setAttribute('target', '_blank');
             }
         },
