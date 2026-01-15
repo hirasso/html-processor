@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+### Patch Changes
+
+- 2a4ce16: Fixes links being considered external if they contained a custom port number
+
 ## 0.4.1
 
 ### Patch Changes
