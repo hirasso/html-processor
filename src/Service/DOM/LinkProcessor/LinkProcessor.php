@@ -22,7 +22,7 @@ use IvoPetkov\HTML5DOMElement;
 final readonly class LinkProcessor implements DOMServiceContract
 {
     /**
-     * @param ?Closure(Link $link, Closure(?string): mixed $defaultHandler): mixed $userCallback
+     * @param ?Closure(Link $link, Closure(?string=): mixed $defaultHandler): mixed $userCallback
      */
     public function __construct(private ?Closure $userCallback = null)
     {
