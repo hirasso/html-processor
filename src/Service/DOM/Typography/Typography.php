@@ -42,11 +42,13 @@ final class Typography implements DOMServiceContract
         return $this;
     }
 
-    public function getLocale(): string {
+    public function getLocale(): string
+    {
         return $this->locale;
     }
 
-    public function getLanguageCode(): ?string {
+    public function getLanguageCode(): ?string
+    {
         $separator = str_contains($this->locale, '_') ? '_' : '-';
         return explode($separator, $this->locale)[0] ?: null;
     }

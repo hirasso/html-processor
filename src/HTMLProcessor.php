@@ -111,7 +111,7 @@ final class HTMLProcessor
         }
 
         /** Must be a locale string at this point */
-        if(!empty($localeOrCallback)) {
+        if (!empty($localeOrCallback)) {
             $instance->setLocale($localeOrCallback);
         }
 

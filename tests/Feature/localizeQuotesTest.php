@@ -5,7 +5,8 @@ use Hirasso\HTMLProcessor\HTMLProcessor;
 function runTest(string $str, string $locale, string $expected): void
 {
     $result = HTMLProcessor::fromString($str)
-        ->typography(fn($typo) => $typo
+        ->typography(
+            fn ($typo) => $typo
             ->setLocale($locale)
             ->localizeQuotes()
         )->apply();
@@ -56,12 +57,13 @@ test('Ignores quotes in tags', function () {
 });
 
 
-test('Works when setting the locale late', function() {
+test('Works when setting the locale late', function () {
     $str = "<p>\"Hallo\"</p>";
     $expected = '<p>„Hallo“</p>';
 
     $result = HTMLProcessor::fromString($str)
-        ->typography(fn($typo) => $typo
+        ->typography(
+            fn ($typo) => $typo
             ->localizeQuotes()
             ->setLocale('de_DE')
         )->apply();

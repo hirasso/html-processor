@@ -35,7 +35,8 @@ final class QuoteLocalizer implements DOMServiceContract
         return 0;
     }
 
-    public function __construct(private Typography $typography) {
+    public function __construct(private Typography $typography)
+    {
 
         $this->doubleQuoteReplacements = [
             'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
