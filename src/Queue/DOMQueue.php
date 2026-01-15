@@ -44,7 +44,8 @@ final class DOMQueue implements DOMQueueContract
     /**
      * Run all registered services against a document
      */
-    public function applyTo(string $html): string {
+    public function applyTo(string $html): string
+    {
         if ($this->isEmpty()) {
             return $html;
         }
@@ -70,7 +71,8 @@ final class DOMQueue implements DOMQueueContract
     /**
      * Apply all registered services against a provided $document
      */
-    public function runServices(HTML5DOMDocument $document): void {
+    public function runServices(HTML5DOMDocument $document): void
+    {
         // Execute all DOM services
         foreach ($this->all() as $service) {
             $service->run($document);

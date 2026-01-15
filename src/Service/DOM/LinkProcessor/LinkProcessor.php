@@ -69,9 +69,10 @@ final readonly class LinkProcessor implements DOMServiceContract
     /**
      * Get the default handler for processing links
      */
-    private function getDefaultHandler(Link $link): Closure {
+    private function getDefaultHandler(Link $link): Closure
+    {
 
-        return function(?string $prefix = null) use ($link) {
+        return function (?string $prefix = null) use ($link) {
             $prefix ??= 'link';
 
             $link->el->classList->add("{$prefix}--{$link->type->value}");

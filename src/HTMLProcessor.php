@@ -6,7 +6,6 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
-use Hirasso\HTMLProcessor\Enum\LinkType;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
@@ -79,7 +78,8 @@ final class HTMLProcessor
      *
      * @param ?Closure(Link $link, Closure(?string=): mixed $defaultHandler): mixed $callback
      */
-    public function processLinks(?Closure $callback = null): self {
+    public function processLinks(?Closure $callback = null): self
+    {
         $this->domQueue->add(new LinkProcessor($callback));
         return $this;
     }

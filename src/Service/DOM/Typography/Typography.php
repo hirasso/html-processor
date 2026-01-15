@@ -11,15 +11,14 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\QuoteLocalizer;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\WidowPreventer;
 use IvoPetkov\HTML5DOMDocument;
 
 final class Typography implements DOMServiceContract
 {
     private DOMQueue $queue;
 
-    public function prio(): int {
+    public function prio(): int
+    {
         return 0;
     }
 
@@ -29,11 +28,13 @@ final class Typography implements DOMServiceContract
         $this->queue = new DOMQueue();
     }
 
-    public static function make(?string $locale = null): self {
+    public static function make(?string $locale = null): self
+    {
         return new self($locale ?? 'en_US');
     }
 
-    public function applyDefaults(): self {
+    public function applyDefaults(): self
+    {
         $this->queue->add(new QuoteLocalizer($this->locale));
         $this->queue->add(new WidowPreventer());
         return $this;
@@ -51,7 +52,8 @@ final class Typography implements DOMServiceContract
         return $this;
     }
 
-    public function run(HTML5DOMDocument $document): void {
+    public function run(HTML5DOMDocument $document): void
+    {
         /**
          * Apply the default services if no service was registered
          */

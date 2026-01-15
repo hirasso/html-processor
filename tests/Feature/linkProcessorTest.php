@@ -89,4 +89,3 @@ test('Allows to customize the prefix in the default handler', function () {
     );
     expect($result->apply())->toBe('<a href="https://example.com" class="foo--internal">example.com</a>');
 });
-
