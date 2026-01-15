@@ -22,7 +22,7 @@ use IvoPetkov\HTML5DOMElement;
 final readonly class LinkProcessor implements DOMServiceContract
 {
     /**
-     * @param ?Closure(Link $link, Closure $defaultHandler): mixed $userCallback
+     * @param ?Closure(Link $link, Closure(?string $prefix) $defaultHandler): mixed $userCallback
      */
     public function __construct(private ?Closure $userCallback = null)
     {
@@ -52,21 +52,36 @@ final readonly class LinkProcessor implements DOMServiceContract
 
         $defaultHandler = $this->getDefaultHandler($link);
 
+        /**
+         * Run the user callback if provided
+         */
         if ($this->userCallback !== null) {
             ($this->userCallback)($link, $defaultHandler);
             return;
         }
+
+        /**
+         * Run the default handler
+         */
+        $defaultHandler();
     }
 
     /**
-     * Get the default handler if there was no userCallback provided
+     * Get the default handler for processing links
      */
     private function getDefaultHandler(Link $link): Closure {
 
-        return function() use ($link) {
-            $link->el->classList->add("link--{$link->type->value}");
+        return function(?string $prefix = null) use ($link) {
+            $prefix ??= 'link';
+
+            $link->el->classList->add("{$prefix}--{$link->type->value}");
+
             if ($link->isLinkToFile()) {
-                $link->el->classList->add("link--file link--ext--$link->extension");
+                $link->el->classList->add("{$prefix}--file");
+            }
+
+            if ($link->extension) {
+                $link->el->classList->add("{$prefix}--ext--$link->extension");
             }
         };
 

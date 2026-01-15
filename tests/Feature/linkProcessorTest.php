@@ -1,7 +1,6 @@
 <?php
 
 use Hirasso\HTMLProcessor\HTMLProcessor;
-use IvoPetkov\HTML5DOMElement;
 
 beforeAll(function () {
     $_SERVER['HTTP_HOST'] = 'example.com';
@@ -38,18 +37,18 @@ test('Processes internal links', function () {
 
 test('Processes local file links', function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com/file.zip"></a>')->processLinks();
-    expect($result->apply())->toBe('<a href="https://example.com/file.zip" class="link--internal link--file link--file--zip"></a>');
+    expect($result->apply())->toBe('<a href="https://example.com/file.zip" class="link--internal link--file link--ext--zip"></a>');
 
     $result = HTMLProcessor::fromString('<a href="file.zip"></a>')->processLinks();
-    expect($result->apply())->toBe('<a href="file.zip" class="link--internal link--file link--file--zip"></a>');
+    expect($result->apply())->toBe('<a href="file.zip" class="link--internal link--file link--ext--zip"></a>');
 
     $result = HTMLProcessor::fromString('<a href="/path/to/file.zip"></a>')->processLinks();
-    expect($result->apply())->toBe('<a href="/path/to/file.zip" class="link--internal link--file link--file--zip"></a>');
+    expect($result->apply())->toBe('<a href="/path/to/file.zip" class="link--internal link--file link--ext--zip"></a>');
 });
 
 test("Doesn't wrongly detect file links", function () {
     $result = HTMLProcessor::fromString('<a href="https://example.com/page.html"></a>')->processLinks();
-    expect($result->apply())->toBe('<a href="https://example.com/page.html" class="link--internal"></a>');
+    expect($result->apply())->toBe('<a href="https://example.com/page.html" class="link--internal link--ext--html"></a>');
 });
 
 test('Processes external links', function () {
@@ -62,14 +61,32 @@ test('Treats subdomains as external links', function () {
     expect($result->apply())->toBe('<a href="https://external.example.com" class="link--external"></a>');
 });
 
-test('Provides a callback for link processing', function () {
-    $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
-        fn ($link) => $link->el->setAttribute('x-typowave.notouch.minvw.768', '')
-    );
-    expect($result->apply())->toBe('<a href="https://example.com" class="link--internal" x-typowave.notouch.minvw.768="">example.com</a>');
-});
-
 test('Adds a class for invalid links', function () {
     $result = HTMLProcessor::fromString('<a href="http://user@:80"></a>')->processLinks();
     expect($result->apply())->toBe('<a href="http://user@:80" class="link--invalid"></a>');
 });
+
+test('Provides a custom callback', function () {
+    $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
+        fn ($link) => $link->el->setAttribute('my:custom.attribute', '')
+    );
+    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="">example.com</a>');
+});
+
+test('Provides the default handler in the custom callback', function () {
+    $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
+        function ($link, $defaultHandler) {
+            $link->el->setAttribute('my:custom.attribute', '');
+            $defaultHandler();
+        }
+    );
+    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="" class="link--internal">example.com</a>');
+});
+
+test('Allows to customize the prefix in the default handler', function () {
+    $result = HTMLProcessor::fromString('<a href="https://example.com">example.com</a>')->processLinks(
+        fn ($link, $defaultHandler) => $defaultHandler('foo')
+    );
+    expect($result->apply())->toBe('<a href="https://example.com" class="foo--internal">example.com</a>');
+});
+

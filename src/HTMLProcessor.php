@@ -77,7 +77,7 @@ final class HTMLProcessor
     /**
      * Add classes to links, open external links in a new tab, etc.
      *
-     * @param ?Closure(Link $link, Closure $defaultHandler): mixed $process – process links with information
+     * @param ?Closure(Link $link, Closure(?string $prefix) $defaultHandler): mixed $process – process links with information
      */
     public function processLinks(
         ?Closure $process = null,
