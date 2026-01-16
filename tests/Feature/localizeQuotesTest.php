@@ -1,10 +1,10 @@
 <?php
 
-use function Hirasso\HTMLProcessor\html;
+use function Hirasso\HTMLProcessor\process;
 
 function runTest(string $str, string $locale, string $expected): void
 {
-    $result = html($str)
+    $result = process($str)
         ->typography(
             $locale,
             fn ($typo) => $typo
@@ -72,7 +72,7 @@ test('Works when setting the locale late', function () {
     $str = "<p>\"Hallo\"</p>";
     $expected = '<p>„Hallo“</p>';
 
-    $result = html($str)
+    $result = process($str)
         ->typography(
             'en_EN',
             fn ($typo) => $typo

@@ -13,9 +13,9 @@
 - 29c68b7: Provide a helper function:
 
   ```php
-  use function Hirasso\HTMLProcessor\html;
+  use function Hirasso\HTMLProcessor\process;
 
-  echo html($html)->autolinkUrls();
+  echo process($html)->autolinkUrls();
   ```
 
 ## 0.4.0
