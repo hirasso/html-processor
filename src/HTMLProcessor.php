@@ -126,7 +126,7 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
-        $this->preserveEntities = true;
+        $this->preserveEntities();
         $this->htmlQueue->add(new EmailEncoder());
         return $this;
     }
@@ -174,9 +174,9 @@ final class HTMLProcessor
     /**
      * Preserve entities explicitly
      */
-    public function preserveEntities(?bool $preserve = true): self
+    public function preserveEntities(): self
     {
-        $this->preserveEntities = $preserve ?? true;
+        $this->preserveEntities = true;
         return $this;
     }
 }
