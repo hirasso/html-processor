@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+### Patch Changes
+
+- 2a683fe: don't require illuminate/collections
+
 ## 0.5.0
 
 ### Minor Changes
