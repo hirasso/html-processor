@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Enum;
 
-enum LinkType: string
+enum UrlType: string
 {
     case Internal = 'internal';
     case External = 'external';

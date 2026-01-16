@@ -113,7 +113,7 @@
           preventWidows: true // prevent widows
       )
       ->processLinks(function ($el, $type) { // process links by callback
-              if ($type === LinkType::External) {
+              if ($type === UrlType::External) {
                   $el->setAttribute('target', '_blank');
               }
           },
