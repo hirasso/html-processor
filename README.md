@@ -22,9 +22,9 @@ composer require hirasso/html-processor
 ## Minimal Example
 
 ```php
-use function Hirasso\HTMLProcessor\html;
+use function Hirasso\HTMLProcessor\process;
 
-echo html($html)
+echo process($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
     ->removeEmptyElements() // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
@@ -35,9 +35,9 @@ echo html($html)
 ## Maximal Example
 
 ```php
-use function Hirasso\HTMLProcessor\html;
+use function Hirasso\HTMLProcessor\process;
 
-echo html($html)
+echo process($html)
     ->autolinkUrls() // wrap raw url strings in `<a>` tags
     ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon

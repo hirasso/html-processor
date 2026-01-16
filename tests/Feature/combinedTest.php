@@ -2,7 +2,7 @@
 
 use Hirasso\HTMLProcessor\Support\Support;
 
-use function Hirasso\HTMLProcessor\html;
+use function Hirasso\HTMLProcessor\process;
 
 test('Runs various tasks on a string', function () {
     $html = trimLines(<<<HTML
@@ -13,7 +13,7 @@ test('Runs various tasks on a string', function () {
     <p>And some more text that should not have a widow</p>
     HTML);
 
-    $result = html($html)
+    $result = process($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
         ->typography('de_DE', fn ($typo) => $typo
                 ->localizeQuotes()
@@ -53,7 +53,7 @@ test('Runs autolinkUrls before processLinks', function () {
     <p><a href="https://example.com" class="link--internal">example.com</a></p>
     HTML);
 
-    $result = html($html)
+    $result = process($html)
         ->processLinks()
         ->autolinkUrls()
         ->apply();
@@ -70,7 +70,7 @@ test('Runs autolinkUrls before encodeEmails', function () {
     <p><a href="mailto:mail@example.com">mail@example.com</a></p>
     HTML);
 
-    $result = html($html)
+    $result = process($html)
         ->encodeEmails()
         ->autolinkUrls()
         ->apply();
@@ -96,7 +96,7 @@ test('Works with self-closing tags', function () {
     HTML;
 
     expect(
-        html($html)
+        process($html)
             ->removeEmptyElements()
             ->apply()
     )->toBe($expected);
