@@ -1,5 +1,5 @@
 ---
-"html-processor": patch
+"html-processor": minor
 ---
 
 Rename the helper function `html()` to `process()`:
