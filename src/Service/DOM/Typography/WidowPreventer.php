@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
 
+use DOMNode;
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
@@ -45,13 +46,17 @@ final readonly class WidowPreventer implements DOMServiceContract
          * For each block element that doesn't contain other block elements (leaf blocks),
          * find the last text node and apply widow prevention
          */
-        foreach ($blockElements as $blockElement) {
-            // Skip if this block contains other block elements
-            if ($this->containsBlockElements($blockElement, $xPath)) {
+        foreach ($blockElements as $el) {
+            if (!($el instanceof DOMNode)) {
                 continue;
             }
 
-            $lastTextNode = $this->findLastTextNode($blockElement);
+            // Skip if this block contains other block elements
+            if ($this->containsBlockElements($el, $xPath)) {
+                continue;
+            }
+
+            $lastTextNode = $this->findLastTextNode($el);
 
             if ($lastTextNode !== null) {
                 $lastTextNode->textContent = $this->maybePreventWidows($lastTextNode->textContent);
