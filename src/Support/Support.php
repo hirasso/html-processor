@@ -10,22 +10,16 @@ use IvoPetkov\HTML5DOMElement;
 final class Support
 {
     /**
-     * Convert entities, while preserving already-encoded entities.
-     *
-     * @link https://www.php.net/htmlentities Borrowed from the PHP Manual user notes.
+     * Convert entities while preserving already-encoded entities
      */
-    public static function htmlentities(string $text): string
+    public static function encode(string $html): string
     {
-        $translation_table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
-        $translation_table[chr(38)] = '&';
-
-        $result = preg_replace(
-            '/&(?![A-Za-z]+;|#[0-9]+;|#x[0-9a-fA-F]+;)/',
-            '&amp;',
-            strtr($text, $translation_table)
+        return \htmlentities(
+            string: $html,
+            flags: ENT_QUOTES,
+            encoding: 'UTF-8',
+            double_encode: false
         );
-
-        return $result ?? $text;
     }
 
     /**
@@ -43,7 +37,6 @@ final class Support
     /**
      * Remove any whitespace-looking stuff from a html string
      * \s matches regular whitespace, \xc2\xa0 matches UTF-8 non-breaking space
-     * @see https://stackoverflow.com/a/30101404/586823
      */
     public static function normalizeWhitespace(string $string): string
     {
