@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2
+
+### Patch Changes
+
+- de4dc40: Fix phpstan errors
+- 5b5af67: Use native `htmlentities` with `$double_encode` set to false to prevent double-encoding
+
 ## 0.5.1
 
 ### Patch Changes
