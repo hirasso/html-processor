@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
+use DOMNode;
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use IvoPetkov\HTML5DOMDocument;
@@ -55,6 +56,9 @@ final class PrefixLinker implements DOMServiceContract
         };
 
         foreach ($textNodes as $textNode) {
+            if (!($textNode instanceof DOMNode)) {
+                continue;
+            }
             // Skip text nodes inside <a> elements
             $ancestors = $xPath->query('ancestor::a', $textNode);
             if (!!$ancestors && $ancestors->length) {

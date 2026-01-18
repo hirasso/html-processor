@@ -141,7 +141,7 @@ final class QuoteLocalizer implements DOMServiceContract
      */
     protected function entitiesToPlaceholders(string $str): string
     {
-        $str = Support::htmlentities($str);
+        $str = Support::encode($str);
         $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str) ?? $str;
         $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str) ?? $str;
         return $str;

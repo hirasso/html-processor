@@ -55,7 +55,7 @@ final class DOMQueue implements DOMQueueContract
 
         $document = new HTML5DOMDocument();
         $document->loadHTML(
-            htmlspecialchars_decode(Support::htmlentities($html)),
+            htmlspecialchars_decode(Support::encode($html)),
             /**
              * @TODO reactivate this if it is fixed upstream
              * https://github.com/ivopetkov/html5-dom-document-php/pull/65
