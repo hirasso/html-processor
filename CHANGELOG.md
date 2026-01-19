@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3
+
+### Patch Changes
+
+- 8c5a895: Fix timing and encoding issues
+
 ## 0.5.2
 
 ### Patch Changes
