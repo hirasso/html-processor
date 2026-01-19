@@ -17,6 +17,9 @@ final class DOMQueue implements DOMQueueContract
     public function add(DOMServiceContract $service): void
     {
         $this->services[$service::class] = $service;
+        uasort($this->services, function ($a, $b) {
+            return $a->prio() <=> $b->prio();
+        });
     }
 
     public function isEmpty(): bool
