@@ -14,5 +14,5 @@ phpstan.neon export-ignore
 phpunit.xml export-ignore
 
 # other
-pint.json
-LICENSE
+pint.json export-ignore
+LICENSE export-ignore
