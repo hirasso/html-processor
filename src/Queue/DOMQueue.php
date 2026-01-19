@@ -24,12 +24,6 @@ final class DOMQueue implements DOMQueueContract
         return empty($this->services);
     }
 
-    /** @return array<string, DOMServiceContract> */
-    public function all(): array
-    {
-        return $this->services;
-    }
-
     /**
      * @template T of object
      * @param class-string<T> $className
@@ -74,7 +68,7 @@ final class DOMQueue implements DOMQueueContract
     public function runServices(HTML5DOMDocument $document): void
     {
         // Execute all DOM services
-        foreach ($this->all() as $service) {
+        foreach ($this->services as $service) {
             $service->run($document);
         }
     }

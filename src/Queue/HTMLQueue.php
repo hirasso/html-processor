@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue;
 
+use Closure;
 use Hirasso\HTMLProcessor\Queue\Contract\HTMLQueueContract;
 use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 
@@ -26,12 +27,6 @@ final class HTMLQueue implements HTMLQueueContract
         return empty($this->services);
     }
 
-    /** @return array<string, HTMLServiceContract> */
-    public function all(): array
-    {
-        return $this->services;
-    }
-
     /**
      * @template T of object
      * @param class-string<T> $className
@@ -43,12 +38,18 @@ final class HTMLQueue implements HTMLQueueContract
         return $this->services[$className] ?? null;
     }
 
-    /**
-     * Apply all services against an HTML string
-     */
-    public function applyTo(string $html): string
-    {
-        foreach ($this->all() as $service) {
+    public function applyTo(
+        string $html,
+        ?Closure $filter = null
+    ): string {
+        $services = $this->services;
+        if ($filter) {
+            $services = array_filter(
+                $this->services,
+                fn ($service) => ($filter)($service)
+            );
+        }
+        foreach($services as $service) {
             $html = $service->run($html);
         }
         return $html;

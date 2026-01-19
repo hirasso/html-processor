@@ -137,7 +137,8 @@ final class HTMLProcessor
      */
     protected function hasOperations(): bool
     {
-        return !$this->htmlQueue->isEmpty() || !$this->domQueue->isEmpty();
+        return !$this->domQueue->isEmpty()
+            || !$this->htmlQueue->isEmpty();
     }
 
     /**
@@ -152,8 +153,15 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->htmlQueue->applyTo($html);
+        $html = $this->htmlQueue->applyTo(
+            $html,
+            fn ($service) => $service->prio() < 0
+        );
         $html = $this->domQueue->applyTo($html);
+        $html = $this->htmlQueue->applyTo(
+            $html,
+            fn ($service) => $service->prio() >= 0
+        );
 
         if (!$this->preserveEntities) {
             return Support::decode($html);

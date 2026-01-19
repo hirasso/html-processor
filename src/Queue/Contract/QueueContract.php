@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue\Contract;
 
+use Closure;
+
 interface QueueContract
 {
     public function isEmpty(): bool;
-
-    /** @return array<string, mixed> */
-    public function all(): array;
 
     /**
      * @template T of object
@@ -17,6 +16,4 @@ interface QueueContract
      * @return T|null
      */
     public function get(string $className): ?object;
-
-    public function applyTo(string $html): string;
 }

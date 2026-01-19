@@ -18,9 +18,10 @@ final readonly class Autolinker implements HTMLServiceContract
     ) {
     }
 
+    /** autolink has to happen before everything else */
     public function prio(): int
     {
-        return -100;
+        return -10;
     }
 
     public function run(string $html): string
