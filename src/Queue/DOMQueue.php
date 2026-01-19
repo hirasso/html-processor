@@ -70,7 +70,6 @@ final class DOMQueue implements DOMQueueContract
      */
     public function runServices(HTML5DOMDocument $document): void
     {
-        dump($this->services);
         // Execute all DOM services
         foreach ($this->services as $service) {
             $service->run($document);
