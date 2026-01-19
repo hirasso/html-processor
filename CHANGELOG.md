@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5
+
+### Patch Changes
+
+- 26924e8: export-ignore some files
+- 769010d: Switch License to MIT
+
 ## 0.5.4
 
 ### Patch Changes
