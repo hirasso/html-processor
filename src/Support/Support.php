@@ -86,4 +86,37 @@ final class Support
 
         return true;
     }
+
+    /**
+     * Convert internal entity placeholders from HTML5DOMDocument back to the real entity
+     */
+    public static function placeholdersToEntities(string $html): string
+    {
+        if (strpos($html, 'html5-dom-document-internal-entity') === false) {
+            return $html;
+        }
+        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html) ?? $html;
+        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html) ?? $html;
+        return $html;
+    }
+
+    /**
+     * Convert special chars to entities and then to the internal format used by HTML5DOMDocument
+     */
+    public static function entitiesToPlaceholders(string $html): string
+    {
+        // First, remove all placeholders
+        $html = self::placeholdersToEntities($html);
+
+        // Re-encode to normalize numeric entities (&#8220;) and named entities (&ldquo;) to UTF-8
+        $html = self::decode($html);
+        $html = self::encode($html);
+
+        // replace named entities with placeholders
+        $html = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $html) ?? $html;
+        // replace numeric entities with placeholders
+        $html = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $html) ?? $html;
+
+        return $html;
+    }
 }

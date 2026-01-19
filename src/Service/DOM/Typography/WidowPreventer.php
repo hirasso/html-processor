@@ -135,8 +135,8 @@ final readonly class WidowPreventer implements DOMServiceContract
             return $string;
         }
 
-        $lastWord = $this->placeholdersToEntities($words[$wordCount - 1]);
-        $secondLastWord = $this->placeholdersToEntities($words[$wordCount - 2]);
+        $lastWord = Support::placeholdersToEntities($words[$wordCount - 1]);
+        $secondLastWord = Support::placeholdersToEntities($words[$wordCount - 2]);
 
         // bail early if the last two words together are longer then 25 characters
         // Decode HTML entities to get the actual character length
@@ -151,16 +151,5 @@ final readonly class WidowPreventer implements DOMServiceContract
         return $result ?? $string;
     }
 
-    /**
-     * Convert internal entity placeholders from HTML5DOMDocument back to the real entity
-     */
-    private function placeholdersToEntities(string $html): string
-    {
-        if (strpos($html, 'html5-dom-document-internal-entity') === false) {
-            return $html;
-        }
-        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html) ?? $html;
-        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html) ?? $html;
-        return $html;
-    }
+
 }

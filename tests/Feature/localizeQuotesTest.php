@@ -82,11 +82,12 @@ test('Works when setting the locale late', function () {
     expect($result)->toBe($expected);
 });
 
-test('Handles numeric entities', function () {
-    $locale = 'de_DE';
-
+test('Handles numeric entities for double quotes', function () {
     // &#8220; = " (left double quote), &#8221; = " (right double quote)
-    runTest('<p>&#8220;Hallo&#8221;</p>', $locale, '<p>„Hallo"</p>');
+    runTest('<p>&#8220;Hallo&#8221;</p>', 'de_DE', '<p>„Hallo“</p>');
+});
+
+test('Handles numeric entities for single quotes', function () {
     // &#8216; = ' (left single quote), &#8217; = ' (right single quote)
-    runTest('<p>&#8216;Gundeli&#8217;</p>', $locale, '<p>‚Hallo‘</p>');
+    runTest('<p>&#8216;Hallo&#8217;</p>', 'de_DE', '<p>‚Hallo‘</p>');
 });

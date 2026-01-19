@@ -36,17 +36,17 @@ final class QuoteLocalizer implements DOMServiceContract
     public function __construct(private Typography $typography)
     {
         $this->doubleQuoteReplacements = [
-            'en' => fn (string $s) => $this->entitiesToPlaceholders("“{$s}”"),
-            'de' => fn (string $s) => $this->entitiesToPlaceholders("„{$s}“"),
+            'en' => fn (string $s) => Support::entitiesToPlaceholders("“{$s}”"),
+            'de' => fn (string $s) => Support::entitiesToPlaceholders("„{$s}“"),
             // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => $this->entitiesToPlaceholders("«\u{202F}{$s}\u{202F}»"),
+            'fr' => fn (string $s) => Support::entitiesToPlaceholders("«\u{202F}{$s}\u{202F}»"),
         ];
 
         $this->singleQuoteReplacements = [
-            'en' => fn (string $s) => $this->entitiesToPlaceholders("‘{$s}’"),
-            'de' => fn (string $s) => $this->entitiesToPlaceholders("‚{$s}‘"),
+            'en' => fn (string $s) => Support::entitiesToPlaceholders("‘{$s}’"),
+            'de' => fn (string $s) => Support::entitiesToPlaceholders("‚{$s}‘"),
             // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => $this->entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
+            'fr' => fn (string $s) => Support::entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
         ];
     }
 
@@ -73,11 +73,11 @@ final class QuoteLocalizer implements DOMServiceContract
         $doubleQuoteChars = ['“', '”', '„', '«', '»'];
         $singleQuoteChars = ['‘', '’', '‚', '‹', '›'];
 
-        $doubleQuoteEntity = $this->entitiesToPlaceholders('"');
-        $singleQuoteEntity = $this->entitiesToPlaceholders("'");
+        $doubleQuoteEntity = Support::entitiesToPlaceholders('"');
+        $singleQuoteEntity = Support::entitiesToPlaceholders("'");
 
-        $doubleQuoteSearch = array_map([$this, 'entitiesToPlaceholders'], $doubleQuoteChars);
-        $singleQuoteSearch = array_map([$this, 'entitiesToPlaceholders'], $singleQuoteChars);
+        $doubleQuoteSearch = array_map(Support::entitiesToPlaceholders(...), $doubleQuoteChars);
+        $singleQuoteSearch = array_map(Support::entitiesToPlaceholders(...), $singleQuoteChars);
 
         if (!$textNodes = (new DOMXPath($document))->query('//text()')) {
             return;
@@ -90,7 +90,7 @@ final class QuoteLocalizer implements DOMServiceContract
                 continue;
             }
 
-            $text = $this->entitiesToPlaceholders($nodeValue);
+            $text = Support::entitiesToPlaceholders($nodeValue);
 
             // Normalize all quotes to a consistent representation
             $text = str_replace($doubleQuoteSearch, $doubleQuoteEntity, $text);
@@ -134,18 +134,5 @@ final class QuoteLocalizer implements DOMServiceContract
         );
 
         return $result ?? $text;
-    }
-
-    /**
-     * Convert special chars to entities and then to the internal format used by HTML5DOMDocument
-     */
-    protected function entitiesToPlaceholders(string $str): string
-    {
-        // Decode first to normalize numeric entities (&#8220;) and named entities (&ldquo;) to UTF-8
-        $str = Support::decode($str);
-        $str = Support::encode($str);
-        $str = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $str) ?? $str;
-        $str = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $str) ?? $str;
-        return $str;
     }
 }
