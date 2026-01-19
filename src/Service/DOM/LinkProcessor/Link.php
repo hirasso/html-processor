@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 
 use Exception;
-use Hirasso\HTMLProcessor\Enum\UrlType;
+use Hirasso\HTMLProcessor\Enum\LinkType;
 use IvoPetkov\HTML5DOMElement;
 use League\Uri\Uri;
 
 final readonly class Link
 {
     public string $href;
-    public UrlType $type;
+    public LinkType $type;
     public ?string $extension;
 
     public function __construct(
@@ -26,14 +26,14 @@ final readonly class Link
     /**
      * Get the type of a URL (internal/external/invalid)
      */
-    private function getType(?string $url): UrlType
+    private function getType(?string $url): LinkType
     {
         if (is_null($url)) {
-            return UrlType::Invalid;
+            return LinkType::Invalid;
         }
 
         if (!$linkUri = $this->getUri($url)) {
-            return UrlType::Invalid;
+            return LinkType::Invalid;
         }
 
         $scheme = $linkUri->getScheme();
@@ -42,12 +42,12 @@ final readonly class Link
         $isAnchorToCurrentPage = str_starts_with(trim($url), '#');
 
         return match(true) {
-            $scheme === 'mailto' => UrlType::Mailto,
-            $scheme === 'tel' => UrlType::Tel,
-            $isCustomScheme => UrlType::External,
-            $isAnchorToCurrentPage => UrlType::Anchor,
-            !$linkUri->getHost() => UrlType::Internal,
-            default => (function () use ($linkUri): UrlType {
+            $scheme === 'mailto' => LinkType::Mailto,
+            $scheme === 'tel' => LinkType::Tel,
+            $isCustomScheme => LinkType::External,
+            $isAnchorToCurrentPage => LinkType::Anchor,
+            !$linkUri->getHost() => LinkType::Internal,
+            default => (function () use ($linkUri): LinkType {
                 $currentUri = $this->getUri('//' . ($_SERVER['HTTP_HOST'] ?? ''));
 
                 $linkHostname = $this->removeWWW($this->getHostname($linkUri));
@@ -55,8 +55,8 @@ final readonly class Link
 
                 // Only match exact domains (with or without www.)
                 return (!$currentHostname || $linkHostname  === $currentHostname)
-                    ? UrlType::Internal
-                    : UrlType::External;
+                    ? LinkType::Internal
+                    : LinkType::External;
             })()
         };
     }
