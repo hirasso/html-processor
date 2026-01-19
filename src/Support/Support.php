@@ -23,6 +23,14 @@ final class Support
     }
 
     /**
+     * Decode a HTML string
+     */
+    public static function decode(string $html): string
+    {
+        return html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    /**
      * Extract HTML from body
      */
     public static function extractBodyHTML(\DOMDocument|HTML5DOMDocument $document): string

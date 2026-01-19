@@ -15,6 +15,7 @@ use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
 use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
+use Hirasso\HTMLProcessor\Support\Support;
 
 /**
  * Process a HTML string using a fluent API
@@ -23,7 +24,7 @@ use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
 final class HTMLProcessor
 {
     /** track if entities should be decoded */
-    protected bool $preserveEntities = false;
+    public bool $preserveEntities = false;
 
     /** used for typography optimizations */
     protected string $locale = 'en_US';
@@ -155,7 +156,7 @@ final class HTMLProcessor
         $html = $this->domQueue->applyTo($html);
 
         if (!$this->preserveEntities) {
-            return html_entity_decode($html);
+            return Support::decode($html);
         }
 
         // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)

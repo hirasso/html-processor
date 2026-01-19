@@ -140,7 +140,7 @@ final readonly class WidowPreventer implements DOMServiceContract
 
         // bail early if the last two words together are longer then 25 characters
         // Decode HTML entities to get the actual character length
-        $combinedDecoded = html_entity_decode("$lastWord $secondLastWord", ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $combinedDecoded = Support::decode("$lastWord $secondLastWord");
         $combinedLength = mb_strlen($combinedDecoded);
         if ($combinedLength > 25) {
             return $string;
