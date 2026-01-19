@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue\Contract;
 
+use Closure;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use IvoPetkov\HTML5DOMDocument;
 

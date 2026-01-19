@@ -12,9 +12,9 @@ use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
 use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
+use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Support\Support;
 
 /**
@@ -29,12 +29,16 @@ final class HTMLProcessor
     /** used for typography optimizations */
     protected string $locale = 'en_US';
 
+    protected DOMQueue $domQueueEarly;
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
+
+    protected bool $mutated = false;
 
     protected function __construct(
         protected readonly string $originalHTML
     ) {
+        $this->domQueueEarly = new DOMQueue();
         $this->domQueue = new DOMQueue();
         $this->htmlQueue = new HTMLQueue();
     }
@@ -48,19 +52,30 @@ final class HTMLProcessor
     }
 
     /**
+     * Mutate, return self
+     * @param Closure(): mixed $mutation
+     */
+    protected function mutate(Closure $mutation): self
+    {
+        $mutation();
+        $this->mutated = true;
+        return $this;
+    }
+
+    /**
      * Make urls clickable
      */
     public function autolinkUrls(?AutolinkOptions $options = null): self
     {
-        $this->htmlQueue->add(new Autolinker($options  ?? new AutolinkOptions(
-            stripScheme: true,
-            textLimit: 35,
-            autoTitle: false,
-            escape: true,
-            linkNoScheme: true
-        )));
-
-        return $this;
+        return $this->mutate(function () use ($options) {
+            $this->domQueueEarly->add(new Autolinker($options  ?? new AutolinkOptions(
+                stripScheme: true,
+                textLimit: 35,
+                autoTitle: false,
+                escape: true,
+                linkNoScheme: true
+            )));
+        });
     }
 
     /**
@@ -68,14 +83,14 @@ final class HTMLProcessor
      */
     public function autolinkPrefix(string $prefix, string $url): self
     {
-        $linker = $this->domQueue->get(PrefixLinker::class)
+        return $this->mutate(function () use ($prefix, $url) {
+            $linker = $this->domQueue->get(PrefixLinker::class)
             ?? new PrefixLinker();
 
-        $linker->register($prefix, $url);
+            $linker->register($prefix, $url);
 
-        $this->domQueue->add($linker);
-
-        return $this;
+            $this->domQueue->add($linker);
+        });
     }
 
     /**
@@ -85,8 +100,9 @@ final class HTMLProcessor
      */
     public function processLinks(?Closure $callback = null): self
     {
-        $this->domQueue->add(new LinkProcessor($callback));
-        return $this;
+        return $this->mutate(function () use ($callback) {
+            $this->domQueue->add(new LinkProcessor($callback));
+        });
     }
 
     /**
@@ -94,8 +110,9 @@ final class HTMLProcessor
      */
     public function removeEmptyElements(?string $selector = null): self
     {
-        $this->domQueue->add(new EmptyElements($selector));
-        return $this;
+        return $this->mutate(function () use ($selector) {
+            $this->domQueue->add(new EmptyElements($selector));
+        });
     }
 
     /**
@@ -108,18 +125,18 @@ final class HTMLProcessor
         string $locale,
         ?Closure $callback = null,
     ): self {
-        $instance = Typography::fromLocale($locale);
-        $this->domQueue->add($instance);
+        return $this->mutate(function () use ($locale, $callback) {
+            $instance = Typography::fromLocale($locale);
+            $this->domQueue->add($instance);
 
-        /** Apply the callback */
-        if ($callback instanceof Closure) {
-            ($callback)($instance);
-            return $this;
-        }
+            /** Apply the callback */
+            if ($callback instanceof Closure) {
+                ($callback)($instance);
+                return $this;
+            }
 
-        $this->domQueue->add($instance);
-
-        return $this;
+            $this->domQueue->add($instance);
+        });
     }
 
     /**
@@ -127,18 +144,10 @@ final class HTMLProcessor
      */
     public function encodeEmails(): self
     {
-        $this->preserveEntities();
-        $this->htmlQueue->add(new EmailEncoder());
-        return $this;
-    }
-
-    /**
-     * Check if there are any operations registered
-     */
-    protected function hasOperations(): bool
-    {
-        return !$this->domQueue->isEmpty()
-            || !$this->htmlQueue->isEmpty();
+        return $this->mutate(function () {
+            $this->preserveEntities();
+            $this->htmlQueue->add(new EmailEncoder());
+        });
     }
 
     /**
@@ -148,20 +157,14 @@ final class HTMLProcessor
      */
     public function apply(): string
     {
-        if (empty($this->originalHTML) || !$this->hasOperations()) {
+        if (empty($this->originalHTML) || !$this->mutated) {
             return $this->originalHTML;
         }
 
         $html = $this->originalHTML;
-        $html = $this->htmlQueue->applyTo(
-            $html,
-            fn ($service) => $service->prio() < 0
-        );
+        $html = $this->domQueueEarly->applyTo($html);
         $html = $this->domQueue->applyTo($html);
-        $html = $this->htmlQueue->applyTo(
-            $html,
-            fn ($service) => $service->prio() >= 0
-        );
+        $html = $this->htmlQueue->applyTo($html);
 
         if (!$this->preserveEntities) {
             return Support::decode($html);

@@ -2,12 +2,14 @@
 
 use function Hirasso\HTMLProcessor\process;
 
-test('Autolinks URLS', function () {
-    $result = process("mail@example.com")->autolinkUrls()->apply();
-    expect($result)->toBe('<a href="mailto:mail@example.com">mail@example.com</a>');
-
+test('Autolinks URLs', function() {
     $result = process("example.com")->autolinkUrls()->apply();
     expect($result)->toBe('<a href="http://example.com">example.com</a>');
+});
+
+test('Autolinks Emails', function () {
+    $result = process("mail@example.com")->autolinkUrls()->apply();
+    expect($result)->toBe('<a href="mailto:mail@example.com">mail@example.com</a>');
 });
 
 test('Truncates autolinked URLs', function () {
