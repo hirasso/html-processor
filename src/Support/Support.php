@@ -12,14 +12,20 @@ final class Support
     /**
      * Convert entities while preserving already-encoded entities
      */
-    public static function encode(string $html): string
+    public static function encode(string $html, ?bool $usePlaceholders = false): string
     {
-        return \htmlentities(
+        $html = \htmlentities(
             string: $html,
             flags: ENT_QUOTES,
             encoding: 'UTF-8',
             double_encode: false
         );
+
+        if ($usePlaceholders ?? false) {
+            $html = self::entitiesToPlaceholders($html);
+        }
+
+        return $html;
     }
 
     /**
@@ -27,6 +33,7 @@ final class Support
      */
     public static function decode(string $html): string
     {
+        $html = self::placeholdersToEntities($html);
         return html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
