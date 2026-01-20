@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.6
+
+### Patch Changes
+
+- 0806776: Do not wrongly replace single quotes in a string like this: `Edith's Lädchen's Öffnungszeiten`
+
 ## 0.5.5
 
 ### Patch Changes
