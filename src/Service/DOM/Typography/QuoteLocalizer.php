@@ -36,17 +36,17 @@ final class QuoteLocalizer implements DOMServiceContract
     public function __construct(private Typography $typography)
     {
         $this->doubleQuoteReplacements = [
-            'en' => fn (string $s) => Support::entitiesToPlaceholders("“{$s}”"),
-            'de' => fn (string $s) => Support::entitiesToPlaceholders("„{$s}“"),
+            'en' => fn (string $s) => "“{$s}”",
+            'de' => fn (string $s) => "„{$s}“",
             // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => Support::entitiesToPlaceholders("«\u{202F}{$s}\u{202F}»"),
+            'fr' => fn (string $s) => "«\u{202F}{$s}\u{202F}»",
         ];
 
         $this->singleQuoteReplacements = [
-            'en' => fn (string $s) => Support::entitiesToPlaceholders("‘{$s}’"),
-            'de' => fn (string $s) => Support::entitiesToPlaceholders("‚{$s}‘"),
+            'en' => fn (string $s) => "‘{$s}’",
+            'de' => fn (string $s) => "‚{$s}‘",
             // French has narrow non-breaking spaces between the quotes and the word
-            'fr' => fn (string $s) => Support::entitiesToPlaceholders("‹\u{202F}{$s}\u{202F}›"),
+            'fr' => fn (string $s) => "‹\u{202F}{$s}\u{202F}›",
         ];
     }
 
@@ -70,14 +70,11 @@ final class QuoteLocalizer implements DOMServiceContract
             return;
         }
 
-        $doubleQuoteChars = ['“', '”', '„', '«', '»'];
-        $singleQuoteChars = ['‘', '’', '‚', '‹', '›'];
+        $doubleQuoteSearch = ['“', '”', '„', '«', '»'];
+        $singleQuoteSearch = ['‘', '’', '‚', '‹', '›'];
 
-        $doubleQuoteEntity = Support::entitiesToPlaceholders('"');
-        $singleQuoteEntity = Support::entitiesToPlaceholders("'");
-
-        $doubleQuoteSearch = array_map(Support::entitiesToPlaceholders(...), $doubleQuoteChars);
-        $singleQuoteSearch = array_map(Support::entitiesToPlaceholders(...), $singleQuoteChars);
+        $doubleQuote = '"';
+        $singleQuote = "'";
 
         if (!$textNodes = (new DOMXPath($document))->query('//text()')) {
             return;
@@ -90,17 +87,17 @@ final class QuoteLocalizer implements DOMServiceContract
                 continue;
             }
 
-            $text = Support::entitiesToPlaceholders($nodeValue);
+            $text = Support::decode($nodeValue);
 
             // Normalize all quotes to a consistent representation
-            $text = str_replace($doubleQuoteSearch, $doubleQuoteEntity, $text);
-            $text = str_replace($singleQuoteSearch, $singleQuoteEntity, $text);
+            $text = str_replace($doubleQuoteSearch, $doubleQuote, $text);
+            $text = str_replace($singleQuoteSearch, $singleQuote, $text);
 
             // Localize the quotes
-            $text = $this->replaceQuoted($text, $doubleQuoteEntity, $this->doubleQuoteReplacements, $lang);
-            $text = $this->replaceQuoted($text, $singleQuoteEntity, $this->singleQuoteReplacements, $lang);
+            $text = $this->replaceQuoted($text, $doubleQuote, $this->doubleQuoteReplacements, $lang);
+            $text = $this->replaceQuoted($text, $singleQuote, $this->singleQuoteReplacements, $lang);
 
-            $textNode->nodeValue = $text;
+            $textNode->nodeValue = Support::encode($text, usePlaceholders: true);
         }
     }
 
@@ -116,9 +113,9 @@ final class QuoteLocalizer implements DOMServiceContract
         string $lang
     ): string {
 
-        // Return the text unchainged if the provided language doesn't have replacements
+        // Return the text unchanged if the provided language doesn't have replacements
         if (!isset($replacements[$lang])) {
-            return $lang;
+            return $text;
         }
 
         /**
@@ -127,12 +124,12 @@ final class QuoteLocalizer implements DOMServiceContract
          */
         $escapedQuoteEntity = preg_quote($quoteEntity, '/');
 
-        $result = preg_replace_callback(
-            "/$escapedQuoteEntity(.*?)$escapedQuoteEntity/",
+        $text = preg_replace_callback(
+            "/(?<!\p{L})$escapedQuoteEntity(.*?)$escapedQuoteEntity(?!\p{L})/u",
             fn ($matches) => $replacements[$lang]($matches[1]),
             $text
-        );
+        ) ?? $text;
 
-        return $result ?? $text;
+        return $text;
     }
 }

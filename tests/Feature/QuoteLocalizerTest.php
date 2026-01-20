@@ -91,3 +91,7 @@ test('Handles numeric entities for single quotes', function () {
     // &#8216; = ' (left single quote), &#8217; = ' (right single quote)
     runTest('<p>&#8216;Hallo&#8217;</p>', 'de_DE', '<p>‚Hallo‘</p>');
 });
+
+test('Ignores quotes that do not have a space before or after', function () {
+    runTest("<p>Edit's Lädchen's Öffnungszeiten</p>", 'de_DE', "<p>Edit's Lädchen's Öffnungszeiten</p>");
+});

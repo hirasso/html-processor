@@ -135,14 +135,11 @@ final readonly class WidowPreventer implements DOMServiceContract
             return $string;
         }
 
-        $lastWord = Support::placeholdersToEntities($words[$wordCount - 1]);
-        $secondLastWord = Support::placeholdersToEntities($words[$wordCount - 2]);
+        $lastWord = Support::decode($words[$wordCount - 1]);
+        $secondLastWord = Support::decode($words[$wordCount - 2]);
 
-        // bail early if the last two words together are longer then 25 characters
-        // Decode HTML entities to get the actual character length
-        $combinedDecoded = Support::decode("$lastWord $secondLastWord");
-        $combinedLength = mb_strlen($combinedDecoded);
-        if ($combinedLength > 25) {
+        // Return unchanged if the last two words together are longer then 25 characters
+        if (mb_strlen("$lastWord $secondLastWord") > 25) {
             return $string;
         }
 
