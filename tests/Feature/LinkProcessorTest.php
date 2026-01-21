@@ -75,17 +75,17 @@ test('Provides a custom callback', function () {
 
 test('Provides the default handler in the custom callback', function () {
     $result = process('<a href="https://example.com">example.com</a>')->processLinks(
-        function ($link, $defaultHandler) {
+        function ($link) {
             $link->el->setAttribute('my:custom.attribute', '');
-            $defaultHandler('foo');
+            $link->addClasses();
         }
     );
-    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="" class="foo--internal">example.com</a>');
+    expect($result->apply())->toBe('<a href="https://example.com" my:custom.attribute="" class="link--internal">example.com</a>');
 });
 
-test('Allows to customize the prefix in the default handler', function () {
+test('Allows to customize the prefix when adding classes', function () {
     $result = process('<a href="https://example.com">example.com</a>')->processLinks(
-        fn ($link, $defaultHandler) => $defaultHandler('foo')
+        fn ($link) => $link->addClasses('foo')
     );
     expect($result->apply())->toBe('<a href="https://example.com" class="foo--internal">example.com</a>');
 });

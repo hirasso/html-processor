@@ -15,15 +15,8 @@ test('Runs various tasks on a string', function () {
 
     $result = process($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography('de_DE', fn ($typo) => $typo
-                ->localizeQuotes()
-                ->preventWidows())
-        ->processLinks(function ($link, $defaultHandler) { // process links by callback
-            if ($link->type->value === 'external') {
-                $link->el->setAttribute('target', '_blank');
-            }
-            $defaultHandler(); // run the default handler (adds classes based on type)
-        })
+        ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->preventWidows())
+        ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
