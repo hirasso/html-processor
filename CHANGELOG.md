@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.7
+
+### Patch Changes
+
+- f2fd7c0: Do not autolink strings without scheme (e.g. "Architekt.innen")
+
 ## 0.5.6
 
 ### Patch Changes
