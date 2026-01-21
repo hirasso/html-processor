@@ -2,9 +2,14 @@
 
 use function Hirasso\HTMLProcessor\process;
 
-test('Autolinks URLs', function() {
-    $result = process("example.com")->autolinkUrls()->apply();
+test('Autolinks URLs', function () {
+    $result = process("http://example.com")->autolinkUrls()->apply();
     expect($result)->toBe('<a href="http://example.com">example.com</a>');
+});
+
+test('Requires a scheme before autolinking', function () {
+    $result = process("example.com")->autolinkUrls()->apply();
+    expect($result)->toBe('example.com');
 });
 
 test('Autolinks Emails', function () {

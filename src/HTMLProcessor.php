@@ -73,7 +73,8 @@ final class HTMLProcessor
                 textLimit: 35,
                 autoTitle: false,
                 escape: true,
-                linkNoScheme: true
+                // poses issues with e.g. "Architekt.innen"
+                linkNoScheme: false
             )));
         });
     }
