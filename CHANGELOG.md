@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- 4bf9b49: Simplify the API for `processLinks`
+
+  ```php
+  use function Hirasso\HTMLProcessor\process;
+
+  echo process($html)->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab());
+  ```
+
 ## 0.5.7
 
 ### Patch Changes
