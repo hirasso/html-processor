@@ -50,8 +50,8 @@ final readonly class Link
             default => (function () use ($linkUri): LinkType {
                 $currentUri = $this->getUri('//' . ($_SERVER['HTTP_HOST'] ?? ''));
 
-                $linkHostname = $this->removeWWW($this->getHostname($linkUri));
-                $currentHostname = $this->removeWWW($this->getHostname($currentUri));
+                $linkHostname = $this->removeWWW($linkUri->getHost());
+                $currentHostname = $this->removeWWW($currentUri?->getHost());
 
                 // Only match exact domains (with or without www.)
                 return (!$currentHostname || $linkHostname  === $currentHostname)
@@ -73,21 +73,6 @@ final readonly class Link
     private function removeWWW(?string $uri = null): ?string
     {
         return preg_replace('/^www\./', '', $uri ?? '') ?? $uri;
-    }
-
-    private function getHostname(?Uri $uri = null): ?string
-    {
-        if (!$uri) {
-            return null;
-        }
-
-        $hostname = $uri->getHost();
-
-        if (!$port = $uri->getPort()) {
-            return $hostname;
-        }
-
-        return "$hostname:$port";
     }
 
     /**
@@ -122,5 +107,36 @@ final readonly class Link
         }
         $webExtensions = ['html', 'htm', 'php', 'asp', 'aspx', 'jsp'];
         return !in_array($this->extension, $webExtensions, true);
+    }
+
+    /**
+     * Apply classes with a customizable prefix
+     */
+    public function addClasses(?string $prefix = null): self
+    {
+        $prefix ??= 'link';
+
+        $this->el->classList->add("{$prefix}--{$this->type->value}");
+
+        if ($this->isLinkToFile()) {
+            $this->el->classList->add("{$prefix}--file");
+        }
+
+        if ($this->extension) {
+            $this->el->classList->add("{$prefix}--ext--$this->extension");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Open external links in a new tab by adding [target="_blank"]
+     */
+    public function openExternalInNewTab(): self
+    {
+        if ($this->type === LinkType::External) {
+            $this->el->setAttribute('target', '_blank');
+        }
+        return $this;
     }
 }

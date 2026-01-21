@@ -43,16 +43,8 @@ echo process($html)
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
     ->removeEmptyElements('p,div') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
-    ->typography('de_DE', fn ($typo) => $typo
-        ->localizeQuotes() // format quotes based on locale
-        ->preventWidows() // prevent widows
-    )
-    ->processLinks(function ($link, $defaultHandler) { // process links by callback
-        if ($link->type->value === 'external') {
-            $link->el->setAttribute('target', '_blank');
-        }
-        $defaultHandler(); // run the default handler
-    });
+    ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->preventWidows())
+    ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab());
 
 ```
 
