@@ -107,3 +107,30 @@ test('Gracefully handles an empty $_SERVER host', function () {
 
     expect(process($input)->processLinks()->apply())->toBe($expected);
 });
+
+
+test('Adds `rel="noopener noreferrer" to external links that open in a new tab', function () {
+    $_SERVER['HTTP_HOST'] = "https://example.local";
+
+    $input = '<a href="https://example.com">example.com</a>';
+    $expected = '<a href="https://example.com" class="link--external" target="_blank" rel="noopener noreferrer">example.com</a>';
+
+    expect(process($input)->processLinks(fn ($link) => $link
+        ->addClasses()
+        ->openExternalInNewTab())
+        ->apply())
+    ->toBe($expected);
+});
+
+test('Allows to disable `rel="noopener noreferrer"', function () {
+    $_SERVER['HTTP_HOST'] = "https://example.local";
+
+    $input = '<a href="https://example.com">example.com</a>';
+    $expected = '<a href="https://example.com" class="link--external" target="_blank">example.com</a>';
+
+    expect(process($input)->processLinks(fn ($link) => $link
+        ->addClasses()
+        ->openExternalInNewTab(false))
+        ->apply())
+    ->toBe($expected);
+});
