@@ -131,12 +131,20 @@ final readonly class Link
 
     /**
      * Open external links in a new tab by adding [target="_blank"]
+     * @param ?bool $safe add [rel="noopener noreferrer"] to links
      */
-    public function openExternalInNewTab(): self
+    public function openExternalInNewTab(?bool $safe = true): self
     {
-        if ($this->type === LinkType::External) {
-            $this->el->setAttribute('target', '_blank');
+        if ($this->type !== LinkType::External) {
+            return $this;
         }
+
+        $this->el->setAttribute('target', '_blank');
+
+        if ($safe) {
+            $this->el->setAttribute('rel', "noopener noreferrer");
+        }
+
         return $this;
     }
 }
