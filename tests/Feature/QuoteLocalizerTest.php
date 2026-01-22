@@ -95,3 +95,7 @@ test('Handles numeric entities for single quotes', function () {
 test('Ignores quotes that do not have a space before or after', function () {
     runTest("<p>Edit's Lädchen's Öffnungszeiten</p>", 'de_DE', "<p>Edit's Lädchen's Öffnungszeiten</p>");
 });
+
+// test('Preserves ignored quotes', function() {
+//     runTest("l’équipement prévu pour l’ICN et l’IAE.", 'fr_FR', "l’équipement prévu pour l’ICN et l’IAE.");
+// })->only();
