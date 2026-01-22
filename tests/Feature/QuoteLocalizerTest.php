@@ -9,7 +9,6 @@ function runTest(string $str, string $locale, string $expected): void
             $locale,
             fn ($typo) => $typo
             ->localizeQuotes()
-            ->preventWidows()
         )->apply();
 
 
@@ -32,6 +31,11 @@ test('Localizes quotes at the start and end of a string', function () {
     $locale = 'de_DE';
 
     runTest("\"Hallo\"", $locale, '„Hallo“');
+});
+
+test('Works nested', function () {
+    // @TODO in the future maybe optimize for multiple nested quotes
+    runTest('"foo "outer \'inner\' outer" bar"', 'en_US', '“foo "outer ‘inner’ outer" bar”');
 });
 
 test('Works with simple language codes', function () {

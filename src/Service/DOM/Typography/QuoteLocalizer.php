@@ -76,7 +76,7 @@ final class QuoteLocalizer implements DOMServiceContract
 
             $text = Support::decode($nodeValue);
 
-            $text = $replacer->apply($text);
+            $text = $replacer->applyTo($text);
 
             $textNode->nodeValue = Support::encode($text, usePlaceholders: true);
         }

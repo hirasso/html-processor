@@ -13,24 +13,34 @@ use Closure;
 
 final readonly class QuoteReplacer
 {
+    private const SINGLE_QUOTES = ['‘', '’', '‚', '‹', '›'];
+    private const DOUBLE_QUOTES = ['“', '”', '„', '«', '»'];
+    private const STANDARD_SINGLE_QUOTE = "'";
+    private const STANDARD_DOUBLE_QUOTE = '"';
+
+    /** before and after quotes */
+    private string $matchBefore;
+    private string $matchAfter;
+
     public function __construct(
         public string $lang,
         public Closure $single,
         public Closure $double
     ) {
-
+        $this->matchBefore = '(?<!\p{L})';
+        $this->matchAfter = '(?!\p{L})';
     }
 
     /**
      * Apply this replacer to a string
      */
-    public function apply(string $text): string
+    public function applyTo(string $text): string
     {
-        $text = $this->normalize($text, ['‘', '’', '‚', '‹', '›'], "'");
-        $text = $this->normalize($text, ['“', '”', '„', '«', '»'], '"');
+        $text = $this->normalize($text, self::SINGLE_QUOTES, self::STANDARD_SINGLE_QUOTE);
+        $text = $this->normalize($text, self::DOUBLE_QUOTES, self::STANDARD_DOUBLE_QUOTE);
 
-        $text = $this->localize("'", $this->single, $text);
-        $text = $this->localize('"', $this->double, $text);
+        $text = $this->localize(self::STANDARD_SINGLE_QUOTE, $this->single, $text);
+        $text = $this->localize(self::STANDARD_DOUBLE_QUOTE, $this->double, $text);
 
         return $text;
     }
@@ -44,25 +54,18 @@ final readonly class QuoteReplacer
         $class = '[' . preg_quote(implode('', $quotes), '/') . ']';
 
         /** Match quotes not preceded by letter OR not followed by letter */
-        $pattern = "/(?:(?<!\p{L})$class|$class(?!\p{L}))/u";
+        $pattern = "/(?:{$this->matchBefore}{$class}|{$class}{$this->matchAfter})/u";
 
         return preg_replace($pattern, $replace, $text) ?? $text;
     }
 
     /**
-     * Replace a string with a callback
-     * @param string|string[] $search
+     * Localize wrapping quotes with the localized version
      */
-    private function localize(string|array $search, Closure $callback, string $text): string
+    private function localize(string $quote, Closure $callback, string $text): string
     {
-        /** always convert to array */
-        $search = array_map(
-            fn (string $s) => "/(?<!\p{L})$s(.*?)$s(?!\p{L})/u",
-            is_array($search) ? $search : [$search]
-        );
-
         return preg_replace_callback(
-            $search,
+            "/{$this->matchBefore}{$quote}(.*){$quote}{$this->matchAfter}/u",
             fn ($matches) => ($callback)($matches[1]),
             $text
         ) ?? $text;
