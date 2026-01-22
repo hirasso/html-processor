@@ -27,7 +27,7 @@ final readonly class QuoteReplacer
     public function apply(string $text): string
     {
         $text = $this->normalize($text, ['‘', '’', '‚', '‹', '›'], "'");
-        $text = $this->normalize($text, ['“', '”', '„', '«', '»'], "\"");
+        $text = $this->normalize($text, ['“', '”', '„', '«', '»'], '"');
 
         $text = $this->localize("'", $this->single, $text);
         $text = $this->localize('"', $this->double, $text);
@@ -40,11 +40,13 @@ final readonly class QuoteReplacer
      */
     private function normalize(string $text, array $quotes, string $replace): string
     {
-        /** at the start of a string */
-        $text = preg_replace(array_map(fn (string $s) => "/(?<!\p{L})$s/u", $quotes), $replace, $text) ?? $text;
-        /** at the end of a string */
-        $text = preg_replace(array_map(fn (string $s) => "/$s(?!\p{L})/u", $quotes), $replace, $text) ?? $text;
-        return $text;
+        /** convert the array of quotes into a character class like [”|“|›] */
+        $class = '[' . preg_quote(implode('', $quotes), '/') . ']';
+
+        /** Match quotes not preceded by letter OR not followed by letter */
+        $pattern = "/(?:(?<!\p{L})$class|$class(?!\p{L}))/u";
+
+        return preg_replace($pattern, $replace, $text) ?? $text;
     }
 
     /**
