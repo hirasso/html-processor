@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1
+
+### Patch Changes
+
+- a53ea9a: Robuster structure for `QuoteLocalizer`
+- b6b5070: Make opening external links in a new tab safe by default by adding [rel="noopener noreferrer"]
+
 ## 0.6.0
 
 ### Minor Changes
