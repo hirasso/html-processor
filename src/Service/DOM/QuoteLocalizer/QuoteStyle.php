@@ -18,6 +18,7 @@ enum QuoteStyle: string
     case English = 'en';
     case German = 'de';
     case French = 'fr';
+    case Spanish = 'es';
 
     /**
      * Get the QuoteReplacer for this style.
@@ -39,6 +40,11 @@ enum QuoteStyle: string
                 lang: $this->value,
                 single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"), // ‹ ›
                 double: new QuotePair("\u{00AB}\u{202F}", "\u{202F}\u{00BB}"), // « »
+            ),
+            self::Spanish => new QuoteReplacer(
+                lang: $this->value,
+                single: new QuotePair("\u{2018}", "\u{2019}"), // ‘ ’
+                double: new QuotePair("\u{00AB}", "\u{00BB}"), // « »
             ),
         };
     }
