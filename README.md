@@ -6,8 +6,22 @@
 
 **A tiny HTML processor written in PHP 🐘**
 
-## Features
+> [!WARNING]
+> The API hasn't stabilized, yet. Use with caution, ideally in combination with a tool like
+> [phpstan/phpstan](https://github.com/phpstan/phpstan)
 
+## Features (all optional)
+
+- Automatically convert raw URLs to links
+- Remove empty elements
+- Optimize typography:
+  - Localize quotes (currently supported languages, `en`, `de`, `fr`)
+  - Avoid short last lines (traditionally called "Widows")
+- Process links:
+  - Add link classes based on type (e.g. `link--external link--file link--ext--pdf`)
+  - Open external links in new tab
+- Encode email addresses to confuse spam bots
+- Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
 - Fluent API
 - Understands HTML5
 - Optimized for performance
@@ -24,12 +38,7 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-echo process($html)
-    ->autolinkUrls() // wrap raw url strings in `<a>` tags
-    ->removeEmptyElements() // remove empty paragraphs
-    ->encodeEmails() // encode emails to confuse spam bots
-    ->typography('de_DE') // fix typography based on locale
-    ->processLinks(); // add classes based on link type
+echo process($html)->typography('de_DE');
 ```
 
 ## Maximal Example
@@ -38,13 +47,13 @@ echo process($html)
 use function Hirasso\HTMLProcessor\process;
 
 echo process($html)
-    ->autolinkUrls() // wrap raw url strings in `<a>` tags
-    ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
-    ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
-    ->removeEmptyElements('p,div') // remove empty paragraphs
-    ->encodeEmails() // encode emails to confuse spam bots
+    ->autolinkUrls()
+    ->removeEmptyElements('p')
+    ->encodeEmails()
     ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
-    ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab());
+    ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
+    ->autolinkPrefix('@', 'https://your-instance.social/@')
+    ->autolinkPrefix('#', 'https://your-instance.social/tags');
 
 ```
 
