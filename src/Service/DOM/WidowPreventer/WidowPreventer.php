@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
+namespace Hirasso\HTMLProcessor\Service\DOM\WidowPreventer;
 
 use DOMNode;
 use DOMXPath;

@@ -7,10 +7,12 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
+namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\WidowPreventer\WidowPreventer;
 use IvoPetkov\HTML5DOMDocument;
 
 final class Typography implements DOMServiceContract
