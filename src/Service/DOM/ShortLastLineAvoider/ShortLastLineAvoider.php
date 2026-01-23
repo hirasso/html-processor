@@ -121,6 +121,8 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
             return $string;
         }
 
-        return preg_replace('/([^\s])\s+([^\s]+)\s*$/', '$1&nbsp;$2', $string) ?? $string;
+        $lastWord = array_pop($words);
+
+        return implode(' ', $words) . '&nbsp;' . $lastWord;
     }
 }
