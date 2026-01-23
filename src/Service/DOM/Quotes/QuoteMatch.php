@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
+namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
 
 /**
  * Represents a quote character found in text during stack-based localization.

@@ -38,7 +38,24 @@ final class Support
     }
 
     /**
-     * Extract HTML from body
+     * Create a document from a HTML string
+     */
+    public static function createDocument(string $html): HTML5DOMDocument
+    {
+        $document = new HTML5DOMDocument();
+        $document->loadHTML(
+            htmlspecialchars_decode(Support::encode($html)),
+            /**
+             * @TODO reactivate this if it is fixed upstream
+             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
+             */
+            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
+        );
+        return $document;
+    }
+
+    /**
+     * Extract the innerHTML from a document's <body>
      */
     public static function extractBodyHTML(\DOMDocument|HTML5DOMDocument $document): string
     {

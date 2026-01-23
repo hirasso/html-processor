@@ -6,7 +6,8 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteNormalizer;
 use Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
 use IvoPetkov\HTML5DOMDocument;
 
@@ -74,6 +75,12 @@ final class Typography implements DOMServiceContract
     public function avoidShortLastLines(): self
     {
         $this->queue->add(new ShortLastLineAvoider());
+        return $this;
+    }
+
+    public function normalizeQuotes(): self
+    {
+        $this->queue->add(new QuoteNormalizer());
         return $this;
     }
 

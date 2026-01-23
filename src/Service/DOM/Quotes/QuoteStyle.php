@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
+namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
 
 /**
  * Localized quote styles by language.

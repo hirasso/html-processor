@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Benchmark;
 
-use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuotePair;
-use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuoteReplacer;
+use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuotePair;
+use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteReplacer;
 use PhpBench\Attributes as Bench;
 
 #[Bench\BeforeMethods('setUp')]
