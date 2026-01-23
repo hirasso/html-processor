@@ -56,7 +56,7 @@ jobs:
           echo "## Benchmark Comparison" > benchmark-report.md
           echo "" >> benchmark-report.md
           echo "\`\`\`" >> benchmark-report.md
-          ./vendor/bin/phpbench report --ref=baseline --ref=current --report=compare 2>&1 | tee -a benchmark-report.md || true
+          ./vendor/bin/phpbench report --ref=baseline --ref=current --report=benchmark_compare 2>&1 | tee -a benchmark-report.md || true
           echo "\`\`\`" >> benchmark-report.md
 
       # Run without comparison if no baseline
