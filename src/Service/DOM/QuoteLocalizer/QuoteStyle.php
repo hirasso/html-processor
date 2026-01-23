@@ -20,13 +20,8 @@ namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
  */
 enum QuoteStyle: string
 {
-    // English: 'single' "double"
     case English = 'en';
-
-    // German: ‚single' „double"
     case German = 'de';
-
-    // French: ‹ single › « double » (with narrow non-breaking spaces)
     case French = 'fr';
 
     /**
@@ -37,18 +32,18 @@ enum QuoteStyle: string
         return match ($this) {
             self::English => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{2018}", "\u{2019}"), // ' '
-                double: new QuotePair("\u{201C}", "\u{201D}"), // " "
+                single: new QuotePair("\u{2018}", "\u{2019}"), // ‘ ’
+                double: new QuotePair("\u{201C}", "\u{201D}"), // “ ”
             ),
             self::German => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{201A}", "\u{2018}"), // ‚ '
-                double: new QuotePair("\u{201E}", "\u{201C}"), // „ "
+                single: new QuotePair("\u{201A}", "\u{2018}"), // ‚ ‘
+                double: new QuotePair("\u{201E}", "\u{201C}"), // „ “
             ),
             self::French => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"), // ‹  ›
-                double: new QuotePair("\u{00AB}\u{202F}", "\u{202F}\u{00BB}"), // «  »
+                single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"), // ‹ ›
+                double: new QuotePair("\u{00AB}\u{202F}", "\u{202F}\u{00BB}"), // « »
             ),
         };
     }
