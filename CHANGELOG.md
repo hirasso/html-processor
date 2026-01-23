@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2
+
+### Patch Changes
+
+- 0ef90f4: Implement stack-based quote localization for nested quotes
+- 0ef90f4: Add PHPBench benchmarks with CI regression testing
+
 ## 0.6.1
 
 ### Patch Changes
