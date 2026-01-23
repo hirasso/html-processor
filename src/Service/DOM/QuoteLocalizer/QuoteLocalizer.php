@@ -34,19 +34,19 @@ final class QuoteLocalizer implements DOMServiceContract
     {
         // Using Unicode escapes to help LLMs understand
         $this->replacers = [
-            // English: 'single' "double"
+            // English: ‘single’ “double”
             'en' => new QuoteReplacer(
                 lang: 'en',
                 single: new QuotePair("\u{2018}", "\u{2019}"),
                 double: new QuotePair("\u{201C}", "\u{201D}"),
             ),
-            // German: ‚single' „double"
+            // German: ‚single‘ „double“
             'de' => new QuoteReplacer(
                 lang: 'de',
                 single: new QuotePair("\u{201A}", "\u{2018}"),
                 double: new QuotePair("\u{201E}", "\u{201C}"),
             ),
-            // French: ‹ single › « double » (with narrow non-breaking spaces)
+            // French: ‹ single › « double » (with narrow non-breaking spaces)
             'fr' => new QuoteReplacer(
                 lang: 'fr',
                 single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"),
