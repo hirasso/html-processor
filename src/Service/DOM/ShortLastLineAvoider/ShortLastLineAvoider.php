@@ -13,6 +13,13 @@ use IvoPetkov\HTML5DOMDocument;
 
 final readonly class ShortLastLineAvoider implements DOMServiceContract
 {
+    public function __construct(
+        private ?int $minWordCount = 4,
+        private ?int $maxTailLength = 25
+    ) {
+
+    }
+
     public function prio(): int
     {
         return 0;
@@ -103,14 +110,14 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
         $words = explode(' ', $string);
         $wordCount = count($words);
 
-        if ($wordCount < 4) {
+        if ($wordCount < $this->minWordCount) {
             return $string;
         }
 
         $lastWord = Support::decode($words[$wordCount - 1]);
         $secondLastWord = Support::decode($words[$wordCount - 2]);
 
-        if (mb_strlen("$lastWord $secondLastWord") > 25) {
+        if (mb_strlen("$lastWord $secondLastWord") > $this->maxTailLength) {
             return $string;
         }
 
