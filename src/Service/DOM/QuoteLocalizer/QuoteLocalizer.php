@@ -36,6 +36,7 @@ final class QuoteLocalizer implements DOMServiceContract
      */
     public function run(HTML5DOMDocument $document): void
     {
+        /** get the language code late to support ->setLocale() */
         $lang = $this->typography->getLanguageCode();
 
         if (!$lang || !$replacer = QuoteStyle::fromLang($lang)?->replacer()) {
