@@ -12,7 +12,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuoteLocalizer;
-use Hirasso\HTMLProcessor\Service\DOM\WidowPreventer\WidowPreventer;
+use Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
 use IvoPetkov\HTML5DOMDocument;
 
 final class Typography implements DOMServiceContract
@@ -66,7 +66,7 @@ final class Typography implements DOMServiceContract
     private function applyDefaults(): self
     {
         $this->queue->add(new QuoteLocalizer($this));
-        $this->queue->add(new WidowPreventer());
+        $this->queue->add(new ShortLastLineAvoider());
         return $this;
     }
 
@@ -76,9 +76,9 @@ final class Typography implements DOMServiceContract
         return $this;
     }
 
-    public function preventWidows(): self
+    public function avoidShortLastLines(): self
     {
-        $this->queue->add(new WidowPreventer());
+        $this->queue->add(new ShortLastLineAvoider());
         return $this;
     }
 
