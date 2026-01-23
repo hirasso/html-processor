@@ -72,7 +72,6 @@ test('Does nothing if the language is unknonwn', function () {
     runTest('<p>"foo"</p>', 'zh_CN', '<p>"foo"</p>');
 });
 
-
 test('Works when setting the locale late', function () {
     $str = "<p>\"Hallo\"</p>";
     $expected = '<p>„Hallo“</p>';
@@ -101,6 +100,9 @@ test('Ignores quotes that do not have a space before or after', function () {
     runTest("<p>Edit's Lädchen's Öffnungszeiten</p>", 'de_DE', "<p>Edit's Lädchen's Öffnungszeiten</p>");
 });
 
-// test('Preserves ignored quotes', function() {
-//     runTest("l’équipement prévu pour l’ICN et l’IAE.", 'fr_FR', "l’équipement prévu pour l’ICN et l’IAE.");
-// })->only();
+test('Works with spanish quote style', function () {
+    $locale = 'es_ES';
+
+    runTest("<p>\"Hola\"</p>", $locale, '<p>«Hola»</p>');
+    runTest("<p>'Hola'</p>", $locale, '<p>„Hola“</p>');
+});

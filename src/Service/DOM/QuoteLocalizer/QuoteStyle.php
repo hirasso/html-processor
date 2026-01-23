@@ -43,7 +43,7 @@ enum QuoteStyle: string
             ),
             self::Spanish => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{2018}", "\u{2019}"), // ‘ ’
+                single: new QuotePair("\u{201E}", "\u{201C}"), // „ “
                 double: new QuotePair("\u{00AB}", "\u{00BB}"), // « »
             ),
         };
