@@ -6,6 +6,10 @@
 
 **A tiny HTML processor written in PHP 🐘**
 
+> [!WARNING]
+> The API hasn't stabilized, yet. Use with caution, ideally in combination with a tool like
+> [phpstan/phpstan](https://github.com/phpstan/phpstan)
+
 ## Features (all optional)
 
 - Automatically convert raw URLs to links
