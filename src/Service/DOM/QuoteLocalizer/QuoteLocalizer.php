@@ -1,10 +1,5 @@
 <?php
 
-/*
-* Copyright (c) 2025 Rasso Hilber
-* https://rassohilber.com
-*/
-
 declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
@@ -16,15 +11,12 @@ use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
 /**
- * Localize single and double quotes to the correct format in various languages
- * Usage: $html = QuoteLocalizer::localize($html, get_locale());
- * Supported languages: English, German, French
+ * Localize single and double quotes to the correct format in various languages.
+ *
+ * @see QuoteStyle for supported languages
  */
 final class QuoteLocalizer implements DOMServiceContract
 {
-    /** @var array<string, QuoteReplacer> $replacers */
-    private array $replacers;
-
     public function prio(): int
     {
         return 0;
@@ -32,27 +24,6 @@ final class QuoteLocalizer implements DOMServiceContract
 
     public function __construct(private Typography $typography)
     {
-        // Using Unicode escapes to help LLMs understand
-        $this->replacers = [
-            // English: ‘single’ “double”
-            'en' => new QuoteReplacer(
-                lang: 'en',
-                single: new QuotePair("\u{2018}", "\u{2019}"),
-                double: new QuotePair("\u{201C}", "\u{201D}"),
-            ),
-            // German: ‚single‘ „double“
-            'de' => new QuoteReplacer(
-                lang: 'de',
-                single: new QuotePair("\u{201A}", "\u{2018}"),
-                double: new QuotePair("\u{201E}", "\u{201C}"),
-            ),
-            // French: ‹ single › « double » (with narrow non-breaking spaces)
-            'fr' => new QuoteReplacer(
-                lang: 'fr',
-                single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"),
-                double: new QuotePair("\u{00AB}\u{202F}", "\u{202F}\u{00BB}"),
-            ),
-        ];
     }
 
     /**
@@ -60,10 +31,10 @@ final class QuoteLocalizer implements DOMServiceContract
      */
     public function run(HTML5DOMDocument $document): void
     {
+        /** get the language code late to support ->setLocale() */
         $lang = $this->typography->getLanguageCode();
-        $replacer = $this->replacers[$lang] ?? null;
 
-        if (!$lang || !$replacer) {
+        if (!$lang || !$replacer = QuoteStyle::fromLang($lang)?->replacer()) {
             return;
         }
 

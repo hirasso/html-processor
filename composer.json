@@ -19,11 +19,11 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Hirasso\\HTMLProcessor\\Tests\\": "tests/"
+      "Tests\\": "tests/"
     }
   },
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.2",
     "asika/autolink": "^2.2",
     "ivopetkov/html5-dom-document-php": "^2.10",
     "league/uri": "^7.7"

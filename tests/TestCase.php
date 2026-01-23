@@ -1,6 +1,6 @@
 <?php
 
-namespace Hirasso\HTMLProcessor\Tests;
+namespace Tests;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
