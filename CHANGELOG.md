@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.3
+
+### Patch Changes
+
+- ac17b59: Rename `->preventWidows` to `->avoidShortLastLines`, according to the [decision of the CSS working group](https://github.com/w3c/csswg-drafts/issues/11283#issuecomment-2776875912)
+- 5ce193d: Make it easier to contribute new quote styles for `QuoteLocalizer`
+- b4a9818: Optimize the internal structure of `avoidShortLastLine`
+
 ## 0.6.2
 
 ### Patch Changes
