@@ -41,7 +41,7 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-echo process($html)->typography('de_DE');
+echo process($html)->typography('de');
 ```
 
 ## Maximal Example
@@ -53,11 +53,12 @@ echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
     ->encodeEmails()
-    ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
+    ->typography('de', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags');
 
 ```
 
-Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
+- Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
+- See the [list of currently supported quote styles](./src/Service/DOM/QuoteLocalizer/QuoteStyle.php) here.
