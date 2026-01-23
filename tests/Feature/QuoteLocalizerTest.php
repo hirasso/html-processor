@@ -34,8 +34,7 @@ test('Localizes quotes at the start and end of a string', function () {
 });
 
 test('Works nested', function () {
-    // @TODO in the future maybe optimize for multiple nested quotes
-    runTest('"foo "outer \'inner\' outer" bar"', 'en_US', '“foo "outer ‘inner’ outer" bar”');
+    runTest('„foo ”outer \'inner\' outer“ bar”', 'de_DE', "„foo „outer ‚inner‘ outer“ bar“");
 });
 
 test('Works with simple language codes', function () {

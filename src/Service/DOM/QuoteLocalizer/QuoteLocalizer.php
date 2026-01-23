@@ -7,10 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Typography;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
 use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\DOM\Typography;
 use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
@@ -31,22 +32,25 @@ final class QuoteLocalizer implements DOMServiceContract
 
     public function __construct(private Typography $typography)
     {
+        // Using Unicode escapes to help LLMs understand
         $this->replacers = [
+            // English: 'single' "double"
             'en' => new QuoteReplacer(
                 lang: 'en',
-                single: fn (string $s) => "‘{$s}’",
-                double: fn (string $s) => "“{$s}”"
+                single: new QuotePair("\u{2018}", "\u{2019}"),
+                double: new QuotePair("\u{201C}", "\u{201D}"),
             ),
+            // German: ‚single' „double"
             'de' => new QuoteReplacer(
                 lang: 'de',
-                single: fn (string $s) => "‚{$s}‘",
-                double: fn (string $s) => "„{$s}“"
+                single: new QuotePair("\u{201A}", "\u{2018}"),
+                double: new QuotePair("\u{201E}", "\u{201C}"),
             ),
-            // French has narrow non-breaking spaces between the quotes and the word
+            // French: ‹ single › « double » (with narrow non-breaking spaces)
             'fr' => new QuoteReplacer(
-                lang: 'de',
-                single: fn (string $s) => "‹\u{202F}{$s}\u{202F}›",
-                double: fn (string $s) => "«\u{202F}{$s}\u{202F}»"
+                lang: 'fr',
+                single: new QuotePair("\u{2039}\u{202F}", "\u{202F}\u{203A}"),
+                double: new QuotePair("\u{00AB}\u{202F}", "\u{202F}\u{00BB}"),
             ),
         ];
     }

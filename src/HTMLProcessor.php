@@ -13,7 +13,7 @@ use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Service\DOM\Typography\Typography;
+use Hirasso\HTMLProcessor\Service\DOM\Typography;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Support\Support;
 

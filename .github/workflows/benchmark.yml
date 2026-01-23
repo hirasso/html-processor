@@ -1,0 +1,120 @@
+name: Benchmark
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+          coverage: none
+          extensions: opcache
+          ini-values: opcache.enable_cli=1
+
+      - name: Install Composer Dependencies
+        uses: ramsey/composer-install@v3
+
+      # Restore baseline from cache (if exists)
+      - name: Restore Baseline
+        id: cache-baseline
+        uses: actions/cache/restore@v4
+        with:
+          path: .phpbench
+          key: phpbench-baseline-main
+          restore-keys: |
+            phpbench-baseline-
+
+      # Run benchmarks and store results
+      - name: Run Benchmarks
+        run: |
+          ./vendor/bin/phpbench run --report=aggregate --progress=plain --tag=current --store
+
+      # Compare against baseline on PRs
+      - name: Compare Against Baseline
+        if: github.event_name == 'pull_request' && steps.cache-baseline.outputs.cache-hit == 'true'
+        id: benchmark-compare
+        run: |
+          echo "## Benchmark Comparison" > benchmark-report.md
+          echo "" >> benchmark-report.md
+          echo "\`\`\`" >> benchmark-report.md
+          ./vendor/bin/phpbench report --ref=baseline --ref=current --report=benchmark_compare 2>&1 | tee -a benchmark-report.md || true
+          echo "\`\`\`" >> benchmark-report.md
+
+      # Run without comparison if no baseline
+      - name: Benchmark Results (No Baseline)
+        if: github.event_name == 'pull_request' && steps.cache-baseline.outputs.cache-hit != 'true'
+        run: |
+          echo "## Benchmark Results" > benchmark-report.md
+          echo "" >> benchmark-report.md
+          echo "_No baseline available for comparison. Baseline will be created when merged to main._" >> benchmark-report.md
+          echo "" >> benchmark-report.md
+          echo "\`\`\`" >> benchmark-report.md
+          ./vendor/bin/phpbench report --ref=current --report=aggregate 2>&1 | tee -a benchmark-report.md
+          echo "\`\`\`" >> benchmark-report.md
+
+      - name: Comment PR with Benchmark Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('benchmark-report.md', 'utf8');
+
+            let body = '📊 ' + report;
+            body += '\n\n---\n_Run `composer bench` locally to reproduce_';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c => c.body.includes('📊') && c.body.includes('Benchmark'));
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
+
+      # Save baseline on main branch
+      - name: Save Baseline
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ./vendor/bin/phpbench run --report=aggregate --progress=plain --tag=baseline --store
+
+      - name: Cache Baseline
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: .phpbench
+          key: phpbench-baseline-main

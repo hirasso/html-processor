@@ -12,5 +12,8 @@ node_modules
 coverage.xml
 tests/reports
 
+# phpbench
+.phpbench
+
 # claude
 .claude

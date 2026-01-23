@@ -32,6 +32,7 @@
     "laravel/pint": "^1.20",
     "pestphp/pest": "^3.7",
     "pestphp/pest-plugin-watch": "^3.0",
+    "phpbench/phpbench": "^1.4",
     "phpstan/phpstan": "^2.1",
     "symfony/var-dumper": "^7.2"
   },
@@ -42,6 +43,7 @@
     "test:coverage": "php -d zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-83-arm64.so -d xdebug.mode=coverage ./vendor/bin/pest --coverage --coverage-html ./tests/reports",
     "test:ci": "./vendor/bin/pest --coverage-clover coverage.xml",
     "analyse": "./vendor/bin/phpstan analyse --memory-limit=2G",
+    "bench": "./vendor/bin/phpbench run --report=default",
     "post-install-cmd": ["[ -n \"$CI\" ] || pnpm install"],
     "post-update-cmd": ["[ -n \"$CI\" ] || pnpm install"]
   },
