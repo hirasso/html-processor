@@ -27,7 +27,7 @@ test('Works on multiple paragraphs', function () {
 
     $result = process($string)
         ->typography('de_DE', fn ($typo) => $typo
-            ->preventWidows())
+            ->avoidShortLastLines())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -42,7 +42,7 @@ test('only prevents widows at the very end of block elements', function () {
     HTML);
 
     $result = process($string)
-        ->typography('en', fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -57,7 +57,7 @@ test('works without a parent element', function () {
     HTML);
 
     $result = process($string)
-        ->typography('en', fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -72,7 +72,7 @@ test('works with nested elements', function () {
     HTML);
 
     $result = process($string)
-        ->typography('en', fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
         ->apply();
     expect($result)->toBe($expected);
 });
@@ -93,7 +93,7 @@ test('should work with this', function () {
     HTML);
 
     $result = process($foo)
-        ->typography('en', fn ($typo) => $typo->preventWidows())
+        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
         ->apply();
     expect($result)->toBe($bar);
 });

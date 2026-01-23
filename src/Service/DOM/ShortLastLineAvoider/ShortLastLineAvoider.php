@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\WidowPreventer;
+namespace Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider;
 
 use DOMNode;
 use DOMXPath;
@@ -10,7 +10,7 @@ use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
 
-final readonly class WidowPreventer implements DOMServiceContract
+final readonly class ShortLastLineAvoider implements DOMServiceContract
 {
     public function prio(): int
     {

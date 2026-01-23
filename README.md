@@ -43,7 +43,7 @@ echo process($html)
     ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
     ->removeEmptyElements('p,div') // remove empty paragraphs
     ->encodeEmails() // encode emails to confuse spam bots
-    ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->preventWidows())
+    ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab());
 
 ```
