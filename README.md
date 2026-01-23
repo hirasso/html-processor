@@ -22,6 +22,9 @@
   - Open external links in new tab
 - Encode email addresses to confuse spam bots
 - Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
+
+## Promises
+
 - Fluent API
 - Understands HTML5
 - Optimized for performance
