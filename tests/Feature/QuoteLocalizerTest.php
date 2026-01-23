@@ -69,11 +69,7 @@ test('Ignores quotes in tags', function () {
 });
 
 test('Does nothing if the language is unknonwn', function () {
-    runTest(
-        '<p>"foo"</p>',
-        'es_ES',
-        '<p>"foo"</p>',
-    );
+    runTest('<p>"foo"</p>', 'zh_CN', '<p>"foo"</p>');
 });
 
 
