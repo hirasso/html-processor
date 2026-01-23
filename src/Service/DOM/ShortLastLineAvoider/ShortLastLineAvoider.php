@@ -39,11 +39,13 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
                 continue;
             }
 
-            $lastTextNode = $this->findLastTextNode($el);
+            if (!$lastTextNode = $this->findLastTextNode($el)) {
+                continue;
+            };
 
-            if ($lastTextNode !== null) {
-                $lastTextNode->textContent = $this->maybePreventWidows($lastTextNode->textContent);
-            }
+
+            $lastTextNode->textContent = $this->injectNonbreakingSpace($lastTextNode->textContent);
+
         }
     }
 
@@ -66,13 +68,9 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
             return null;
         }
 
-        for ($i = $node->childNodes->length - 1; $i >= 0; $i--) {
-            $child = $node->childNodes->item($i);
+        $children = array_reverse(iterator_to_array($node->childNodes));
 
-            if ($child === null) {
-                continue;
-            }
-
+        foreach ($children as $child) {
             if ($child instanceof DOMText && !empty(trim($child->textContent))) {
                 return $child;
             }
@@ -89,11 +87,12 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
     }
 
     /**
-     * Prevent widows in a string
+     * Prevent short last lines (widows) in a string by injecting a
+     * non-breaking space between the last two words
      *
      * @see http://davidwalsh.name/prevent-widows-php-javascript
      */
-    private function maybePreventWidows(string $textContent): string
+    private function injectNonbreakingSpace(string $textContent): string
     {
         $string = Support::normalizeWhitespace($textContent);
 
