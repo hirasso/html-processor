@@ -53,7 +53,7 @@ jobs:
         if: github.event_name == 'pull_request' && steps.cache-baseline.outputs.cache-hit == 'true'
         id: benchmark-compare
         run: |
-          echo "## Benchmark Comparison" > benchmark-report.md
+          echo "## 📊 Benchmark Comparison" > benchmark-report.md
           echo "" >> benchmark-report.md
           echo "\`\`\`" >> benchmark-report.md
           ./vendor/bin/phpbench report --ref=baseline --ref=current --report=benchmark_compare 2>&1 | tee -a benchmark-report.md || true
@@ -79,7 +79,7 @@ jobs:
             const fs = require('fs');
             const report = fs.readFileSync('benchmark-report.md', 'utf8');
 
-            let body = '📊 ' + report;
+            let body = report;
             body += '\n\n---\n_Run `composer bench` locally to reproduce_';
 
             const { data: comments } = await github.rest.issues.listComments({
