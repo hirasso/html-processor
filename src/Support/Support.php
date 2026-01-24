@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Support;
 
+use DOMText;
+use DOMXPath;
+use Generator;
 use IvoPetkov\HTML5DOMDocument;
 use IvoPetkov\HTML5DOMElement;
 
@@ -142,5 +145,16 @@ final class Support
         $html = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $html) ?? $html;
 
         return $html;
+    }
+
+    /** @return \Generator<DOMText> */
+    public static function getTextNodes(HTML5DOMDocument $doc): Generator
+    {
+        $xpath = new DOMXPath($doc);
+        foreach ($xpath->query('//text()') ?: [] as $node) {
+            if ($node instanceof DOMText && trim($node->nodeValue ?? '') !== '') {
+                yield $node;
+            }
+        }
     }
 }

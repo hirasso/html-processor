@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
 
-use DOMXPath;
+use DOMText;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
+use IvoPetkov\HTML5DOMElement;
 
 /**
  * Wraps quoted text in <q> HTML tags.
@@ -21,6 +22,15 @@ use IvoPetkov\HTML5DOMDocument;
 final class QuoteNormalizer implements DOMServiceContract
 {
     private QuoteWrapper $wrapper;
+
+    /** Current parent element during segment processing */
+    private \DOMNode $currentParent;
+
+    /** Original parent of the text node being replaced */
+    private \DOMNode $originalParent;
+
+    /** Original text node being replaced */
+    private DOMText $textNode;
 
     public function __construct()
     {
@@ -37,62 +47,106 @@ final class QuoteNormalizer implements DOMServiceContract
      */
     public function run(HTML5DOMDocument $document): void
     {
-        $xpath = new DOMXPath($document);
-        $textNodes = $xpath->query('//text()');
-
-        if (!$textNodes) {
-            return;
-        }
-
-        // Collect all text nodes first (modifying DOM while iterating can cause issues)
-        /** @var \DOMText[] $nodes */
-        $nodes = [];
-        foreach ($textNodes as $textNode) {
-            if ($textNode instanceof \DOMText) {
-                $nodes[] = $textNode;
-            }
-        }
-
-        foreach ($nodes as $textNode) {
+        foreach (Support::getTextNodes($document) as $textNode) {
             $nodeValue = $textNode->nodeValue ?? '';
 
-            if (empty(trim($nodeValue))) {
-                continue;
-            }
-
             $text = Support::decode($nodeValue);
-            $wrapped = $this->wrapper->wrapQuotes($text);
+            $segments = $this->wrapper->wrapQuotes($text);
 
-            // If the text contains <q> tags, we need to replace with a document fragment
-            if (str_contains($wrapped, '<q>')) {
-                $this->replaceWithFragment($document, $textNode, $wrapped);
-            } else {
-                $textNode->nodeValue = Support::encode($wrapped, usePlaceholders: true);
+            // Check if we have any quote segments
+            if ($this->hasQuoteSegments($segments)) {
+                $this->replaceWithSegments($document, $textNode, $segments);
             }
         }
     }
 
     /**
-     * Replace a text node with HTML content (including <q> tags)
+     * Check if segments contain any quote open/close markers
+     *
+     * @param Segment[] $segments
      */
-    private function replaceWithFragment(HTML5DOMDocument $document, \DOMText $textNode, string $html): void
+    private function hasQuoteSegments(array $segments): bool
+    {
+        foreach ($segments as $segment) {
+            if (in_array($segment->type, [SegmentType::QuoteOpen, SegmentType::QuoteClose], true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Replace a text node with DOM nodes built from segments
+     *
+     * Example for "outer 'inner' outer":
+     * ┌────────────┬───────────────────────┬────────────────┐
+     * │    Step    │ $this->currentParent  │   $ancestors   │
+     * ├────────────┼───────────────────────┼────────────────┤
+     * │ Start      │ <p>                   │ []             │
+     * ├────────────┼───────────────────────┼────────────────┤
+     * │ QuoteOpen  │ <q>                   │ [<p>]          │
+     * ├────────────┼───────────────────────┼────────────────┤
+     * │ QuoteOpen  │ <q> (inner)           │ [<p>, <q>]     │
+     * ├────────────┼───────────────────────┼────────────────┤
+     * │ QuoteClose │ <q> (outer)           │ [<p>]          │
+     * ├────────────┼───────────────────────┼────────────────┤
+     * │ QuoteClose │ <p>                   │ []             │
+     * └────────────┴───────────────────────┴────────────────┘
+     *
+     * @param Segment[] $segments
+     */
+    private function replaceWithSegments(HTML5DOMDocument $document, DOMText $textNode, array $segments): void
     {
         if (!$parent = $textNode->parentNode) {
             return;
         }
 
-        // Create a temporary wrapper to parse the HTML with <q> tags
-        if (!$body = Support::createDocument($html)->getElementsByTagName('body')->item(0)) {
-            return;
+        /** @var HTML5DOMElement[] $ancestors Ancestor elements for nested <q> tags */
+        $ancestors = [];
+        $this->originalParent = $parent;
+        $this->currentParent = $parent;
+        $this->textNode = $textNode;
+
+        foreach ($segments as $segment) {
+            switch ($segment->type) {
+                case SegmentType::QuoteOpen:
+                    /** Create <q>, push current parent to ancestors, descend into <q> */
+                    if ($qElement = $document->createElement('q')) {
+                        $this->insertAtCurrentPosition($qElement);
+                        $ancestors[] = $this->currentParent;
+                        $this->currentParent = $qElement;
+                    }
+                    break;
+
+                case SegmentType::QuoteClose:
+                    /** Pop ancestors to return to parent level */
+                    $this->currentParent = array_pop($ancestors) ?? $this->currentParent;
+                    break;
+
+                case SegmentType::Text:
+                    /** Create text node at current position */
+                    if ($segment->content !== null) {
+                        $this->insertAtCurrentPosition($document->createTextNode(
+                            Support::encode($segment->content, usePlaceholders: true)
+                        ));
+                    }
+                    break;
+            }
         }
 
-        // Import and insert each child node before the text node
-        foreach ($body->childNodes as $child) {
-            $imported = $document->importNode($child, true);
-            $parent->insertBefore($imported, $textNode);
-        }
-
-        // Remove the original text node
+        /** Remove the original text node (now replaced by new structure) */
         $parent->removeChild($textNode);
+    }
+
+    /**
+     * Insert a node at the current position.
+     * Before descending into nested <q> elements, inserts before the original text node.
+     * Inside nested <q> elements, appends to the current parent.
+     */
+    private function insertAtCurrentPosition(\DOMNode $node): void
+    {
+        $this->currentParent === $this->originalParent
+            ? $this->currentParent->insertBefore($node, $this->textNode)
+            : $this->currentParent->appendChild($node);
     }
 }

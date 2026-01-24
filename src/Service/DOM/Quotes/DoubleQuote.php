@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
 
-use Hirasso\HTMLProcessor\Service\Contract\Utf8QuoteContract;
-
 /**
  * UTF-8 quotation mark variants.
  *
  * Intended for normalization and sanitization tasks.
  */
-enum DoubleQuote: string implements Utf8QuoteContract
+enum DoubleQuote: string implements QuoteContract
 {
+    case ASCII       = '"';
+
     // Curly double quotes
     case LEFT        = "\u{201C}"; // "
     case RIGHT       = "\u{201D}"; // "

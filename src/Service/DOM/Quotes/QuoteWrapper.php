@@ -9,34 +9,35 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
  *
  * Uses the same stack-based approach as QuoteReplacer for proper nesting:
  * Input:  "outer 'inner' outer"
- * Output: <q>outer <q>inner</q> outer</q>
+ * Output: [QuoteOpenSegment, TextSegment("outer "), QuoteOpenSegment, TextSegment("inner"), QuoteCloseSegment, TextSegment(" outer"), QuoteCloseSegment]
  */
 final class QuoteWrapper
 {
     /**
-     * Wrap quoted text with <q> tags
+     * Wrap quoted text and return structured segments
+     *
+     * @return Segment[]
      */
-    public function wrapQuotes(string $text): string
+    public function wrapQuotes(string $text): array
     {
-        // Phase 1: Normalize existing curly quotes to standard ASCII quotes
-        $text = $this->normalize($text, SingleQuote::all(), "'");
-        $text = $this->normalize($text, DoubleQuote::all(), '"');
+        // Phase 1: Reset existing curly quotes to standard ASCII quotes
+        $text = $this->resetQuotes($text, '"');
 
         // Phase 2: Apply stack-based wrapping
         return $this->wrapWithStack($text);
     }
 
     /**
-     * Normalize curly quotes back to ASCII, but only if they look like quotes
+     * Reset curly quotes back to ASCII, but only if they look like quotes
      * (not preceded by letter OR not followed by letter).
      * This preserves apostrophes like "don't" which are surrounded by letters.
-     *
-     * @param string[] $quotes Curly quote characters to normalize
      */
-    private function normalize(string $text, array $quotes, string $replace): string
+    private function resetQuotes(string $text, string $replace): string
     {
         $matchBefore = '(?<!\p{L})'; // negative lookbehind: not preceded by letter
         $matchAfter = '(?!\p{L})';   // negative lookahead: not followed by letter
+
+        $quotes = [...SingleQuote::all(), ...DoubleQuote::all()];
 
         // Build character class like [''‚‹›]
         $class = '[' . preg_quote(implode('', $quotes), '/') . ']';
@@ -49,8 +50,10 @@ final class QuoteWrapper
 
     /**
      * Wrap quotes using stack-based matching for proper nesting.
+     *
+     * @return Segment[]
      */
-    private function wrapWithStack(string $text): string
+    private function wrapWithStack(string $text): array
     {
         // Step 1: Find all quote positions with context
         $quotes = $this->findQuotes($text);
@@ -58,12 +61,13 @@ final class QuoteWrapper
         // Step 2: Assign Open/Close roles using a stack
         $this->assignRoles($quotes);
 
-        // Step 3: Build output string
-        return $this->buildOutput($text, $quotes);
+        // Step 3: Build output segments
+        return $this->buildSegments($text, $quotes);
     }
 
     /**
-     * Find all ASCII quotes in text with their context.
+     * Find all quotes in text with their context.
+     * All quotes have been normalized to " by resetQuotes().
      *
      * @return QuoteMatch[]
      */
@@ -71,11 +75,9 @@ final class QuoteWrapper
     {
         $quotes = [];
 
-        if (preg_match_all('/[\'"]/', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            foreach ($matches[0] as [$char, $pos]) {
+        if (preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+            foreach ($matches[0] as [, $pos]) {
                 $position = (int) $pos;
-                $type = $char === "'" ? QuoteType::Single : QuoteType::Double;
-                $length = 1;
 
                 // Check preceding character
                 $precededByLetter = false;
@@ -86,16 +88,15 @@ final class QuoteWrapper
 
                 // Check following character
                 $followedByLetter = false;
-                $afterPos = $position + $length;
-                if ($afterPos < strlen($text)) {
-                    $after = mb_substr(substr($text, $afterPos), 0, 1);
+                if ($position + 1 < strlen($text)) {
+                    $after = mb_substr(substr($text, $position + 1), 0, 1);
                     $followedByLetter = preg_match('/\p{L}/u', $after) === 1;
                 }
 
                 $quotes[] = new QuoteMatch(
                     position: $position,
-                    length: $length,
-                    type: $type,
+                    length: 1,
+                    type: QuoteType::Double,
                     canOpen: !$precededByLetter,
                     canClose: !$followedByLetter,
                 );
@@ -106,54 +107,39 @@ final class QuoteWrapper
     }
 
     /**
-     * Assign Open/Close roles to quotes using stacks.
-     * Unlike QuoteReplacer, we track actual quote references to handle unpaired quotes.
+     * Assign Open/Close roles to quotes using a stack.
+     * Tracks actual quote references to handle unpaired quotes.
      *
      * @param QuoteMatch[] $quotes
      */
     private function assignRoles(array $quotes): void
     {
-        /** @var QuoteMatch[] $singleStack */
-        $singleStack = [];
-        /** @var QuoteMatch[] $doubleStack */
-        $doubleStack = [];
+        /** @var QuoteMatch[] $stack */
+        $stack = [];
 
         foreach ($quotes as $match) {
-            $isSingle = $match->type === QuoteType::Single;
-            $stack = $isSingle ? $singleStack : $doubleStack;
-
             if ($match->canClose && count($stack) > 0) {
                 $match->role = QuoteRole::Close;
-                if ($isSingle) {
-                    array_pop($singleStack);
-                } else {
-                    array_pop($doubleStack);
-                }
+                array_pop($stack);
             } elseif ($match->canOpen) {
                 $match->role = QuoteRole::Open;
-                if ($isSingle) {
-                    $singleStack[] = $match;
-                } else {
-                    $doubleStack[] = $match;
-                }
+                $stack[] = $match;
             }
         }
 
         // Unassign roles from unpaired opening quotes
-        foreach ($singleStack as $unpaired) {
-            $unpaired->role = null;
-        }
-        foreach ($doubleStack as $unpaired) {
+        foreach ($stack as $unpaired) {
             $unpaired->role = null;
         }
     }
 
     /**
-     * Build output string with <q> tags around matched quote pairs.
+     * Build output segments from text and quote matches.
      *
      * @param QuoteMatch[] $quotes
+     * @return Segment[]
      */
-    private function buildOutput(string $text, array $quotes): string
+    private function buildSegments(string $text, array $quotes): array
     {
         // Index quotes by position for fast lookup
         $quotesByPosition = [];
@@ -161,7 +147,8 @@ final class QuoteWrapper
             $quotesByPosition[$match->position] = $match;
         }
 
-        $result = '';
+        $segments = [];
+        $currentText = '';
         $len = strlen($text);
 
         for ($i = 0; $i < $len; $i++) {
@@ -169,20 +156,33 @@ final class QuoteWrapper
                 $match = $quotesByPosition[$i];
 
                 if ($match->role === QuoteRole::Open) {
-                    // Skip the quote char, emit <q>
-                    $result .= '<q>';
+                    // Flush accumulated text
+                    if ($currentText !== '') {
+                        $segments[] = new Segment(SegmentType::Text, $currentText);
+                        $currentText = '';
+                    }
+                    $segments[] = new Segment(SegmentType::QuoteOpen);
                 } elseif ($match->role === QuoteRole::Close) {
-                    // Emit </q>, skip the quote char
-                    $result .= '</q>';
+                    // Flush accumulated text
+                    if ($currentText !== '') {
+                        $segments[] = new Segment(SegmentType::Text, $currentText);
+                        $currentText = '';
+                    }
+                    $segments[] = new Segment(SegmentType::QuoteClose);
                 } else {
-                    // Unmatched quote, emit as-is
-                    $result .= $text[$i];
+                    // Unmatched quote, keep as text
+                    $currentText .= $text[$i];
                 }
             } else {
-                $result .= $text[$i];
+                $currentText .= $text[$i];
             }
         }
 
-        return $result;
+        // Flush remaining text
+        if ($currentText !== '') {
+            $segments[] = new Segment(SegmentType::Text, $currentText);
+        }
+
+        return $segments;
     }
 }

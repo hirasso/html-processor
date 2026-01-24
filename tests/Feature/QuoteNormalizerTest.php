@@ -31,7 +31,7 @@ test('Apostrophes preserved', function () {
 });
 
 test('Unmatched quotes stay as-is', function () {
-    runNormalizeTest('<p>"unclosed</p>', '<p>"unclosed</p>');
+    runNormalizeTest('<p>„unclosed</p>', '<p>„unclosed</p>');
     runNormalizeTest('<p>unopened"</p>', '<p>unopened"</p>');
 });
 
