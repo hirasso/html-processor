@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Benchmark;
+namespace Tests\Benchmark\Quotes;
 
 use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuotePair;
 use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteReplacer;
@@ -25,10 +25,10 @@ class QuoteLocalizerBench
             double: new QuotePair("\u{201E}", "\u{201C}"),
         );
 
-        $this->simple = 'This is "a simple test" with \'some quotes\' in it.';
-        $this->nested = '"outer "inner \'deep\' inner" outer" and more "quotes" here.';
-        $this->dense = str_repeat('"quoted" ', 100);
-        $this->long = str_repeat('Some text with "quotes" and \'apostrophes\' mixed in. ', 50);
+        $this->simple = BenchmarkFixtures::SIMPLE;
+        $this->nested = BenchmarkFixtures::NESTED;
+        $this->dense = BenchmarkFixtures::dense();
+        $this->long = BenchmarkFixtures::long();
     }
 
     #[Bench\Revs(1000)]
