@@ -106,46 +106,32 @@ final class QuoteWrapper
      */
     private function buildSegments(string $text, array $quotes): array
     {
-        // Index quotes by position for fast lookup
-        $quotesByPosition = [];
-        foreach ($quotes as $match) {
-            $quotesByPosition[$match->position] = $match;
+        $activeQuotes = array_filter($quotes, static fn ($q) => $q->role !== null);
+
+        if ($activeQuotes === []) {
+            return $text === '' ? [] : [new Segment(SegmentType::Text, $text)];
         }
 
         $segments = [];
-        $currentText = '';
-        $len = strlen($text);
+        $cursor = 0;
 
-        for ($i = 0; $i < $len; $i++) {
-            if (isset($quotesByPosition[$i])) {
-                $match = $quotesByPosition[$i];
-
-                if ($match->role === QuoteRole::Open) {
-                    // Flush accumulated text
-                    if ($currentText !== '') {
-                        $segments[] = new Segment(SegmentType::Text, $currentText);
-                        $currentText = '';
-                    }
-                    $segments[] = new Segment(SegmentType::QuoteOpen);
-                } elseif ($match->role === QuoteRole::Close) {
-                    // Flush accumulated text
-                    if ($currentText !== '') {
-                        $segments[] = new Segment(SegmentType::Text, $currentText);
-                        $currentText = '';
-                    }
-                    $segments[] = new Segment(SegmentType::QuoteClose);
-                } else {
-                    // Unmatched quote, keep as text
-                    $currentText .= $text[$i];
-                }
-            } else {
-                $currentText .= $text[$i];
+        foreach ($activeQuotes as $match) {
+            // Text before this quote
+            if ($match->position > $cursor) {
+                $segments[] = new Segment(SegmentType::Text, substr($text, $cursor, $match->position - $cursor));
             }
+
+            // Quote marker
+            $segments[] = new Segment(
+                $match->role === QuoteRole::Open ? SegmentType::QuoteOpen : SegmentType::QuoteClose
+            );
+
+            $cursor = $match->position + $match->length;
         }
 
-        // Flush remaining text
-        if ($currentText !== '') {
-            $segments[] = new Segment(SegmentType::Text, $currentText);
+        // Remaining text
+        if ($cursor < strlen($text)) {
+            $segments[] = new Segment(SegmentType::Text, substr($text, $cursor));
         }
 
         return $segments;
