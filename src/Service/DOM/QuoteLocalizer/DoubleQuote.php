@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
 /**
  * UTF-8 quotation mark variants.

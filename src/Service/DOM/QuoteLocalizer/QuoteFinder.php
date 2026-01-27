@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
 /**
  * Finds quote characters in text and determines their open/close context.

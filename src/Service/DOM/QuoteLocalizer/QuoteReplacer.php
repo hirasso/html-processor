@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
 /**
  * Replaces standard ASCII quotes with localized typographic quotes.
@@ -133,5 +133,4 @@ final readonly class QuoteReplacer
             }
         }
     }
-
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
 use DOMText;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;

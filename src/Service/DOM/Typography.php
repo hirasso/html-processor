@@ -6,8 +6,8 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteLocalizer;
-use Hirasso\HTMLProcessor\Service\DOM\Quotes\QuoteNormalizer;
+use Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer\QuoteNormalizer;
 use Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
 use IvoPetkov\HTML5DOMDocument;
 
