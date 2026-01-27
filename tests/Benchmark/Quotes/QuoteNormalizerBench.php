@@ -21,10 +21,10 @@ class QuoteNormalizerBench
     {
         $this->normalizer = new QuoteNormalizer();
 
-        $this->simple = '<p>' . BenchmarkFixtures::SIMPLE . '</p>';
-        $this->nested = '<p>' . BenchmarkFixtures::NESTED . '</p>';
-        $this->dense = '<p>' . BenchmarkFixtures::dense() . '</p>';
-        $this->long = '<p>' . BenchmarkFixtures::long() . '</p>';
+        $this->simple = BenchmarkFixtures::SIMPLE;
+        $this->nested = BenchmarkFixtures::NESTED;
+        $this->dense = BenchmarkFixtures::dense();
+        $this->long = BenchmarkFixtures::long();
     }
 
     #[Bench\Revs(1000)]
