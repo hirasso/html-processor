@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- 4c3a120: Add new typography service `normalizeQuotes`
+
+  ```php
+  use function Hirasso\HTMLProcessor\process;
+  echo process($html)->typography('en', fn ($typo) => $typo->normalizeQuotes());
+  ```
+
 ## 0.6.3
 
 ### Patch Changes
