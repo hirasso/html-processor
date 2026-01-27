@@ -6,6 +6,6 @@ namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
 interface Segment
 {
-    /** @return 'text'|'open'|'close' */
+    /** @return 'text'|value-of<QuoteRole> */
     public function getType(): string;
 }
