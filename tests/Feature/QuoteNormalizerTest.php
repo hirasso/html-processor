@@ -4,12 +4,7 @@ use function Hirasso\HTMLProcessor\process;
 
 function runNormalizeTest(string $str, string $expected): void
 {
-    $result = process($str)
-        ->typography(
-            'en',
-            fn ($typo) => $typo->normalizeQuotes()
-        )->apply();
-
+    $result = process($str)->typography('en', fn ($typo) => $typo->normalizeQuotes())->apply();
     expect($result)->toBe($expected);
 }
 
