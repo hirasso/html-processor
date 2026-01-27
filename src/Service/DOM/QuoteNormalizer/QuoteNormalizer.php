@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
+use DOMNode;
 use DOMText;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
@@ -24,10 +25,10 @@ final class QuoteNormalizer implements DOMServiceContract
     private QuoteWrapper $wrapper;
 
     /** Current parent element during segment processing */
-    private \DOMNode $currentParent;
+    private DOMNode $currentParent;
 
     /** Original parent of the text node being replaced */
-    private \DOMNode $originalParent;
+    private DOMNode $originalParent;
 
     /** Original text node being replaced */
     private DOMText $textNode;
@@ -143,7 +144,7 @@ final class QuoteNormalizer implements DOMServiceContract
      * Before descending into nested <q> elements, inserts before the original text node.
      * Inside nested <q> elements, appends to the current parent.
      */
-    private function insertAtCurrentPosition(\DOMNode $node): void
+    private function insertAtCurrentPosition(DOMNode $node): void
     {
         $this->currentParent === $this->originalParent
             ? $this->currentParent->insertBefore($node, $this->textNode)
