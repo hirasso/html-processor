@@ -13,13 +13,6 @@ namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
  */
 final class QuoteParser
 {
-    private QuoteFinder $finder;
-
-    public function __construct()
-    {
-        $this->finder = new QuoteFinder();
-    }
-
     /**
      * Parse text into segments.
      *
@@ -30,13 +23,13 @@ final class QuoteParser
         // Phase 1: Reset existing curly quotes to standard ASCII "
         $text = $this->resetQuotes($text);
 
-        // Phase 2: Find all quotes
-        $quotes = $this->finder->find($text);
+        // Phase 2: Find candidates for quotes
+        $candidates = $this->findCandidates($text);
 
-        // Phase 3: Assign roles to found quotes
-        $this->assignRoles($quotes);
+        // Phase 2: Find all quotes and assign roles (only paired quotes returned)
+        $quotes = $this->findPairedQuotes($candidates);
 
-        // Phase 4: build and return segments
+        // Phase 3: Build and return segments
         return $this->buildSegments($text, $quotes);
     }
 
@@ -57,34 +50,36 @@ final class QuoteParser
     }
 
     /**
-     * Assign Open/Close roles using a stack.
-     * Unpaired opening quotes have their role cleared.
+     * Find paired quotes using a stack
      *
-     * @param QuoteMatch[] $quotes
+     * @param QuoteCandidate[] $candidates
+     * @return Quote[]
      */
-    private function assignRoles(array $quotes): void
+    private function findPairedQuotes(array $candidates): array
     {
-        /** @var QuoteMatch[] $stack */
+        /** @var QuoteCandidate[] $stack */
         $stack = [];
+        /** @var Quote[] $paired */
+        $paired = [];
 
-        foreach ($quotes as $match) {
-            if ($match->canClose && count($stack) > 0) {
-                $match->role = QuoteRole::Close;
-                array_pop($stack);
-            } elseif ($match->canOpen) {
-                $match->role = QuoteRole::Open;
-                $stack[] = $match;
+        foreach ($candidates as $candidate) {
+            if ($candidate->canClose && count($stack) > 0) {
+                $opener = array_pop($stack);
+                $paired[] = new Quote($opener->position, QuoteRole::Open);
+                $paired[] = new Quote($candidate->position, QuoteRole::Close);
+            } elseif ($candidate->canOpen) {
+                $stack[] = $candidate;
             }
         }
 
-        // Clear unpaired opening quotes
-        foreach ($stack as $unpaired) {
-            $unpaired->role = null;
-        }
+        // Sort by position since openers are added when paired
+        usort($paired, static fn ($a, $b) => $a->position <=> $b->position);
+
+        return $paired;
     }
 
     /**
-     * @param QuoteMatch[] $quotes
+     * @param Quote[] $quotes Paired quotes only (all have roles assigned)
      * @return Segment[]
      */
     private function buildSegments(string $text, array $quotes): array
@@ -93,21 +88,18 @@ final class QuoteParser
             return [];
         }
 
-        $activeQuotes = array_filter($quotes, static fn ($q) => !!$q->role);
-
-        if (empty($activeQuotes)) {
+        if (empty($quotes)) {
             return [new TextSegment($text)];
         }
 
         $segments = [];
         $cursor = 0;
 
-        foreach ($activeQuotes as $match) {
+        foreach ($quotes as $match) {
             if ($match->position > $cursor) {
                 $segments[] = new TextSegment(substr($text, $cursor, $match->position - $cursor));
             }
 
-            // @phpstan-ignore-next-line argument.type – $match->role is never null at this point
             $segments[] = new QuoteSegment($match->role);
 
             $cursor = $match->position + 1;
@@ -118,5 +110,53 @@ final class QuoteParser
         }
 
         return $segments;
+    }
+
+    /**
+     * Find all double quotes with their context.
+     *
+     * @return QuoteCandidate[]
+     */
+    private function findCandidates(string $text): array
+    {
+        if (!preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+            return [];
+        }
+        /** we are only interested in the match positions */
+        $positions = array_map(
+            static fn ($match) => (int) $match[1],
+            $matches[0]
+        );
+
+        return array_map(
+            fn ($position) => new QuoteCandidate(
+                position: $position,
+                canOpen: !$this->isPrecededByLetter($text, $position),
+                canClose: !$this->isFollowedByLetter($text, $position + 1),
+            ),
+            $positions
+        );
+    }
+
+    private function isPrecededByLetter(string $text, int $bytePos): bool
+    {
+        if ($bytePos <= 0) {
+            return false;
+        }
+
+        $charBefore = mb_substr(substr($text, 0, $bytePos), -1, 1);
+
+        return preg_match('/\p{L}/u', $charBefore) === 1;
+    }
+
+    private function isFollowedByLetter(string $text, int $bytePos): bool
+    {
+        if ($bytePos >= strlen($text)) {
+            return false;
+        }
+
+        $charAfter = mb_substr(substr($text, $bytePos), 0, 1);
+
+        return preg_match('/\p{L}/u', $charAfter) === 1;
     }
 }
