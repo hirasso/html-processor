@@ -62,14 +62,14 @@ final class QuoteNormalizer implements DOMServiceContract
     }
 
     /**
-     * Check if segments contain any quote open/close markers
+     * Check if segments contain any quote markers
      *
      * @param Segment[] $segments
      */
     private function hasQuoteSegments(array $segments): bool
     {
         foreach ($segments as $segment) {
-            if (in_array($segment->type, [SegmentType::QuoteOpen, SegmentType::QuoteClose], true)) {
+            if ($segment->getType() !== 'text') {
                 return true;
             }
         }
@@ -109,9 +109,8 @@ final class QuoteNormalizer implements DOMServiceContract
         $this->textNode = $textNode;
 
         foreach ($segments as $segment) {
-            switch ($segment->type) {
-                case SegmentType::QuoteOpen:
-                    /** Create <q>, push current parent to ancestors, descend into <q> */
+            switch ($segment->getType()) {
+                case 'open':
                     if ($qElement = $document->createElement('q')) {
                         $this->insertAtCurrentPosition($qElement);
                         $ancestors[] = $this->currentParent;
@@ -119,18 +118,15 @@ final class QuoteNormalizer implements DOMServiceContract
                     }
                     break;
 
-                case SegmentType::QuoteClose:
-                    /** Pop ancestors to return to parent level */
+                case 'close':
                     $this->currentParent = array_pop($ancestors) ?? $this->currentParent;
                     break;
 
-                case SegmentType::Text:
-                    /** Create text node at current position */
-                    if ($segment->content !== null) {
-                        $this->insertAtCurrentPosition($document->createTextNode(
-                            Support::encode($segment->content, usePlaceholders: true)
-                        ));
-                    }
+                case 'text':
+                    /** @var TextSegment $segment */
+                    $this->insertAtCurrentPosition(
+                        $document->createTextNode(Support::encode($segment->content, usePlaceholders: true))
+                    );
                     break;
             }
         }

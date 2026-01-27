@@ -21,44 +21,44 @@ final class QuoteFinder
      */
     public function find(string $text): array
     {
-        $quotes = [];
-
         if (!preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            return $quotes;
+            return [];
         }
+        /** we are only interested in the match positions */
+        $positions = array_map(
+            fn ($match) => (int) $match[1],
+            $matches[0]
+        );
 
-        foreach ($matches[0] as [, $pos]) {
-            $position = (int) $pos;
-
-            $quotes[] = new QuoteMatch(
+        return array_map(
+            fn ($position) => new QuoteMatch(
                 position: $position,
                 canOpen: !$this->isPrecededByLetter($text, $position),
                 canClose: !$this->isFollowedByLetter($text, $position + 1),
-            );
-        }
-
-        return $quotes;
+            ),
+            $positions
+        );
     }
 
-    private function isPrecededByLetter(string $text, int $position): bool
+    private function isPrecededByLetter(string $text, int $bytePos): bool
     {
-        if ($position <= 0) {
+        if ($bytePos <= 0) {
             return false;
         }
 
-        $before = mb_substr(substr($text, 0, $position), -1, 1);
+        $charBefore = mb_substr(substr($text, 0, $bytePos), -1, 1);
 
-        return preg_match('/\p{L}/u', $before) === 1;
+        return preg_match('/\p{L}/u', $charBefore) === 1;
     }
 
-    private function isFollowedByLetter(string $text, int $position): bool
+    private function isFollowedByLetter(string $text, int $bytePos): bool
     {
-        if ($position >= strlen($text)) {
+        if ($bytePos >= strlen($text)) {
             return false;
         }
 
-        $after = mb_substr(substr($text, $position), 0, 1);
+        $charAfter = mb_substr(substr($text, $bytePos), 0, 1);
 
-        return preg_match('/\p{L}/u', $after) === 1;
+        return preg_match('/\p{L}/u', $charAfter) === 1;
     }
 }

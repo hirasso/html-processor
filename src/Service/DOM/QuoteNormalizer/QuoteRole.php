@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
-enum QuoteRole
+enum QuoteRole: string
 {
-    case Open;
-    case Close;
+    case Open = "open";
+    case Close = "close";
 }

@@ -94,10 +94,14 @@ final class QuoteWrapper
      */
     private function buildSegments(string $text, array $quotes): array
     {
+        if (empty($text)) {
+            return [];
+        }
+
         $activeQuotes = array_filter($quotes, static fn ($q) => $q->role !== null);
 
-        if ($activeQuotes === []) {
-            return $text === '' ? [] : [new Segment(SegmentType::Text, $text)];
+        if (empty($activeQuotes)) {
+            return [new TextSegment($text)];
         }
 
         $segments = [];
@@ -105,18 +109,17 @@ final class QuoteWrapper
 
         foreach ($activeQuotes as $match) {
             if ($match->position > $cursor) {
-                $segments[] = new Segment(SegmentType::Text, substr($text, $cursor, $match->position - $cursor));
+                $segments[] = new TextSegment(substr($text, $cursor, $match->position - $cursor));
             }
 
-            $segments[] = new Segment(
-                $match->role === QuoteRole::Open ? SegmentType::QuoteOpen : SegmentType::QuoteClose
-            );
+            // @phpstan-ignore-next-line argument.type – $match->role is never null at this point
+            $segments[] = new QuoteSegment($match->role);
 
-            $cursor = $match->position + 1; // Quote is always 1 byte (ASCII ")
+            $cursor = $match->position + 1;
         }
 
         if ($cursor < strlen($text)) {
-            $segments[] = new Segment(SegmentType::Text, substr($text, $cursor));
+            $segments[] = new TextSegment(substr($text, $cursor));
         }
 
         return $segments;
