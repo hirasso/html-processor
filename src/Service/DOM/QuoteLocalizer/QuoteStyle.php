@@ -28,13 +28,13 @@ enum QuoteStyle: string
         return match ($this) {
             self::English => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{2018}", "\u{2019}"), // ‘ ’
-                double: new QuotePair("\u{201C}", "\u{201D}"), // “ ”
+                single: new QuotePair("\u{2018}", "\u{2019}"), // ' '
+                double: new QuotePair("\u{201C}", "\u{201D}"), // " "
             ),
             self::German => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{201A}", "\u{2018}"), // ‚ ‘
-                double: new QuotePair("\u{201E}", "\u{201C}"), // „ “
+                single: new QuotePair("\u{201A}", "\u{2018}"), // ‚ '
+                double: new QuotePair("\u{201E}", "\u{201C}"), // „ "
             ),
             self::French => new QuoteReplacer(
                 lang: $this->value,
@@ -43,7 +43,7 @@ enum QuoteStyle: string
             ),
             self::Spanish => new QuoteReplacer(
                 lang: $this->value,
-                single: new QuotePair("\u{201E}", "\u{201C}"), // „ “
+                single: new QuotePair("\u{201E}", "\u{201C}"), // „ "
                 double: new QuotePair("\u{00AB}", "\u{00BB}"), // « »
             ),
         };

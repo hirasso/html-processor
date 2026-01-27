@@ -48,7 +48,7 @@ final class HTMLQueue implements HTMLQueueContract
                 fn ($service) => ($filter)($service)
             );
         }
-        foreach($services as $service) {
+        foreach ($services as $service) {
             $html = $service->run($html);
         }
         return $html;

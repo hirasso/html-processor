@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
-use Hirasso\HTMLProcessor\Service\Contract\Utf8QuoteContract;
-
 /**
  * UTF-8 quotation mark variants.
  *
  * Intended for normalization and sanitization tasks.
  */
-enum SingleQuote: string implements Utf8QuoteContract
+enum SingleQuote: string implements QuoteContract
 {
+    case ASCII       = "'";
+
     // Curly single quotes
     case LEFT        = "\u{2018}"; // '
     case RIGHT       = "\u{2019}"; // '

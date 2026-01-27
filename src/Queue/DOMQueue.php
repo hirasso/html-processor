@@ -50,15 +50,7 @@ final class DOMQueue implements DOMQueueContract
         // Remove duplicate IDs before loading
         $html = $this->removeDuplicateIds($html);
 
-        $document = new HTML5DOMDocument();
-        $document->loadHTML(
-            htmlspecialchars_decode(Support::encode($html)),
-            /**
-             * @TODO reactivate this if it is fixed upstream
-             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
-             */
-            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
-        );
+        $document = Support::createDocument($html);
 
         $this->runServices($document);
 

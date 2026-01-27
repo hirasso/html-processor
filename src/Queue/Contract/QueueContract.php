@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue\Contract;
 
-use Closure;
-
 interface QueueContract
 {
     public function isEmpty(): bool;

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\Contract;
+namespace Hirasso\HTMLProcessor\Service\DOM\QuoteLocalizer;
 
 /**
- * UTF-8 quotation mark variants.
+ * Quotation mark variants.
  *
  * Intended for normalization and sanitization tasks.
  */
-interface Utf8QuoteContract
+interface QuoteContract
 {
     /**
-     * All UTF-8 quote variants.
+     * All quote variants.
      *
      * @return list<string>
      */
