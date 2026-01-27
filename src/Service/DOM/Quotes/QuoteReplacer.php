@@ -17,11 +17,14 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
  */
 final readonly class QuoteReplacer
 {
+    private QuoteFinder $finder;
+
     public function __construct(
         public string $lang,
         public QuotePair $single,
         public QuotePair $double
     ) {
+        $this->finder = new QuoteFinder();
     }
 
     /**
@@ -71,7 +74,7 @@ final readonly class QuoteReplacer
     private function localizeWithStack(string $text): string
     {
         // Step 1: Find all quote positions with context (can open? can close?)
-        $quotes = $this->findQuotes($text);
+        $quotes = $this->finder->find($text);
 
         // Step 2: Walk through quotes and assign Open/Close roles using a stack
         $this->assignRoles($quotes);
@@ -131,55 +134,4 @@ final readonly class QuoteReplacer
         }
     }
 
-    /**
-     * Find all ASCII quotes in text with their context.
-     *
-     * Context determines if a quote can be opening or closing:
-     * - canOpen: NOT preceded by a letter (e.g., space/start before quote)
-     * - canClose: NOT followed by a letter (e.g., space/punctuation/end after)
-     *
-     * Examples:
-     * - "Hello"  → both quotes can open AND close (space context)
-     * - don't    → apostrophe can't open (d before) AND can't close (t after) → ignored
-     * - Edit's   → apostrophe can't open (t before) AND can't close (s after) → ignored
-     *
-     * @return QuoteMatch[]
-     */
-    private function findQuotes(string $text): array
-    {
-        $quotes = [];
-
-        if (preg_match_all('/[\'"]/', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            foreach ($matches[0] as [$char, $pos]) {
-                $position = (int) $pos;
-                $type = $char === "'" ? QuoteType::Single : QuoteType::Double;
-                $length = 1; // ASCII quotes are always 1 byte
-
-                // Check preceding character (Unicode-aware via \p{L})
-                $precededByLetter = false;
-                if ($position > 0) {
-                    $before = mb_substr(substr($text, 0, $position), -1, 1);
-                    $precededByLetter = preg_match('/\p{L}/u', $before) === 1;
-                }
-
-                // Check following character
-                $followedByLetter = false;
-                $afterPos = $position + $length;
-                if ($afterPos < strlen($text)) {
-                    $after = mb_substr(substr($text, $afterPos), 0, 1);
-                    $followedByLetter = preg_match('/\p{L}/u', $after) === 1;
-                }
-
-                $quotes[] = new QuoteMatch(
-                    position: $position,
-                    length: $length,
-                    type: $type,
-                    canOpen: !$precededByLetter,
-                    canClose: !$followedByLetter,
-                );
-            }
-        }
-
-        return $quotes;
-    }
 }

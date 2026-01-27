@@ -13,6 +13,12 @@ namespace Hirasso\HTMLProcessor\Service\DOM\Quotes;
  */
 final class QuoteWrapper
 {
+    private QuoteFinder $finder;
+
+    public function __construct()
+    {
+        $this->finder = new QuoteFinder();
+    }
     /**
      * Wrap quoted text and return structured segments
      *
@@ -56,54 +62,13 @@ final class QuoteWrapper
     private function wrapWithStack(string $text): array
     {
         // Step 1: Find all quote positions with context
-        $quotes = $this->findQuotes($text);
+        $quotes = $this->finder->find($text, '/"/');
 
         // Step 2: Assign Open/Close roles using a stack
         $this->assignRoles($quotes);
 
         // Step 3: Build output segments
         return $this->buildSegments($text, $quotes);
-    }
-
-    /**
-     * Find all quotes in text with their context.
-     * All quotes have been normalized to " by resetQuotes().
-     *
-     * @return QuoteMatch[]
-     */
-    private function findQuotes(string $text): array
-    {
-        $quotes = [];
-
-        if (preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            foreach ($matches[0] as [, $pos]) {
-                $position = (int) $pos;
-
-                // Check preceding character
-                $precededByLetter = false;
-                if ($position > 0) {
-                    $before = mb_substr(substr($text, 0, $position), -1, 1);
-                    $precededByLetter = preg_match('/\p{L}/u', $before) === 1;
-                }
-
-                // Check following character
-                $followedByLetter = false;
-                if ($position + 1 < strlen($text)) {
-                    $after = mb_substr(substr($text, $position + 1), 0, 1);
-                    $followedByLetter = preg_match('/\p{L}/u', $after) === 1;
-                }
-
-                $quotes[] = new QuoteMatch(
-                    position: $position,
-                    length: 1,
-                    type: QuoteType::Double,
-                    canOpen: !$precededByLetter,
-                    canClose: !$followedByLetter,
-                );
-            }
-        }
-
-        return $quotes;
     }
 
     /**
