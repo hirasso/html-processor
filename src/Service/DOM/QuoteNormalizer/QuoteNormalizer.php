@@ -125,7 +125,7 @@ final class QuoteNormalizer implements DOMServiceContract
                 case 'text':
                     /** @var TextSegment $segment */
                     $this->insertAtCurrentPosition(
-                        $document->createTextNode(Support::encode($segment->content, usePlaceholders: true))
+                        $document->createTextNode(Support::encode($segment->text, usePlaceholders: true))
                     );
                     break;
             }

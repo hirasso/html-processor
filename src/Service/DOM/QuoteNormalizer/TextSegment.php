@@ -6,7 +6,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
 readonly class TextSegment implements Segment
 {
-    public function __construct(public string $content)
+    public function __construct(public string $text)
     {
     }
 
