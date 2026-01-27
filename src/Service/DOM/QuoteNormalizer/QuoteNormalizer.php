@@ -18,11 +18,11 @@ use IvoPetkov\HTML5DOMElement;
  * this service wraps quoted content with semantic <q> elements that can be
  * styled via CSS.
  *
- * @see QuoteWrapper for the wrapping algorithm
+ * @see QuoteParser for the parsing algorithm
  */
 final class QuoteNormalizer implements DOMServiceContract
 {
-    private QuoteWrapper $wrapper;
+    private QuoteParser $parser;
 
     /** Current parent element during segment processing */
     private DOMNode $currentParent;
@@ -35,7 +35,7 @@ final class QuoteNormalizer implements DOMServiceContract
 
     public function __construct()
     {
-        $this->wrapper = new QuoteWrapper();
+        $this->parser = new QuoteParser();
     }
 
     public function prio(): int
@@ -52,7 +52,7 @@ final class QuoteNormalizer implements DOMServiceContract
             $nodeValue = $textNode->nodeValue ?? '';
 
             $text = Support::decode($nodeValue);
-            $segments = $this->wrapper->wrapQuotes($text);
+            $segments = $this->parser->parse($text);
 
             // Check if we have any quote segments
             if ($this->hasQuoteSegments($segments)) {

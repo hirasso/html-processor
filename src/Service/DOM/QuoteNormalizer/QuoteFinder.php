@@ -26,7 +26,7 @@ final class QuoteFinder
         }
         /** we are only interested in the match positions */
         $positions = array_map(
-            fn ($match) => (int) $match[1],
+            static fn ($match) => (int) $match[1],
             $matches[0]
         );
 

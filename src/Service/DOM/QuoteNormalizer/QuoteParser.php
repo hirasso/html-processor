@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service\DOM\QuoteNormalizer;
 
 /**
- * Wraps quoted text in <q> HTML tags instead of replacing with typographic characters.
+ * Parses text into segments for quote wrapping.
  *
  * Uses stack-based matching for proper nesting:
  * Input:  "outer "inner" outer"
  * Output: [QuoteOpen, Text("outer "), QuoteOpen, Text("inner"), QuoteClose, Text(" outer"), QuoteClose]
  */
-final class QuoteWrapper
+final class QuoteParser
 {
     private QuoteFinder $finder;
 
@@ -21,17 +21,23 @@ final class QuoteWrapper
     }
 
     /**
-     * Wrap quoted text and return structured segments.
+     * Parse text into segments.
      *
      * @return Segment[]
      */
-    public function wrapQuotes(string $text): array
+    public function parse(string $text): array
     {
         // Phase 1: Reset existing curly quotes to standard ASCII "
         $text = $this->resetQuotes($text);
 
-        // Phase 2: Apply stack-based wrapping
-        return $this->wrapWithStack($text);
+        // Phase 2: Find all quotes
+        $quotes = $this->finder->find($text);
+
+        // Phase 3: Assign roles to found quotes
+        $this->assignRoles($quotes);
+
+        // Phase 4: build and return segments
+        return $this->buildSegments($text, $quotes);
     }
 
     /**
@@ -48,17 +54,6 @@ final class QuoteWrapper
         $pattern = "/(?:{$matchBefore}{$class}|{$class}{$matchAfter})/u";
 
         return preg_replace($pattern, '"', $text) ?? $text;
-    }
-
-    /**
-     * @return Segment[]
-     */
-    private function wrapWithStack(string $text): array
-    {
-        $quotes = $this->finder->find($text);
-        $this->assignRoles($quotes);
-
-        return $this->buildSegments($text, $quotes);
     }
 
     /**
@@ -98,7 +93,7 @@ final class QuoteWrapper
             return [];
         }
 
-        $activeQuotes = array_filter($quotes, static fn ($q) => $q->role !== null);
+        $activeQuotes = array_filter($quotes, static fn ($q) => !!$q->role);
 
         if (empty($activeQuotes)) {
             return [new TextSegment($text)];
