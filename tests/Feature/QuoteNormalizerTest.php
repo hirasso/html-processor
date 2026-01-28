@@ -68,12 +68,12 @@ test('Deeply nested quotes', function () {
     );
 });
 
-// test('Inch notation', function () {
-//     expect(normalize('<p>"some 12" long"</p>'))->toBe(
-//         '<p><q>some 12" long</q></p>'
-//     );
-// });
+test('Inch notation', function () {
+    expect(normalize('<p>"some 12" long"</p>'))->toBe(
+        '<p><q>some 12" long</q></p>'
+    );
+});
 
-// test('Preserves unmatched quotes', function () {
-//     expect(normalize('"some interesting quote" ‘'))->toBe('<q>quote</q> ‘');
-// })->only();
+test('Preserves unmatched quotes', function () {
+    expect(normalize('"quote" ‘'))->toBe('<q>quote</q> ‘');
+});
