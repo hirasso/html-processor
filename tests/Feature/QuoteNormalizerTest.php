@@ -32,7 +32,7 @@ test('Normalizes curly quotes before wrapping', function () {
     // Curly quotes should be treated like regular quotes
     expect(normalize("<p>\u{201C}hello\u{201D}</p>"))->toBe('<p><q>hello</q></p>');
     expect(normalize("<p>\u{2018}hello\u{2019}</p>"))->toBe('<p><q>hello</q></p>');
-})->only();
+});
 
 test('Mixed quote types nested', function () {
     expect(normalize('<p>"she said \'hello\' to him"</p>'))->toBe(

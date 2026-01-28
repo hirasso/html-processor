@@ -46,8 +46,8 @@ final class QuoteParser
         foreach ($candidates as $candidate) {
             if ($candidate->canClose && count($stack) > 0) {
                 $opener = array_pop($stack);
-                $paired[] = new Quote($opener->position, QuoteRole::Open);
-                $paired[] = new Quote($candidate->position, QuoteRole::Close);
+                $paired[] = new Quote(QuoteRole::Open, $opener->position, $opener->char);
+                $paired[] = new Quote(QuoteRole::Close, $candidate->position, $candidate->char);
             } elseif ($candidate->canOpen) {
                 $stack[] = $candidate;
             }
@@ -83,7 +83,8 @@ final class QuoteParser
 
             $segments[] = new QuoteSegment($match->role);
 
-            $cursor = $match->position + 1;
+            // Advance cursor by the quote's byte length (UTF-8 curly quotes are 3 bytes)
+            $cursor = $match->position + strlen($match->char);
         }
 
         if ($cursor < strlen($text)) {
@@ -99,6 +100,16 @@ final class QuoteParser
      * @return QuoteCandidate[]
      */
     private function findCandidates(string $text): array
+    {
+        return [
+            ...$this->matchesToCandidates($text, QuoteRole::Open),
+            ...$this->matchesToCandidates($text, QuoteRole::Close),
+            ...$this->matchesToCandidates($text),
+        ];
+    }
+
+    /** @return QuoteCandidate[] */
+    private function matchesToCandidates(string $string, ?QuoteRole $role = null): array
     {
         /**
          * Convert the CurlyQuotes to a character class
@@ -131,55 +142,30 @@ final class QuoteParser
         $anyLetterBefore = '(?<=\p{L})';
         $anyLetterAfter = '(?=\p{L})';
 
-        $candidates = [];
+        $pattern = match($role) {
+            QuoteRole::Open => "/{$startOrWhitespace}{$quotePattern}{$anyLetterAfter}/u",
+            QuoteRole::Close => "/{$anyLetterBefore}{$quotePattern}{$endOrWhitespace}/u",
+            /**
+             * If no quote role was provided it could be opening as well as closing
+             * @TODO: Maybe we don't ever need this
+             */
+            default => "/{$startOrWhitespace}{$quotePattern}{$endOrWhitespace}/u"
+        };
 
-        $canOpen = $this->matchAll("/{$startOrWhitespace}{$quotePattern}{$anyLetterAfter}/u", $text);
-        $canClose = $this->matchAll("/{$anyLetterBefore}{$quotePattern}{$endOrWhitespace}/u", $text);
-        $canOpenAndClose = $this->matchAll("/{$startOrWhitespace}{$quotePattern}{$endOrWhitespace}/", $text);
-
-        foreach( $canOpen as $match) {
-            $candidates[] = new QuoteCandidate(
-                position: $match->position,
-                canOpen: true,
-                canClose: false,
-            );
-        }
-
-        foreach( $canClose as $match) {
-            $candidates[] = new QuoteCandidate(
-                position: $match->position,
-                canOpen: false,
-                canClose: true,
-            );
-        }
-
-        foreach( $canOpenAndClose as $match) {
-            $candidates[] = new QuoteCandidate(
-                position: $match->position,
-                canOpen: true,
-                canClose: true,
-            );
-        }
-
-        return $candidates;
-    }
-
-    /** @return object{matched: string, position: int}[] */
-    private function matchAll(string $pattern, string $text): array
-    {
-        dump(compact('pattern', 'text'));
-
-        preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
 
         if (empty($matches[0])) {
             return [];
         }
 
-        $matches = array_map(
-            fn ($match) => (object) ['matched' => $match[0], 'position' => (int) $match[1]],
+        return array_map(
+            fn ($match) => new QuoteCandidate(
+                char: $match[0],
+                position: (int) $match[1],
+                canOpen: $role === QuoteRole::Open,
+                canClose: $role === QuoteRole::Close
+            ),
             $matches[0]
         );
-
-        return $matches;
     }
 }
