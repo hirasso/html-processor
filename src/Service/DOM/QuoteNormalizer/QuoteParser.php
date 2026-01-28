@@ -117,24 +117,20 @@ final class QuoteParser
         $quotePattern = '[' . preg_quote(implode('', CurlyQuotes::all()), '/') . ']';
 
         /**
-         * (?<!\S)
+         * (?<![\p{L}\p{N}])
          *  - Negative lookbehind
-         *  - Asserts that the previous character is NOT a non-whitespace character
-         *  - This is equivalent to:
-         *      • start of string (^)
-         *      • OR preceded by whitespace (\s)
+         *  - Asserts that the previous character is NOT a letter or number
+         *  - Allows punctuation like ( ) [ ] etc. before quotes
          */
-        $startOrWhitespace = '(?<!\S)';
+        $notAfterAlphanumeric = '(?<![\p{L}\p{N}])';
 
         /**
-         * (?!\S)
+         * (?![\p{L}\p{N}])
          *  - Negative lookahead
-         *  - Asserts that the next character is NOT a non-whitespace character
-         *  - This is equivalent to:
-         *      • end of string ($)
-         *      • OR followed by whitespace (\s)
+         *  - Asserts that the next character is NOT a letter or number
+         *  - Allows punctuation like ( ) [ ] etc. after quotes
          */
-        $endOrWhitespace = '(?!\S)';
+        $notBeforeAlphanumeric = '(?![\p{L}\p{N}])';
 
         /**
          * Lookahead and behind for any letter
@@ -143,13 +139,13 @@ final class QuoteParser
         $anyLetterAfter = '(?=\p{L})';
 
         $pattern = match($role) {
-            QuoteRole::Open => "/{$startOrWhitespace}{$quotePattern}{$anyLetterAfter}/u",
-            QuoteRole::Close => "/{$anyLetterBefore}{$quotePattern}{$endOrWhitespace}/u",
+            QuoteRole::Open => "/{$notAfterAlphanumeric}{$quotePattern}{$anyLetterAfter}/u",
+            QuoteRole::Close => "/{$anyLetterBefore}{$quotePattern}{$notBeforeAlphanumeric}/u",
             /**
              * If no quote role was provided it could be opening as well as closing
              * @TODO: Maybe we don't ever need this
              */
-            default => "/{$startOrWhitespace}{$quotePattern}{$endOrWhitespace}/u"
+            default => "/{$notAfterAlphanumeric}{$quotePattern}{$notBeforeAlphanumeric}/u"
         };
 
         preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);

@@ -77,3 +77,7 @@ test('Inch notation', function () {
 test('Preserves unmatched quotes', function () {
     expect(normalize('"quote" ‘'))->toBe('<q>quote</q> ‘');
 });
+
+test('Works inside parenthesis', function () {
+    expect(normalize('("quote")'))->toBe('(<q>quote</q>)');
+});
