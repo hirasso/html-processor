@@ -20,10 +20,7 @@ final class QuoteParser
      */
     public function parse(string $text): array
     {
-        // Phase 1: Reset existing curly quotes to standard ASCII "
-        $text = $this->resetQuotes($text);
-
-        // Phase 2: Find candidates for quotes
+        // Phase 1: Find candidates for quotes
         $candidates = $this->findCandidates($text);
 
         // Phase 2: Find all quotes and assign roles (only paired quotes returned)
@@ -31,22 +28,6 @@ final class QuoteParser
 
         // Phase 3: Build and return segments
         return $this->buildSegments($text, $quotes);
-    }
-
-    /**
-     * Reset curly quotes back to ASCII ", but only if they look like quotes
-     * (not preceded by letter OR not followed by letter).
-     * This preserves apostrophes like "don't" which are surrounded by letters.
-     */
-    private function resetQuotes(string $text): string
-    {
-        $matchBefore = '(?<!\p{L})';
-        $matchAfter = '(?!\p{L})';
-
-        $class = '[' . preg_quote(implode('', CurlyQuotes::all()), '/') . ']';
-        $pattern = "/(?:{$matchBefore}{$class}|{$class}{$matchAfter})/u";
-
-        return preg_replace($pattern, '"', $text) ?? $text;
     }
 
     /**
@@ -113,50 +94,92 @@ final class QuoteParser
     }
 
     /**
-     * Find all double quotes with their context.
+     * Find all quote candidates
      *
      * @return QuoteCandidate[]
      */
     private function findCandidates(string $text): array
     {
-        if (!preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+        /**
+         * Convert the CurlyQuotes to a character class
+         */
+        $quotePattern = '[' . preg_quote(implode('', CurlyQuotes::all()), '/') . ']';
+
+        /**
+         * (?<!\S)
+         *  - Negative lookbehind
+         *  - Asserts that the previous character is NOT a non-whitespace character
+         *  - This is equivalent to:
+         *      • start of string (^)
+         *      • OR preceded by whitespace (\s)
+         */
+        $startOrWhitespace = '(?<!\S)';
+
+        /**
+         * (?!\S)
+         *  - Negative lookahead
+         *  - Asserts that the next character is NOT a non-whitespace character
+         *  - This is equivalent to:
+         *      • end of string ($)
+         *      • OR followed by whitespace (\s)
+         */
+        $endOrWhitespace = '(?!\S)';
+
+        /**
+         * Lookahead and behind for any letter
+         */
+        $anyLetterBefore = '(?<=\p{L})';
+        $anyLetterAfter = '(?=\p{L})';
+
+        $candidates = [];
+
+        $canOpen = $this->matchAll("/{$startOrWhitespace}{$quotePattern}{$anyLetterAfter}/u", $text);
+        $canClose = $this->matchAll("/{$anyLetterBefore}{$quotePattern}{$endOrWhitespace}/u", $text);
+        $canOpenAndClose = $this->matchAll("/{$startOrWhitespace}{$quotePattern}{$endOrWhitespace}/", $text);
+
+        foreach( $canOpen as $match) {
+            $candidates[] = new QuoteCandidate(
+                position: $match->position,
+                canOpen: true,
+                canClose: false,
+            );
+        }
+
+        foreach( $canClose as $match) {
+            $candidates[] = new QuoteCandidate(
+                position: $match->position,
+                canOpen: false,
+                canClose: true,
+            );
+        }
+
+        foreach( $canOpenAndClose as $match) {
+            $candidates[] = new QuoteCandidate(
+                position: $match->position,
+                canOpen: true,
+                canClose: true,
+            );
+        }
+
+        return $candidates;
+    }
+
+    /** @return object{matched: string, position: int}[] */
+    private function matchAll(string $pattern, string $text): array
+    {
+        dump(compact('pattern', 'text'));
+
+        preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE);
+
+        if (empty($matches[0])) {
             return [];
         }
-        /** we are only interested in the match positions */
-        $positions = array_map(
-            static fn ($match) => (int) $match[1],
+
+        $matches = array_map(
+            fn ($match) => (object) ['matched' => $match[0], 'position' => (int) $match[1]],
             $matches[0]
         );
 
-        return array_map(
-            fn ($position) => new QuoteCandidate(
-                position: $position,
-                canOpen: !$this->isPrecededByLetter($text, $position),
-                canClose: !$this->isFollowedByLetter($text, $position + 1),
-            ),
-            $positions
-        );
-    }
-
-    private function isPrecededByLetter(string $text, int $bytePos): bool
-    {
-        if ($bytePos <= 0) {
-            return false;
-        }
-
-        $charBefore = mb_substr(substr($text, 0, $bytePos), -1, 1);
-
-        return preg_match('/\p{L}/u', $charBefore) === 1;
-    }
-
-    private function isFollowedByLetter(string $text, int $bytePos): bool
-    {
-        if ($bytePos >= strlen($text)) {
-            return false;
-        }
-
-        $charAfter = mb_substr(substr($text, $bytePos), 0, 1);
-
-        return preg_match('/\p{L}/u', $charAfter) === 1;
+        return $matches;
     }
 }
