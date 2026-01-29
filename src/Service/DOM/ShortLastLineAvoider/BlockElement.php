@@ -36,7 +36,6 @@ enum BlockElement: string
     case Nav = 'nav';
     case Ol = 'ol';
     case P = 'p';
-    case Pre = 'pre';
     case Section = 'section';
     case Td = 'td';
     case Th = 'th';
@@ -45,7 +44,7 @@ enum BlockElement: string
     /**
      * Build an XPath query for all block elements
      */
-    public static function xPathQuery(string $prefix = '//'): string
+    public static function xPathSelector(string $prefix = '//'): string
     {
         return implode(' | ', array_map(
             fn (self $el) => "{$prefix}{$el->value}",

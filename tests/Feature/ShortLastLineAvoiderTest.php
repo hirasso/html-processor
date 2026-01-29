@@ -8,7 +8,15 @@ function transform(string $str): string
 }
 
 test('Avoids short last lines', function () {
-    expect(transform("<p>I don't want to be a widow</p>"))->toBe('<p>I don\'t want to be a&nbsp;widow</p>');
+    expect(transform("<p>The quick brown fox jumps over the lazy dog</p>"))->toBe('<p>The quick brown fox jumps over the lazy&nbsp;dog</p>');
+});
+
+test('Ignores tags', function () {
+    $html = trimLines("
+    <style>The quick brown fox jumps over the lazy dog</style>
+    <script>The quick brown fox jumps over the lazy dog</script>
+    <pre>The quick brown fox jumps over the lazy dog</pre>");
+    expect(transform($html))->toBe($html);
 });
 
 test('Ignores short strings', function () {

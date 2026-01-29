@@ -64,6 +64,6 @@ function trimLines(string $text): string
 {
     return implode("\n", array_map(
         'trim',
-        preg_split("/\R/", $text) ?: []
+        preg_split("/\R/", trim($text)) ?: []
     ));
 }

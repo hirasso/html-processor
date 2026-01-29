@@ -10,6 +10,7 @@ use DOMXPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use IvoPetkov\HTML5DOMDocument;
+use IvoPetkov\HTML5DOMElement;
 
 final readonly class ShortLastLineAvoider implements DOMServiceContract
 {
@@ -31,7 +32,7 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
     public function run(HTML5DOMDocument $document): void
     {
         $xPath = new DOMXPath($document);
-        $blockElements = $xPath->query(BlockElement::xPathQuery());
+        $blockElements = $xPath->query(BlockElement::xPathSelector());
 
         if ($blockElements === false) {
             return;
@@ -50,7 +51,6 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
                 continue;
             };
 
-
             $lastTextNode->textContent = $this->injectNonbreakingSpace($lastTextNode->textContent);
 
         }
@@ -61,7 +61,8 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
      */
     private function containsBlockElements(DOMNode $element, DOMXPath $xPath): bool
     {
-        $childBlocks = $xPath->query(BlockElement::xPathQuery('.//'), $element);
+        $selector = BlockElement::xPathSelector('.//');
+        $childBlocks = $xPath->query($selector, $element);
 
         return $childBlocks !== false && $childBlocks->length > 0;
     }
@@ -78,7 +79,7 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
         $children = array_reverse(iterator_to_array($node->childNodes));
 
         foreach ($children as $child) {
-            if ($child instanceof DOMText && !empty(trim($child->textContent))) {
+            if ($this->isValidCandidate($child)) {
                 return $child;
             }
 
@@ -91,6 +92,33 @@ final readonly class ShortLastLineAvoider implements DOMServiceContract
         }
 
         return null;
+    }
+
+    /** @phpstan-assert-if-true DOMText $el */
+    private function isValidCandidate(DOMNode $el): bool
+    {
+        if (!($el instanceof DOMText)) {
+            return false;
+        }
+        if (empty(trim($el->textContent))) {
+            return false;
+        }
+        return !$this->isInExcludedElement($el);
+    }
+
+    /** @param ?array<array-key, string> $excluded */
+    private function isInExcludedElement(DOMText $text, ?array $excluded = null): bool
+    {
+        $excluded ??= ['head', 'link', 'pre', 'code', 'script', 'style'];
+        for ($node = $text->parentNode; $node !== null; $node = $node->parentNode) {
+            if ($node instanceof HTML5DOMElement) {
+                if (in_array(strtolower($node->tagName), $excluded, true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
