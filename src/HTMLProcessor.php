@@ -15,6 +15,7 @@ use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
 use Hirasso\HTMLProcessor\Service\DOM\Typography;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
+use Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
 use Hirasso\HTMLProcessor\Support\Support;
 
 /**
@@ -122,21 +123,31 @@ final class HTMLProcessor
      * @param string $locale – e.g. 'en_EN', 'de_DE' or even 'de_DE_formal' Only the first bit will be used
      * @param null|Closure(Typography): mixed $callback – customize via callback
      */
-    public function typography(
-        string $locale,
-        ?Closure $callback = null,
-    ): self {
-        return $this->mutate(function () use ($locale, $callback) {
-            $instance = Typography::fromLocale($locale);
-            $this->domQueue->add($instance);
+    // public function typography(
+    //     string $locale,
+    //     ?Closure $callback = null,
+    // ): self {
+    //     return $this->mutate(function () use ($locale, $callback) {
+    //         $instance = Typography::fromLocale($locale);
+    //         $this->domQueue->add($instance);
 
-            /** Apply the callback */
-            if ($callback instanceof Closure) {
-                ($callback)($instance);
-                return $this;
-            }
+    //         /** Apply the callback */
+    //         if ($callback instanceof Closure) {
+    //             ($callback)($instance);
+    //             return $this;
+    //         }
 
-            $this->domQueue->add($instance);
+    //         $this->domQueue->add($instance);
+    //     });
+    // }
+
+    /**
+     * Avoid short last lines in text by injecting non-breaking spaces
+     */
+    public function avoidShortLastLines(): self
+    {
+        return $this->mutate(function() {
+            $this->domQueue->add(new ShortLastLineAvoider());
         });
     }
 

@@ -26,6 +26,7 @@
     "php": ">=8.2",
     "asika/autolink": "^2.2",
     "ivopetkov/html5-dom-document-php": "^2.10",
+    "jolicode/jolitypo": "^1.6",
     "league/uri": "^7.7"
   },
   "require-dev": {

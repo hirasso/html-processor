@@ -2,16 +2,17 @@
 
 use function Hirasso\HTMLProcessor\process;
 
-test('Prevents widows', function () {
-    $result = process("<p>I don't want to be a widow</p>")
-        ->typography('en_US')
-        ->apply();
-    expect($result)->toBe('<p>I don\'t want to be a&nbsp;widow</p>');
+function transform(string $str): string
+{
+    return (string) process($str)->avoidShortLastLines();
+}
+
+test('Avoids short last lines', function () {
+    expect(transform("<p>I don't want to be a widow</p>"))->toBe('<p>I don\'t want to be a&nbsp;widow</p>');
 });
 
-test('Doesn\'t prevent widows in short strings', function () {
-    $result = process("<p>one two three</p>")->typography('en_US')->apply();
-    expect($result)->toBe('<p>one two three</p>'); // no "&nbsp;"
+test('Ignores short strings', function () {
+    expect(transform("<p>one two three</p>"))->toBe('<p>one two three</p>'); // no "&nbsp;"
 });
 
 test('Works on multiple paragraphs', function () {
@@ -25,11 +26,7 @@ test('Works on multiple paragraphs', function () {
     <p>This is the second&nbsp;paragraph</p>
     HTML);
 
-    $result = process($string)
-        ->typography('de_DE', fn ($typo) => $typo
-            ->avoidShortLastLines())
-        ->apply();
-    expect($result)->toBe($expected);
+    expect(transform($string))->toBe($expected);
 });
 
 test('only prevents widows at the very end of block elements', function () {
@@ -41,10 +38,7 @@ test('only prevents widows at the very end of block elements', function () {
     <p>Basel and tutor at the Darmstadt Summer Course, the<i>Darmstadt Sonicals</i> is first and&nbsp;foremost.</p>
     HTML);
 
-    $result = process($string)
-        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
-        ->apply();
-    expect($result)->toBe($expected);
+    expect(transform($string))->toBe($expected);
 });
 
 test('works without a parent element', function () {
@@ -56,10 +50,7 @@ test('works without a parent element', function () {
     this text should have no&nbsp;widow
     HTML);
 
-    $result = process($string)
-        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
-        ->apply();
-    expect($result)->toBe($expected);
+    expect(transform($string))->toBe($expected);
 });
 
 test('works with nested elements', function () {
@@ -71,10 +62,7 @@ test('works with nested elements', function () {
     <div><p>this text should have a&nbsp;widow</p> <p>And this shouold also have&nbsp;one</p></div>
     HTML);
 
-    $result = process($string)
-        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
-        ->apply();
-    expect($result)->toBe($expected);
+    expect(transform($string))->toBe($expected);
 });
 
 test('should work with this', function () {
@@ -92,8 +80,5 @@ test('should work with this', function () {
     <p>Die zur Verfügung stehende Gesamtfläche wird also nur zum Teil von primärem Wohnraum belegt, die verbleibende Fläche bildet den Spielraum auf dem die Nutzungsdichte – auch um Arbeitsplätze – erhöht werden kann. Die Nutzung kann und soll immer wieder neu verhandelt werden und die räumlichen Anliegen der Bewohner:innen heute und in Zukunft erfüllen&nbsp;können.</p>
     HTML);
 
-    $result = process($foo)
-        ->typography('en', fn ($typo) => $typo->avoidShortLastLines())
-        ->apply();
-    expect($result)->toBe($bar);
+    expect(transform($foo))->toBe($bar);
 });

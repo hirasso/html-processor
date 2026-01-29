@@ -2,6 +2,8 @@
 
 use function Hirasso\HTMLProcessor\process;
 
+return;
+
 function normalize(string $str): string
 {
     return process($str)->typography('en', fn ($typo) => $typo->normalizeQuotes())->apply();

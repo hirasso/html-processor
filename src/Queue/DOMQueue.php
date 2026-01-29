@@ -47,9 +47,6 @@ final class DOMQueue implements DOMQueueContract
             return $html;
         }
 
-        // Remove duplicate IDs before loading
-        $html = $this->removeDuplicateIds($html);
-
         $document = Support::createDocument($html);
 
         $this->runServices($document);
@@ -66,35 +63,5 @@ final class DOMQueue implements DOMQueueContract
         foreach ($this->services as $service) {
             $service->run($document);
         }
-    }
-
-    /**
-     * Remove duplicate id attributes from HTML, keeping only first occurrence
-     */
-    private function removeDuplicateIds(string $html): string
-    {
-        $seenIds = [];
-
-        // Match id attributes: id="value", id='value', id=value
-        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
-
-        $result = preg_replace_callback(
-            $pattern,
-            function ($matches) use (&$seenIds) {
-                $idValue = $matches[2];
-
-                // First occurrence: keep it
-                if (!isset($seenIds[$idValue])) {
-                    $seenIds[$idValue] = true;
-                    return $matches[0];
-                }
-
-                // Duplicate: remove entire id attribute
-                return '';
-            },
-            $html
-        );
-
-        return $result ?? $html;
     }
 }

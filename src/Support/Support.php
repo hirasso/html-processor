@@ -45,6 +45,12 @@ final class Support
      */
     public static function createDocument(string $html): HTML5DOMDocument
     {
+        /**
+         * Temporary replacement for the currently broken
+         * HTML5DOMDocument::ALLOW_DUPLICATE_IDS flag:
+         */
+        $html = self::removeDuplicateIds($html);
+
         $document = new HTML5DOMDocument();
         $document->loadHTML(
             htmlspecialchars_decode(Support::encode($html)),
@@ -156,5 +162,35 @@ final class Support
                 yield $node;
             }
         }
+    }
+
+    /**
+     * Remove duplicate id attributes from HTML, keeping only the first occurrence
+     */
+    public static function removeDuplicateIds(string $html): string
+    {
+        $seenIds = [];
+
+        // Match id attributes: id="value", id='value', id=value
+        $pattern = '/\sid\s*=\s*(["\']?)([^"\'>\s]+)\1/i';
+
+        $result = preg_replace_callback(
+            $pattern,
+            function ($matches) use (&$seenIds) {
+                $idValue = $matches[2];
+
+                // First occurrence: keep it
+                if (!isset($seenIds[$idValue])) {
+                    $seenIds[$idValue] = true;
+                    return $matches[0];
+                }
+
+                // Duplicate: remove entire id attribute
+                return '';
+            },
+            $html
+        );
+
+        return $result ?? $html;
     }
 }

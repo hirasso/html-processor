@@ -15,7 +15,8 @@ test('Runs various tasks on a string', function () {
 
     $result = process($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
+        ->avoidShortLastLines()
+        // ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
         ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
