@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1
+
+### Patch Changes
+
+- ac71233: Ignore inch notation when normalizing quotes (e.g. '50"')
+- 3b74fcc: Fix quote boundary detection to allow punctuation (e.g. parentheses) around quotes
+
 ## 0.7.0
 
 ### Minor Changes
