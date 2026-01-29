@@ -20,10 +20,7 @@ final class QuoteParser
      */
     public function parse(string $text): array
     {
-        // Phase 1: Reset existing curly quotes to standard ASCII "
-        $text = $this->resetQuotes($text);
-
-        // Phase 2: Find candidates for quotes
+        // Phase 1: Find candidates for quotes
         $candidates = $this->findCandidates($text);
 
         // Phase 2: Find all quotes and assign roles (only paired quotes returned)
@@ -31,22 +28,6 @@ final class QuoteParser
 
         // Phase 3: Build and return segments
         return $this->buildSegments($text, $quotes);
-    }
-
-    /**
-     * Reset curly quotes back to ASCII ", but only if they look like quotes
-     * (not preceded by letter OR not followed by letter).
-     * This preserves apostrophes like "don't" which are surrounded by letters.
-     */
-    private function resetQuotes(string $text): string
-    {
-        $matchBefore = '(?<!\p{L})';
-        $matchAfter = '(?!\p{L})';
-
-        $class = '[' . preg_quote(implode('', CurlyQuotes::all()), '/') . ']';
-        $pattern = "/(?:{$matchBefore}{$class}|{$class}{$matchAfter})/u";
-
-        return preg_replace($pattern, '"', $text) ?? $text;
     }
 
     /**
@@ -65,8 +46,8 @@ final class QuoteParser
         foreach ($candidates as $candidate) {
             if ($candidate->canClose && count($stack) > 0) {
                 $opener = array_pop($stack);
-                $paired[] = new Quote($opener->position, QuoteRole::Open);
-                $paired[] = new Quote($candidate->position, QuoteRole::Close);
+                $paired[] = new Quote(QuoteRole::Open, $opener->position, $opener->char);
+                $paired[] = new Quote(QuoteRole::Close, $candidate->position, $candidate->char);
             } elseif ($candidate->canOpen) {
                 $stack[] = $candidate;
             }
@@ -102,7 +83,8 @@ final class QuoteParser
 
             $segments[] = new QuoteSegment($match->role);
 
-            $cursor = $match->position + 1;
+            // Advance cursor by the quote's byte length (UTF-8 curly quotes are 3 bytes)
+            $cursor = $match->position + strlen($match->char);
         }
 
         if ($cursor < strlen($text)) {
@@ -113,50 +95,73 @@ final class QuoteParser
     }
 
     /**
-     * Find all double quotes with their context.
+     * Find all quote candidates
      *
      * @return QuoteCandidate[]
      */
     private function findCandidates(string $text): array
     {
-        if (!preg_match_all('/"/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+        return [
+            ...$this->matchesToCandidates($text, QuoteRole::Open),
+            ...$this->matchesToCandidates($text, QuoteRole::Close),
+            ...$this->matchesToCandidates($text),
+        ];
+    }
+
+    /** @return QuoteCandidate[] */
+    private function matchesToCandidates(string $string, ?QuoteRole $role = null): array
+    {
+        /**
+         * Convert the CurlyQuotes to a character class
+         */
+        $quotePattern = '[' . preg_quote(implode('', CurlyQuotes::all()), '/') . ']';
+
+        /**
+         * (?<![\p{L}\p{N}])
+         *  - Negative lookbehind
+         *  - Asserts that the previous character is NOT a letter or number
+         *  - Allows punctuation like ( ) [ ] etc. before quotes
+         */
+        $notAfterAlphanumeric = '(?<![\p{L}\p{N}])';
+
+        /**
+         * (?![\p{L}\p{N}])
+         *  - Negative lookahead
+         *  - Asserts that the next character is NOT a letter or number
+         *  - Allows punctuation like ( ) [ ] etc. after quotes
+         */
+        $notBeforeAlphanumeric = '(?![\p{L}\p{N}])';
+
+        /**
+         * Lookahead and behind for any letter
+         */
+        $anyLetterBefore = '(?<=\p{L})';
+        $anyLetterAfter = '(?=\p{L})';
+
+        $pattern = match($role) {
+            QuoteRole::Open => "/{$notAfterAlphanumeric}{$quotePattern}{$anyLetterAfter}/u",
+            QuoteRole::Close => "/{$anyLetterBefore}{$quotePattern}{$notBeforeAlphanumeric}/u",
+            /**
+             * If no quote role was provided it could be opening as well as closing
+             * @TODO: Maybe we don't ever need this
+             */
+            default => "/{$notAfterAlphanumeric}{$quotePattern}{$notBeforeAlphanumeric}/u"
+        };
+
+        preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
+
+        if (empty($matches[0])) {
             return [];
         }
-        /** we are only interested in the match positions */
-        $positions = array_map(
-            static fn ($match) => (int) $match[1],
-            $matches[0]
-        );
 
         return array_map(
-            fn ($position) => new QuoteCandidate(
-                position: $position,
-                canOpen: !$this->isPrecededByLetter($text, $position),
-                canClose: !$this->isFollowedByLetter($text, $position + 1),
+            fn ($match) => new QuoteCandidate(
+                char: $match[0],
+                position: (int) $match[1],
+                canOpen: $role === QuoteRole::Open,
+                canClose: $role === QuoteRole::Close
             ),
-            $positions
+            $matches[0]
         );
-    }
-
-    private function isPrecededByLetter(string $text, int $bytePos): bool
-    {
-        if ($bytePos <= 0) {
-            return false;
-        }
-
-        $charBefore = mb_substr(substr($text, 0, $bytePos), -1, 1);
-
-        return preg_match('/\p{L}/u', $charBefore) === 1;
-    }
-
-    private function isFollowedByLetter(string $text, int $bytePos): bool
-    {
-        if ($bytePos >= strlen($text)) {
-            return false;
-        }
-
-        $charAfter = mb_substr(substr($text, $bytePos), 0, 1);
-
-        return preg_match('/\p{L}/u', $charAfter) === 1;
     }
 }
