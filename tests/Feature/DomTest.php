@@ -2,7 +2,7 @@
 
 namespace Tests\DomTest;
 
-use Hirasso\HTMLProcessor\Support\Support;
+use Hirasso\HTMLProcessor\Internal\Support\Support;
 
 function process(string $html): string
 {

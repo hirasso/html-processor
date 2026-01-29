@@ -1,6 +1,6 @@
 <?php
 
-use Hirasso\HTMLProcessor\Support\Support;
+use Hirasso\HTMLProcessor\Internal\Support\Support;
 
 use function Hirasso\HTMLProcessor\process;
 

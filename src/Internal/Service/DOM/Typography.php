@@ -1,0 +1,101 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Hirasso\HTMLProcessor\Internal\Service\DOM;
+
+use Hirasso\HTMLProcessor\Internal\Queue\DOMQueue;
+use Hirasso\HTMLProcessor\Internal\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\QuoteLocalizer\QuoteLocalizer;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\QuoteNormalizer\QuoteNormalizer;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
+use IvoPetkov\HTML5DOMDocument;
+
+final class Typography implements DOMServiceContract
+{
+    private DOMQueue $queue;
+
+    private string $locale = 'en_US';
+
+    public function prio(): int
+    {
+        return 0;
+    }
+
+    private function __construct(
+    ) {
+        $this->queue = new DOMQueue();
+    }
+
+    public static function fromLocale(string $locale): self
+    {
+        $instance = new self();
+        $instance->setLocale($locale);
+
+        return $instance;
+    }
+
+    public function setLocale(string $locale): self
+    {
+        if (!preg_match('/^[a-z]{2}([_-]|$).*/', $locale)) {
+            throw new \InvalidArgumentException(
+                "Invalid locale format: '{$locale}'. Expected format: 'en', 'en_US' or 'en-US'"
+            );
+        }
+
+        $this->locale = $locale;
+
+        return $this;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    public function getLanguageCode(): ?string
+    {
+        $separator = str_contains($this->locale, '_') ? '_' : '-';
+        return explode($separator, $this->locale)[0] ?: null;
+    }
+
+    private function applyDefaults(): self
+    {
+        $this->queue->add(new QuoteLocalizer($this));
+        $this->queue->add(new ShortLastLineAvoider());
+        return $this;
+    }
+
+    public function localizeQuotes(): self
+    {
+        $this->queue->add(new QuoteLocalizer($this));
+        return $this;
+    }
+
+    public function avoidShortLastLines(): self
+    {
+        $this->queue->add(new ShortLastLineAvoider());
+        return $this;
+    }
+
+    public function normalizeQuotes(): self
+    {
+        $this->queue->add(new QuoteNormalizer());
+        return $this;
+    }
+
+    /**
+     * Run the registered Typography Services against a document
+     */
+    public function run(HTML5DOMDocument $document): void
+    {
+        /**
+         * Apply the default services if no service was registered
+         */
+        if ($this->queue->isEmpty()) {
+            $this->applyDefaults();
+        }
+
+        $this->queue->runServices($document);
+    }
+}

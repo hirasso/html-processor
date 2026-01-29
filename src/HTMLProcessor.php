@@ -6,17 +6,17 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
-use Hirasso\HTMLProcessor\Queue\DOMQueue;
-use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
-use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
-use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Service\DOM\Typography;
-use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
-use Hirasso\HTMLProcessor\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
-use Hirasso\HTMLProcessor\Support\Support;
+use Hirasso\HTMLProcessor\Internal\Queue\DOMQueue;
+use Hirasso\HTMLProcessor\Internal\Queue\HTMLQueue;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\EmptyElements;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\LinkProcessor\Link;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\LinkProcessor\LinkProcessor;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\PrefixLinker;
+use Hirasso\HTMLProcessor\Internal\Service\HTML\EmailEncoder;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\Typography;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\Autolinker;
+use Hirasso\HTMLProcessor\Internal\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
+use Hirasso\HTMLProcessor\Internal\Support\Support;
 
 /**
  * Process a HTML string using a fluent API
@@ -146,7 +146,7 @@ final class HTMLProcessor
      */
     public function avoidShortLastLines(): self
     {
-        return $this->mutate(function() {
+        return $this->mutate(function () {
             $this->domQueue->add(new ShortLastLineAvoider());
         });
     }

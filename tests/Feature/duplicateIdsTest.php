@@ -1,8 +1,9 @@
 <?php
 
-use Hirasso\HTMLProcessor\Support\Support;
+use Hirasso\HTMLProcessor\Internal\Support\Support;
 
-function process(string $str): string {
+function process(string $str): string
+{
     return Support::removeDuplicateIds($str);
 }
 
