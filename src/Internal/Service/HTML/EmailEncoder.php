@@ -13,7 +13,7 @@ final readonly class EmailEncoder implements HTMLServiceContract
 {
     public function prio(): int
     {
-        return 0;
+        return 10;
     }
 
     /**
@@ -24,7 +24,7 @@ final readonly class EmailEncoder implements HTMLServiceContract
      */
     public function run(string $html): string
     {
-        if (!str_contains($html, '@')) {
+        if (!\str_contains($html, '@')) {
             return $html;
         }
 
@@ -43,7 +43,7 @@ final readonly class EmailEncoder implements HTMLServiceContract
             )
         }xi';
 
-        $result = preg_replace_callback(
+        $result = \preg_replace_callback(
             $pattern,
             fn ($matches) => $this->encodeString($matches[0]),
             $html
@@ -66,11 +66,11 @@ final readonly class EmailEncoder implements HTMLServiceContract
      */
     private function encodeString(string $string): string
     {
-        $chars = str_split($string);
-        $seed = mt_rand(0, (int) abs(crc32($string) / strlen($string)));
+        $chars = \str_split($string);
+        $seed = \mt_rand(0, (int) \abs(\crc32($string) / \strlen($string)));
 
         foreach ($chars as $key => $char) {
-            $ord = ord($char);
+            $ord = \ord($char);
 
             if ($ord < 128) { // ignore non-ascii chars
                 $r = ($seed * (1 + $key)) % 100; // pseudo "random function"
@@ -78,13 +78,13 @@ final readonly class EmailEncoder implements HTMLServiceContract
                 if ($r > 60 && $char !== '@' && $char !== '.') {
                     // plain character (not encoded), except @-signs and dots
                 } elseif ($r < 45) {
-                    $chars[$key] = '&#x' . dechex($ord) . ';'; // hexadecimal
+                    $chars[$key] = '&#x' . \dechex($ord) . ';'; // hexadecimal
                 } else {
                     $chars[$key] = '&#' . $ord . ';'; // decimal (ascii)
                 }
             }
         }
-        $encoded = implode('', $chars);
+        $encoded = \implode('', $chars);
 
         return $encoded;
     }

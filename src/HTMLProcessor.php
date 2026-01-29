@@ -13,7 +13,7 @@ use Hirasso\HTMLProcessor\Internal\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Internal\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Internal\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Internal\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Internal\Service\DOM\Typography;
+use Hirasso\HTMLProcessor\Internal\Service\HTML\TypographyFixer;
 use Hirasso\HTMLProcessor\Internal\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Internal\Service\DOM\ShortLastLineAvoider\ShortLastLineAvoider;
 use Hirasso\HTMLProcessor\Internal\Support\Support;
@@ -120,26 +120,19 @@ final class HTMLProcessor
     /**
      * Optimize typography
      *
-     * @param string $locale – e.g. 'en_EN', 'de_DE' or even 'de_DE_formal' Only the first bit will be used
-     * @param null|Closure(Typography): mixed $callback – customize via callback
+     * @param string $locale – e.g. 'en_GB', 'de_DE' or even 'de_DE_formal'
+     * @param ?list<\JoliTypo\FixerInterface> $rules
      */
-    // public function typography(
-    //     string $locale,
-    //     ?Closure $callback = null,
-    // ): self {
-    //     return $this->mutate(function () use ($locale, $callback) {
-    //         $instance = Typography::fromLocale($locale);
-    //         $this->domQueue->add($instance);
-
-    //         /** Apply the callback */
-    //         if ($callback instanceof Closure) {
-    //             ($callback)($instance);
-    //             return $this;
-    //         }
-
-    //         $this->domQueue->add($instance);
-    //     });
-    // }
+    public function fixTypography(
+        string $locale,
+        ?array $rules = null,
+    ): self {
+        return $this->mutate(function () use ($rules, $locale) {
+            $instance = new TypographyFixer($locale);
+            $instance->setRules($rules ?? []);
+            $this->htmlQueue->add($instance);
+        });
+    }
 
     /**
      * Avoid short last lines in text by injecting non-breaking spaces
@@ -184,7 +177,7 @@ final class HTMLProcessor
 
         // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)
         // while keeping numeric entities (&#109; &#x6d; &nbsp; etc.)
-        return htmlspecialchars_decode($html);
+        return \htmlspecialchars_decode($html);
     }
 
     /**
