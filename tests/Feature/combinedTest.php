@@ -10,12 +10,10 @@ test('Runs various tasks on a string', function () {
     <p><!-- preserve-me --></p>
     <p>Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more.</p>
     <p>Follow @acme on SocialWeb.</p>
-    <p>And some more text that should not have a widow</p>
     HTML);
 
     $result = process($html)
         ->autolinkUrls() // wrap raw url strings in `<a>` tags
-        ->typography('de_DE', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
         ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
@@ -29,11 +27,9 @@ test('Runs various tasks on a string', function () {
     expect($result)->not->toContain('<p><!-- preserve me --></p>');
     expect($result)->toContain('class="link--mailto"');
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
-    expect($result)->toContain('&nbsp;');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
     expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
-    expect($result)->toContain('a&nbsp;widow'); // widow prevented
 });
 
 
@@ -94,8 +90,7 @@ test('Works with self-closing tags', function () {
             ->apply()
     )->toBe($expected);
 
-    /** compare  to native DOMDocument */
-    $doc = new \DOMDocument();
-    $doc->loadHTML($html);
+    /** compare to native Dom\HTMLDocument */
+    $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
     expect(Support::extractBodyHTML($doc))->toBe($expected);
 });

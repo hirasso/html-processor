@@ -6,8 +6,8 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
-use IvoPetkov\HTML5DOMDocument;
-use IvoPetkov\HTML5DOMElement;
+use Dom\Element;
+use Dom\HTMLDocument;
 
 final readonly class EmptyElements implements DOMServiceContract
 {
@@ -21,7 +21,7 @@ final readonly class EmptyElements implements DOMServiceContract
         return 0;
     }
 
-    public function run(HTML5DOMDocument $document): void
+    public function run(HTMLDocument $document): void
     {
         $this->removeEmptyElements($document);
     }
@@ -29,12 +29,12 @@ final readonly class EmptyElements implements DOMServiceContract
     /**
      * Remove empty-looking paragraphs from html
      */
-    private function removeEmptyElements(HTML5DOMDocument $document): void
+    private function removeEmptyElements(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll($this->selector ?? 'p') as $el) {
-            /** @var HTML5DOMElement $el */
+            /** @var Element $el */
             if (Support::containsOnlyWhitespace($el)) {
-                $el->parentNode?->removeChild($el);
+                $el->remove();
             }
         }
     }
