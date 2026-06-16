@@ -14,9 +14,6 @@
 
 - Automatically convert raw URLs to links
 - Remove empty elements
-- Optimize typography:
-  - Localize quotes (currently supported languages, `en`, `de`, `fr`)
-  - Avoid short last lines (traditionally called "Widows")
 - Process links:
   - Add link classes based on type (e.g. `link--external link--file link--ext--pdf`)
   - Open external links in new tab
@@ -41,7 +38,7 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-echo process($html)->typography('de');
+echo process($html)->encodeEmails();
 ```
 
 ## Maximal Example
@@ -53,7 +50,6 @@ echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
     ->encodeEmails()
-    ->typography('de', fn ($typo) => $typo->localizeQuotes()->avoidShortLastLines())
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags');

@@ -117,30 +117,6 @@ final class HTMLProcessor
     }
 
     /**
-     * Optimize typography
-     *
-     * @param string $locale – e.g. 'en_EN', 'de_DE' or even 'de_DE_formal' Only the first bit will be used
-     * @param null|Closure(Typography): mixed $callback – customize via callback
-     */
-    public function typography(
-        string $locale,
-        ?Closure $callback = null,
-    ): self {
-        return $this->mutate(function () use ($locale, $callback) {
-            $instance = Typography::fromLocale($locale);
-            $this->domQueue->add($instance);
-
-            /** Apply the callback */
-            if ($callback instanceof Closure) {
-                ($callback)($instance);
-                return $this;
-            }
-
-            $this->domQueue->add($instance);
-        });
-    }
-
-    /**
      * Encode Email addresses to protect them from spam bots
      */
     public function encodeEmails(): self
