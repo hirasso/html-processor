@@ -6,7 +6,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 
 use Exception;
 use Hirasso\HTMLProcessor\Enum\LinkType;
-use IvoPetkov\HTML5DOMElement;
+use Dom\Element;
 use League\Uri\Uri;
 
 final readonly class Link
@@ -16,9 +16,9 @@ final readonly class Link
     public ?string $extension;
 
     public function __construct(
-        public HTML5DOMElement $el
+        public Element $el
     ) {
-        $this->href = trim($el->getAttribute('href'));
+        $this->href = trim($el->getAttribute('href') ?? '');
         $this->type = $this->getType($this->href);
         $this->extension = $this->getExtension($this->href);
     }

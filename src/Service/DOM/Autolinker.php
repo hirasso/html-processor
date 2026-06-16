@@ -8,7 +8,7 @@ use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
-use IvoPetkov\HTML5DOMDocument;
+use Dom\HTMLDocument;
 
 /**
  * Makes urls clickable
@@ -26,7 +26,7 @@ final readonly class Autolinker implements DOMServiceContract
         return -10;
     }
 
-    public function run(HTML5DOMDocument $document): void
+    public function run(HTMLDocument $document): void
     {
         static $autolink;
 

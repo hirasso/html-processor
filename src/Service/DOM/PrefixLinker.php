@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
-use DOMXPath;
+use Dom\HTMLDocument;
+use Dom\XPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
-use IvoPetkov\HTML5DOMDocument;
 
 final class PrefixLinker implements DOMServiceContract
 {
@@ -47,14 +47,14 @@ final class PrefixLinker implements DOMServiceContract
     /**
      * Link a prefix to a URL
      */
-    public function run(HTML5DOMDocument $document): void
+    public function run(HTMLDocument $document): void
     {
-        $xPath = new DOMXPath($document);
+        $xPath = new XPath($document);
 
         foreach (Support::getTextNodes($document) as $textNode) {
             // Skip text nodes inside <a> elements
-            $ancestors = $xPath->query('ancestor::a', $textNode) ?: null;
-            if ($ancestors?->length) {
+            $ancestors = $xPath->query('ancestor::a', $textNode);
+            if ($ancestors->length) {
                 continue;
             }
 

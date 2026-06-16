@@ -7,7 +7,7 @@ namespace Hirasso\HTMLProcessor\Queue;
 use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
-use IvoPetkov\HTML5DOMDocument;
+use Dom\HTMLDocument;
 
 final class DOMQueue implements DOMQueueContract
 {
@@ -60,7 +60,7 @@ final class DOMQueue implements DOMQueueContract
     /**
      * Apply all registered services against a provided $document
      */
-    public function runServices(HTML5DOMDocument $document): void
+    public function runServices(HTMLDocument $document): void
     {
         // Execute all DOM services
         foreach ($this->services as $service) {

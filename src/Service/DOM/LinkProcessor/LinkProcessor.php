@@ -6,8 +6,8 @@ namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 
 use Closure;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use IvoPetkov\HTML5DOMDocument;
-use IvoPetkov\HTML5DOMElement;
+use Dom\Element;
+use Dom\HTMLDocument;
 
 /**
  * Process links in HTML. Currently detects these URL types
@@ -36,7 +36,7 @@ final readonly class LinkProcessor implements DOMServiceContract
     /**
      * Run this service
      */
-    public function run(HTML5DOMDocument $document): void
+    public function run(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {
             $this->process($el);
@@ -46,7 +46,7 @@ final readonly class LinkProcessor implements DOMServiceContract
     /**
      * Process an HTML link element
      */
-    private function process(HTML5DOMElement $el): void
+    private function process(Element $el): void
     {
         $link = new Link($el);
 

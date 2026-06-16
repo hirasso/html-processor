@@ -90,8 +90,7 @@ test('Works with self-closing tags', function () {
             ->apply()
     )->toBe($expected);
 
-    /** compare  to native DOMDocument */
-    $doc = new \DOMDocument();
-    $doc->loadHTML($html);
+    /** compare to native Dom\HTMLDocument */
+    $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
     expect(Support::extractBodyHTML($doc))->toBe($expected);
 });

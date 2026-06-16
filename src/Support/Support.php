@@ -4,31 +4,25 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Support;
 
-use DOMText;
-use DOMXPath;
+use Dom\Element;
+use Dom\HTMLDocument;
+use Dom\Text;
+use Dom\XPath;
 use Generator;
-use IvoPetkov\HTML5DOMDocument;
-use IvoPetkov\HTML5DOMElement;
 
 final class Support
 {
     /**
      * Convert entities while preserving already-encoded entities
      */
-    public static function encode(string $html, ?bool $usePlaceholders = false): string
+    public static function encode(string $html): string
     {
-        $html = \htmlentities(
+        return \htmlentities(
             string: $html,
             flags: ENT_QUOTES,
             encoding: 'UTF-8',
             double_encode: false
         );
-
-        if ($usePlaceholders ?? false) {
-            $html = self::entitiesToPlaceholders($html);
-        }
-
-        return $html;
     }
 
     /**
@@ -36,37 +30,26 @@ final class Support
      */
     public static function decode(string $html): string
     {
-        $html = self::placeholdersToEntities($html);
         return html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**
      * Create a document from a HTML string
      */
-    public static function createDocument(string $html): HTML5DOMDocument
+    public static function createDocument(string $html): HTMLDocument
     {
-        $document = new HTML5DOMDocument();
-        $document->loadHTML(
+        return HTMLDocument::createFromString(
             htmlspecialchars_decode(Support::encode($html)),
-            /**
-             * @TODO reactivate this if it is fixed upstream
-             * https://github.com/ivopetkov/html5-dom-document-php/pull/65
-             */
-            // HTML5DOMDocument::ALLOW_DUPLICATE_IDS
+            LIBXML_NOERROR,
         );
-        return $document;
     }
 
     /**
      * Extract the innerHTML from a document's <body>
      */
-    public static function extractBodyHTML(\DOMDocument|HTML5DOMDocument $document): string
+    public static function extractBodyHTML(HTMLDocument $document): string
     {
-        $html = $document->saveHTML() ?: '';
-        preg_match('/<body[^>]*>(?<content>.*?)<\/body>/is', $html, $matches);
-        $html = $matches['content'] ?? '';
-        $html = str_replace('="__BOOLEAN_TRUE__"', '', $html);
-        return $html;
+        return $document->body->innerHTML ?? '';
     }
 
     /**
@@ -75,7 +58,6 @@ final class Support
      */
     public static function normalizeWhitespace(string $string): string
     {
-        $string = str_replace("html5-dom-document-internal-entity1-nbsp-end", ' ', $string);
         $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
         $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
         $string = preg_replace('/\s+/', ' ', $string) ?? $string;
@@ -85,13 +67,13 @@ final class Support
     /**
      * Check if an element contains only white space and nothing else
      */
-    public static function containsOnlyWhitespace(HTML5DOMElement $el): bool
+    public static function containsOnlyWhitespace(Element $el): bool
     {
         if (!self::containsOnlyText($el)) {
             return false;
         }
 
-        $textContent = Support::normalizeWhitespace($el->textContent);
+        $textContent = Support::normalizeWhitespace($el->textContent ?? '');
 
         return empty(trim($textContent));
     }
@@ -99,7 +81,7 @@ final class Support
     /**
      * Check if an element only contains text
      */
-    public static function containsOnlyText(HTML5DOMElement $el): bool
+    public static function containsOnlyText(Element $el): bool
     {
         if (!$el->hasChildNodes()) {
             return true;
@@ -114,45 +96,12 @@ final class Support
         return true;
     }
 
-    /**
-     * Convert internal entity placeholders from HTML5DOMDocument back to the real entity
-     */
-    public static function placeholdersToEntities(string $html): string
+    /** @return \Generator<Text> */
+    public static function getTextNodes(HTMLDocument $doc): Generator
     {
-        if (strpos($html, 'html5-dom-document-internal-entity') === false) {
-            return $html;
-        }
-        $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html) ?? $html;
-        $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html) ?? $html;
-        return $html;
-    }
-
-    /**
-     * Convert special chars to entities and then to the internal format used by HTML5DOMDocument
-     */
-    public static function entitiesToPlaceholders(string $html): string
-    {
-        // First, remove all placeholders
-        $html = self::placeholdersToEntities($html);
-
-        // Re-encode to normalize numeric entities (&#8220;) and named entities (&ldquo;) to UTF-8
-        $html = self::decode($html);
-        $html = self::encode($html);
-
-        // replace named entities with placeholders
-        $html = preg_replace('/&([a-zA-Z]+);/', 'html5-dom-document-internal-entity1-$1-end', $html) ?? $html;
-        // replace numeric entities with placeholders
-        $html = preg_replace('/&#(\d+);/', 'html5-dom-document-internal-entity2-$1-end', $html) ?? $html;
-
-        return $html;
-    }
-
-    /** @return \Generator<DOMText> */
-    public static function getTextNodes(HTML5DOMDocument $doc): Generator
-    {
-        $xpath = new DOMXPath($doc);
-        foreach ($xpath->query('//text()') ?: [] as $node) {
-            if ($node instanceof DOMText && trim($node->nodeValue ?? '') !== '') {
+        $xpath = new XPath($doc);
+        foreach ($xpath->query('//text()') as $node) {
+            if ($node instanceof Text && trim($node->nodeValue ?? '') !== '') {
                 yield $node;
             }
         }
