@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.2, 8.3, 8.4]
+        php: [8.4, 8.5]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
 
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v5
-        if: ${{ matrix.php == 8.3 }}
+        if: ${{ matrix.php == 8.4 }}
         with:
           files: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}

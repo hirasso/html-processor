@@ -4,7 +4,7 @@ description: Setup the environment for CI and the version-or-publish workflows
 inputs:
   php-version:
     description: The PHP version to install
-    default: 8.3
+    default: 8.4
 
 runs:
   using: composite
