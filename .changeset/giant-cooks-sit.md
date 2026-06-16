@@ -1,5 +1,5 @@
 ---
-"html-processor": patch
+"html-processor": major
 ---
 
-Remove all typography helpers. These can be better handled by CSS nowadays.
+> [!WARNING] Removed all typography helpers. These can be better handled by CSS nowadays.

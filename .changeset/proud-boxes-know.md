@@ -1,5 +1,5 @@
 ---
-"html-processor": patch
+"html-processor": minor
 ---
 
 New fluid method: `->stripTags()`
