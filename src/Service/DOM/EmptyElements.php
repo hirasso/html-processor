@@ -6,7 +6,6 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
-use Dom\Element;
 use Dom\HTMLDocument;
 
 final readonly class EmptyElements implements DOMServiceContract
@@ -32,8 +31,7 @@ final readonly class EmptyElements implements DOMServiceContract
     private function removeEmptyElements(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll($this->selector ?? 'p') as $el) {
-            /** @var Element $el */
-            if (Support::containsOnlyWhitespace($el)) {
+            if (Support::elementContainsOnlyWhitespace($el)) {
                 $el->remove();
             }
         }

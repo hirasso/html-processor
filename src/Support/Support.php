@@ -36,11 +36,15 @@ final class Support
      */
     public static function replaceTextNodeWithHtml(Text $textNode, string $html): void
     {
+        if (self::containsOnlyWhitespace($html)) {
+            return;
+        }
+
         if ($html === $textNode->nodeValue) {
             return;
         }
 
-        if (!$textNode->ownerDocument) {
+        if (!$targetDoc = $textNode->ownerDocument) {
             return;
         }
 
@@ -50,15 +54,13 @@ final class Support
             return;
         }
 
-        $nodes = iterator_to_array($tmpDoc->body->childNodes);
+        $fragment = $targetDoc->createDocumentFragment();
 
-        $fragment = $textNode->ownerDocument->createDocumentFragment();
-
-        foreach ($nodes as $child) {
-            $fragment->appendChild($textNode->ownerDocument->importNode($child, true));
+        foreach ($tmpDoc->body->childNodes as $child) {
+            $fragment->appendChild($targetDoc->importNode($child, true));
         }
 
-        $textNode->parentNode?->replaceChild($fragment, $textNode);
+        $textNode->replaceWith($fragment);
     }
 
     /**
@@ -76,21 +78,37 @@ final class Support
     /**
      * Check if an element contains only white space and nothing else
      */
-    public static function containsOnlyWhitespace(Element $el): bool
+    public static function elementContainsOnlyWhitespace(Element $el): bool
     {
-        if (!self::containsOnlyText($el)) {
+        if (!self::elementContainsOnlyText($el)) {
             return false;
         }
 
-        $textContent = Support::normalizeWhitespace($el->textContent ?? '');
+        return self::containsOnlyWhitespace($el->textContent ?? '');
+    }
 
-        return empty(trim($textContent));
+    /**
+     * Is a value only whitespace
+     */
+    private static function containsOnlyWhitespace(string $value): bool
+    {
+        $value = self::normalizeWhitespace($value);
+
+        return !self::isNonEmptyString(trim($value));
+    }
+
+    /**
+     * Is a value a non-empty string?
+     */
+    private static function isNonEmptyString(mixed $value): bool
+    {
+        return is_string($value) && $value !== '';
     }
 
     /**
      * Check if an element only contains text
      */
-    public static function containsOnlyText(Element $el): bool
+    public static function elementContainsOnlyText(Element $el): bool
     {
         if (!$el->hasChildNodes()) {
             return true;
