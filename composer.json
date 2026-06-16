@@ -44,7 +44,7 @@
     "test:ci": "./vendor/bin/pest --coverage-clover coverage.xml",
     "analyse": "./vendor/bin/phpstan analyse --memory-limit=2G",
     "bench": "./vendor/bin/phpbench run --report=default",
-    "post-install-cmd": ["[ -n \"$CI\" ] || pnpm install", "ln -s AGENTS.md CLAUDE.md"],
+    "post-install-cmd": ["[ -n \"$CI\" ] || pnpm install", "ln -s AGENTS.md CLAUDE.md || exit 0"],
     "post-update-cmd": ["[ -n \"$CI\" ] || pnpm install"]
   },
   "minimum-stability": "dev",
