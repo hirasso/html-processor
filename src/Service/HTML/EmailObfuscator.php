@@ -17,10 +17,10 @@ final readonly class EmailObfuscator implements HTMLServiceContract
     }
 
     /**
-     * Searches for plain email addresses in given $string and encodes them
+     * Searches for plain email addresses in given $html string and encodes them
      *
      * Regular expression is based on based on John Gruber's Markdown.
-     * http://daringfireball.net/projects/markdown/
+     * @see http://daringfireball.net/projects/markdown/
      */
     public function run(string $html): string
     {
@@ -58,9 +58,9 @@ final readonly class EmailObfuscator implements HTMLServiceContract
      * harvesting bots.
      *
      * Based on Michel Fortin's PHP Markdown:
-     *   http://michelf.com/projects/php-markdown/
+     * @see http://michelf.com/projects/php-markdown/
      * Which is based on John Gruber's original Markdown:
-     *   http://daringfireball.net/projects/markdown/
+     * @see http://daringfireball.net/projects/markdown/
      * Whose code is based on a filter by Matthew Wickline, posted to
      * the BBEdit-Talk with some optimizations by Milian Wolff.
      */
