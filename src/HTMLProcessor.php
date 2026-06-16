@@ -13,8 +13,8 @@ use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
-use Hirasso\HTMLProcessor\Service\DOM\Typography;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
+use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 use Hirasso\HTMLProcessor\Support\Support;
 
 /**
@@ -91,6 +91,16 @@ final class HTMLProcessor
             $linker->register($prefix, $url);
 
             $this->domQueue->add($linker);
+        });
+    }
+
+    /**
+     * @param string|list<string>|null $allowedTags
+     */
+    public function stripTags(string|array|null $allowedTags = null): self
+    {
+        return $this->mutate(function () use ($allowedTags) {
+            $this->htmlQueue->add(new StripTags($allowedTags));
         });
     }
 
