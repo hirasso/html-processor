@@ -13,33 +13,12 @@ use Generator;
 final class Support
 {
     /**
-     * Convert entities while preserving already-encoded entities
-     */
-    public static function encode(string $html): string
-    {
-        return \htmlentities(
-            string: $html,
-            flags: ENT_QUOTES,
-            encoding: 'UTF-8',
-            double_encode: false
-        );
-    }
-
-    /**
-     * Decode a HTML string
-     */
-    public static function decode(string $html): string
-    {
-        return html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    }
-
-    /**
      * Create a document from a HTML string
      */
     public static function createDocument(string $html): HTMLDocument
     {
         return HTMLDocument::createFromString(
-            htmlspecialchars_decode(Support::encode($html)),
+            $html,
             LIBXML_NOERROR,
         );
     }
@@ -50,6 +29,36 @@ final class Support
     public static function extractBodyHTML(HTMLDocument $document): string
     {
         return $document->body->innerHTML ?? '';
+    }
+
+    /**
+     * Convert a text node to HTML
+     */
+    public static function replaceTextNodeWithHtml(Text $textNode, string $html): void
+    {
+        if ($html === $textNode->nodeValue) {
+            return;
+        }
+
+        if (!$textNode->ownerDocument) {
+            return;
+        }
+
+        $tmpDoc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
+
+        if (!$tmpDoc->body) {
+            return;
+        }
+
+        $nodes = iterator_to_array($tmpDoc->body->childNodes);
+
+        $fragment = $textNode->ownerDocument->createDocumentFragment();
+
+        foreach ($nodes as $child) {
+            $fragment->appendChild($textNode->ownerDocument->importNode($child, true));
+        }
+
+        $textNode->parentNode?->replaceChild($fragment, $textNode);
     }
 
     /**
@@ -96,7 +105,7 @@ final class Support
         return true;
     }
 
-    /** @return \Generator<Text> */
+    /** @return \Generator<\Dom\Text> */
     public static function getTextNodes(HTMLDocument $doc): Generator
     {
         $xpath = new XPath($doc);

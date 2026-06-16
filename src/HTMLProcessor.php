@@ -15,7 +15,6 @@ use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\EmailObfuscator;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
-use Hirasso\HTMLProcessor\Support\Support;
 
 /**
  * Process a HTML string using a fluent API
@@ -153,13 +152,7 @@ final class HTMLProcessor
         $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
 
-        if (!$this->preserveEntities) {
-            return Support::decode($html);
-        }
-
-        // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)
-        // while keeping numeric entities (&#109; &#x6d; &nbsp; etc.)
-        return htmlspecialchars_decode($html);
+        return $html;
     }
 
     /**
