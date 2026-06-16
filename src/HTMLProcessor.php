@@ -12,7 +12,7 @@ use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
+use Hirasso\HTMLProcessor\Service\HTML\EmailObfuscator;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 use Hirasso\HTMLProcessor\Support\Support;
@@ -129,11 +129,11 @@ final class HTMLProcessor
     /**
      * Encode Email addresses to protect them from spam bots
      */
-    public function encodeEmails(): self
+    public function obfuscateEmails(): self
     {
         return $this->mutate(function () {
             $this->preserveEntities();
-            $this->htmlQueue->add(new EmailEncoder());
+            $this->htmlQueue->add(new EmailObfuscator());
         });
     }
 

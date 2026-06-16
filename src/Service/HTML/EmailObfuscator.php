@@ -9,7 +9,7 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
-final readonly class EmailEncoder implements HTMLServiceContract
+final readonly class EmailObfuscator implements HTMLServiceContract
 {
     public function prio(): int
     {
