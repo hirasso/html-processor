@@ -64,7 +64,7 @@ final class PrefixLinker implements DOMServiceContract
                 $text = $this->link($text, $prefix, $url);
             }
 
-            $textNode->nodeValue = $text;
+            Support::replaceTextNodeWithHtml($textNode, $text);
         }
     }
 

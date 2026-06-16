@@ -3,8 +3,8 @@
 use function Hirasso\HTMLProcessor\process;
 
 test('Links @mentions to Instagram', function () {
-    $result = process("@hirasso")->autolinkPrefix('@', 'https://www.instagram.com/')->apply();
-    expect($result)->toBe('<a href="https://www.instagram.com/hirasso">@hirasso</a>');
+    $result = process("<p>@hirasso</p>")->autolinkPrefix('@', 'https://www.instagram.com/')->apply();
+    expect($result)->toBe('<p><a href="https://www.instagram.com/hirasso">@hirasso</a></p>');
 });
 
 test('Links #tags to Instagram', function () {

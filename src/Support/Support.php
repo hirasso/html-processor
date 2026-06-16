@@ -13,33 +13,12 @@ use Generator;
 final class Support
 {
     /**
-     * Convert entities while preserving already-encoded entities
-     */
-    public static function encode(string $html): string
-    {
-        return \htmlentities(
-            string: $html,
-            flags: ENT_QUOTES,
-            encoding: 'UTF-8',
-            double_encode: false
-        );
-    }
-
-    /**
-     * Decode a HTML string
-     */
-    public static function decode(string $html): string
-    {
-        return html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    }
-
-    /**
      * Create a document from a HTML string
      */
     public static function createDocument(string $html): HTMLDocument
     {
         return HTMLDocument::createFromString(
-            htmlspecialchars_decode(Support::encode($html)),
+            $html,
             LIBXML_NOERROR,
         );
     }
@@ -50,6 +29,38 @@ final class Support
     public static function extractBodyHTML(HTMLDocument $document): string
     {
         return $document->body->innerHTML ?? '';
+    }
+
+    /**
+     * Convert a text node to HTML
+     */
+    public static function replaceTextNodeWithHtml(Text $textNode, string $html): void
+    {
+        if (self::containsOnlyWhitespace($html)) {
+            return;
+        }
+
+        if ($html === $textNode->nodeValue) {
+            return;
+        }
+
+        if (!$targetDoc = $textNode->ownerDocument) {
+            return;
+        }
+
+        $tmpDoc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
+
+        if (!$tmpDoc->body) {
+            return;
+        }
+
+        $fragment = $targetDoc->createDocumentFragment();
+
+        foreach ($tmpDoc->body->childNodes as $child) {
+            $fragment->appendChild($targetDoc->importNode($child, true));
+        }
+
+        $textNode->replaceWith($fragment);
     }
 
     /**
@@ -67,21 +78,37 @@ final class Support
     /**
      * Check if an element contains only white space and nothing else
      */
-    public static function containsOnlyWhitespace(Element $el): bool
+    public static function elementContainsOnlyWhitespace(Element $el): bool
     {
-        if (!self::containsOnlyText($el)) {
+        if (!self::elementContainsOnlyText($el)) {
             return false;
         }
 
-        $textContent = Support::normalizeWhitespace($el->textContent ?? '');
+        return self::containsOnlyWhitespace($el->textContent ?? '');
+    }
 
-        return empty(trim($textContent));
+    /**
+     * Is a value only whitespace
+     */
+    private static function containsOnlyWhitespace(string $value): bool
+    {
+        $value = self::normalizeWhitespace($value);
+
+        return !self::isNonEmptyString(trim($value));
+    }
+
+    /**
+     * Is a value a non-empty string?
+     */
+    private static function isNonEmptyString(mixed $value): bool
+    {
+        return is_string($value) && $value !== '';
     }
 
     /**
      * Check if an element only contains text
      */
-    public static function containsOnlyText(Element $el): bool
+    public static function elementContainsOnlyText(Element $el): bool
     {
         if (!$el->hasChildNodes()) {
             return true;
@@ -96,7 +123,7 @@ final class Support
         return true;
     }
 
-    /** @return \Generator<Text> */
+    /** @return \Generator<\Dom\Text> */
     public static function getTextNodes(HTMLDocument $doc): Generator
     {
         $xpath = new XPath($doc);

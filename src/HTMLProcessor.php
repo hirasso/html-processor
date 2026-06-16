@@ -12,10 +12,9 @@ use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\EmailEncoder;
+use Hirasso\HTMLProcessor\Service\HTML\EmailObfuscator;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
-use Hirasso\HTMLProcessor\Support\Support;
 
 /**
  * Process a HTML string using a fluent API
@@ -129,11 +128,11 @@ final class HTMLProcessor
     /**
      * Encode Email addresses to protect them from spam bots
      */
-    public function encodeEmails(): self
+    public function obfuscateEmails(): self
     {
         return $this->mutate(function () {
             $this->preserveEntities();
-            $this->htmlQueue->add(new EmailEncoder());
+            $this->htmlQueue->add(new EmailObfuscator());
         });
     }
 
@@ -153,13 +152,7 @@ final class HTMLProcessor
         $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
 
-        if (!$this->preserveEntities) {
-            return Support::decode($html);
-        }
-
-        // When preserving entities, only decode htmlspecialchars (&lt; &gt; &amp; &quot;)
-        // while keeping numeric entities (&#109; &#x6d; &nbsp; etc.)
-        return htmlspecialchars_decode($html);
+        return $html;
     }
 
     /**

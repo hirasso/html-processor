@@ -4,7 +4,7 @@ use function Hirasso\HTMLProcessor\process;
 
 function encode(string $string): string
 {
-    return process($string)->encodeEmails()->apply();
+    return process($string)->obfuscateEmails()->apply();
 }
 function expectEncoded(string $string): void
 {
