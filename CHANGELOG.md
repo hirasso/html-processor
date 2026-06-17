@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- cb6fa30: Renamed `->obfuscateEmails()` to `->obfuscateContacts(email: true, phone: true)`
+- cb6fa30: obfuscate telepone numbers, as well
+
+### Patch Changes
+
+- 8a92584: Add `->dump()` and `->dd()` methods for debugging
+
 ## 1.0.0
 
 ### Major Changes
