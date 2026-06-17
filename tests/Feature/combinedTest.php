@@ -18,7 +18,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscateEmails()
+        ->obfuscateContacts()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
@@ -50,7 +50,7 @@ test('Runs autolinkUrls before processLinks', function () {
     expect($result)->toBe($expected);
 });
 
-test('Runs autolinkUrls before obfuscateEmails', function () {
+test('Runs autolinkUrls before obfuscateContacts', function () {
     $html = trimLines(<<<HTML
     <p>mail@example.com</p>
     HTML);
@@ -60,7 +60,7 @@ test('Runs autolinkUrls before obfuscateEmails', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscateEmails()
+        ->obfuscateContacts()
         ->autolinkUrls()
         ->apply();
 

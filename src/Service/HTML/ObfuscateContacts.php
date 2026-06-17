@@ -9,21 +9,40 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
-final readonly class EmailObfuscator implements HTMLServiceContract
+final readonly class ObfuscateContacts implements HTMLServiceContract
 {
+    public function __construct(
+        private bool $email = true,
+        private bool $phone = true
+    ) {
+
+    }
     public function prio(): int
     {
         return 0;
     }
 
+
+    public function run(string $html): string
+    {
+        $html = $this->encodeEmails($html);
+        $html = $this->encodePhoneNumbers($html);
+
+        return $html;
+    }
+
     /**
-     * Searches for plain email addresses in given $html string and encodes them
+     * Find email addresses and encode them
      *
      * Regular expression is based on based on John Gruber's Markdown.
      * @see http://daringfireball.net/projects/markdown/
      */
-    public function run(string $html): string
+    private function encodeEmails(string $html): string
     {
+        if (!$this->email) {
+            return $html;
+        }
+
         if (!str_contains($html, '@')) {
             return $html;
         }
@@ -46,6 +65,28 @@ final readonly class EmailObfuscator implements HTMLServiceContract
         $result = preg_replace_callback(
             $pattern,
             fn ($matches) => $this->encodeString($matches[0]),
+            $html
+        );
+
+        return $result ?? $html;
+    }
+
+    /**
+     * Find phone numbers and encode them
+     */
+    private function encodePhoneNumbers(string $html): string
+    {
+        if (!$this->phone) {
+            return $html;
+        }
+
+        if (!str_contains($html, 'tel:')) {
+            return $html;
+        }
+
+        $result = preg_replace_callback(
+            '/href=((["\'])tel:[^"\']+\2)/i',
+            fn ($matches) => 'href=' . $this->encodeString($matches[1]),
             $html
         );
 

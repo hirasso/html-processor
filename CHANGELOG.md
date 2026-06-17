@@ -4,7 +4,7 @@
 
 ### Major Changes
 
-- 95c2252: Rename `->encodeEmails` to `->obfuscateEmails`
+- 95c2252: Rename `->encodeEmails` to `->confuseBots`
 - 0bc5ffc: > From now on, php `>=8.4` is the minimum requirement. This allows us to use the new native `DOM\Document` class, which saves a LOT of trouble.
 - 9fe3e02: > Removed all typography helpers. These can be better handled by CSS nowadays.
 

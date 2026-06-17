@@ -35,7 +35,7 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-echo process($html)->obfuscateEmails();
+echo process($html)->obfuscateContacts();
 ```
 
 ## Maximal Example
@@ -46,7 +46,7 @@ use function Hirasso\HTMLProcessor\process;
 echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
-    ->obfuscateEmails()
+    ->obfuscateContacts(email: true, phone: true)
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags');
