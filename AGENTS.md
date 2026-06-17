@@ -15,6 +15,7 @@ This is a tiny HTML processor with a fluent API, written in PHP 🐘
 | `composer bench` | Run benchmarks |
 
 
-## After making changes
+## Writing new code
 
-- **PHP files** → run `composer test` and `composer analyse`
+- add matching tests for each new feature
+- run `composer test` and `composer analyse`

@@ -13,7 +13,7 @@ use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\EmailObfuscator;
+use Hirasso\HTMLProcessor\Service\HTML\ObfuscateContacts;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
@@ -127,13 +127,18 @@ final class HTMLProcessor
     }
 
     /**
-     * Encode Email addresses to protect them from spam bots
+     * Obfuscate contact data to protect it from spam bots
+     *
+     * @param bool $email obfuscate email addresses
+     * @param bool $phone obfuscate phone numbers
      */
-    public function obfuscateEmails(): self
-    {
-        return $this->mutate(function () {
+    public function obfuscateContacts(
+        bool $email = true,
+        bool $phone = true
+    ): self {
+        return $this->mutate(function () use ($email, $phone) {
             $this->preserveEntities();
-            $this->htmlQueue->add(new EmailObfuscator());
+            $this->htmlQueue->add(new ObfuscateContacts($email, $phone));
         });
     }
 
