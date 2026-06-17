@@ -21,7 +21,7 @@
 
 - Fluent API
 - Fully compatible with HTML5
-- All mutations are lazily batched and processed in one go
+- All mutations are lazily queued and processed in one go
 - Extensively tested
 
 ## Installation
