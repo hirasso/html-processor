@@ -85,8 +85,29 @@ final readonly class ObfuscateContacts implements HTMLServiceContract
         }
 
         $result = preg_replace_callback(
-            '/href=((["\'])tel:[^"\']+\2)/i',
-            fn ($matches) => 'href=' . $this->encodeString($matches[1]),
+            '/<a(\s[^>]*?)>(.*?)<\/a>/is',
+            function ($matches) {
+                $attrs = $matches[1];
+                $text = $matches[2];
+
+                if (!preg_match('/href=["\']\s?tel:/i', $attrs)) {
+                    return $matches[0];
+                }
+
+                $attrs = preg_replace_callback(
+                    '/href=((["\'])tel:[^"\']+\2)/i',
+                    fn ($m) => 'href=' . $this->encodeString($m[1]),
+                    $attrs
+                );
+
+                $text = preg_replace_callback(
+                    '/[\d+]/',
+                    fn ($m) => $this->encodeString($m[0]),
+                    $text
+                );
+
+                return '<a' . $attrs . '>' . $text . '</a>';
+            },
             $html
         );
 

@@ -18,16 +18,16 @@ test('Encodes Email addresses', function () {
     expectEncoded(obfuscateContacts('<a href="mailto:mail@example.com">mail@example.com</a>'));
 });
 
-test('encodes tel: href attribute', function () {
+test('encodes tel: href attribute and text content', function () {
     $result = obfuscateContacts('<a href="tel:+491234567890">+49 123 456 7890</a>');
 
     expect($result)->toContain('</a>');
-    // href is encoded (contains entities)
+    // href and text are encoded (contains entities)
     expect($result)->toContain('&#');
-    // visible text is untouched
-    expect($result)->toContain('+49 123 456 7890');
     // original plain href is gone
     expect($result)->not->toContain('href="tel:+491234567890"');
+    // visible digits and + are encoded
+    expect($result)->not->toContain('+49 123 456 7890');
 });
 
 test('leaves non-tel links untouched', function () {
