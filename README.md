@@ -6,25 +6,22 @@
 
 **A tiny HTML processor written in PHP 🐘**
 
-> [!WARNING]
-> The API hasn't stabilized, yet. Use with caution, ideally in combination with a tool like
-> [phpstan/phpstan](https://github.com/phpstan/phpstan)
-
 ## Features (all optional)
 
 - Automatically convert raw URLs to links
 - Remove empty elements
-- Process links:
-  - Add link classes based on type (e.g. `link--external link--file link--ext--pdf`)
-  - Open external links in new tab
-- Encode email addresses to confuse spam bots
+- Process anchor `a` elements:
+  - Add classes reflecting the link type (e.g. `link--external link--file link--ext--pdf`)
+  - Open external links in a new tab
+- Obfuscate email addresses to confuse spam bots (see [this article](https://spencermortensen.com/articles/email-obfuscation/))
 - Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
+- Strip tags
 
 ## Promises
 
 - Fluent API
-- Understands HTML5
-- Optimized for performance
+- Fully compatible with HTML5
+- All mutations are lazily batched and processed in one go
 - Extensively tested
 
 ## Installation
@@ -56,5 +53,4 @@ echo process($html)
 
 ```
 
-- Browse the <a href="./tests/Feature">tests/Feature folder</a> for more usage examples.
-- See the [list of currently supported quote styles](./src/Service/DOM/QuoteLocalizer/QuoteStyle.php) here.
+&rarr; Browse the <a href="./tests/Feature">tests folder</a> for more usage examples.
