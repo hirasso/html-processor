@@ -6,6 +6,7 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
+use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
@@ -153,6 +154,25 @@ final class HTMLProcessor
         $html = $this->htmlQueue->applyTo($html);
 
         return $html;
+    }
+
+    /**
+     * Dump the current state
+     */
+    public function dump(): self
+    {
+        dump($this->apply());
+
+        return $this;
+    }
+
+    /**
+     * Dump the current state and die
+     */
+    public function dd(): never
+    {
+        dump($this->apply());
+        throw new DumpAndDieException();
     }
 
     /**
