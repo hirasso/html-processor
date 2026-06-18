@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service\HTML;
 
 use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
+use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
 final readonly class StripTags implements HTMLServiceContract
 {
-    public function prio(): int
-    {
-        return 0;
-    }
+    use HasDefaultPrio;
 
     /**
      * @param string|list<string>|null $allowed_tags

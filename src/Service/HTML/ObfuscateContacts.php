@@ -5,21 +5,19 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Service\HTML;
 
 use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
+use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
  */
 final readonly class ObfuscateContacts implements HTMLServiceContract
 {
+    use HasDefaultPrio;
+
     public function __construct(
         private bool $email = true,
         private bool $phone = true
     ) {
-
-    }
-    public function prio(): int
-    {
-        return 0;
     }
 
 

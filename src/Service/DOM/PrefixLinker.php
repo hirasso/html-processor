@@ -7,17 +7,15 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 use Dom\HTMLDocument;
 use Dom\XPath;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
 
 final class PrefixLinker implements DOMServiceContract
 {
+    use HasDefaultPrio;
+
     /** @var array<string, string> */
     private array $entries;
-
-    public function prio(): int
-    {
-        return 0;
-    }
 
     /** Register an entry for linking */
     public function register(string $prefix, string $url): void
