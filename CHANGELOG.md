@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 3bc52d1: Fix PrefixLinker incorrectly re-linking text inside `<a>` elements; bump test coverage to 100%
+- 8f2b7af: Remove `removeDuplicateIds` — no longer needed with `Dom\HTMLDocument`
+- 17261ad: Remove `domQueueEarly`; `autolinkUrls` now runs in the same DOM pass as other processors
+- b9361b2: Loosen composer requirements
+- 5313d63: Drop the `league/uri` dependency
+
 ## 2.0.0
 
 ### Major Changes
