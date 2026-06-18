@@ -19,3 +19,9 @@ This is a tiny HTML processor with a fluent API, written in PHP 🐘
 
 - add matching tests for each new feature
 - run `composer test` and `composer analyse`
+
+## Agent skills
+
+### Domain docs
+
+Single-context layout — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
