@@ -42,6 +42,13 @@ test('Works in complex HTML', function () {
     HTML);
 });
 
+test('Does not re-link text already inside an anchor', function () {
+    $html = '<p><a href="https://example.com">@mention</a></p>';
+    $result = process($html)->autolinkPrefix('@', 'https://social.example.com/@')->apply();
+    expect($result)->toBe('<p><a href="https://example.com">@mention</a></p>');
+    expect($result)->not->toContain('<a href="https://social.example.com/@mention">');
+});
+
 test('Works with repeated calls', function () {
     $html = trimLines(<<<HTML
         <p>Follow @acme on SocialWeb.</p>
