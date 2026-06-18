@@ -29,7 +29,6 @@ final class HTMLProcessor
     /** used for typography optimizations */
     protected string $locale = 'en_US';
 
-    protected DOMQueue $domQueueEarly;
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
 
@@ -38,7 +37,6 @@ final class HTMLProcessor
     protected function __construct(
         protected readonly string $originalHTML
     ) {
-        $this->domQueueEarly = new DOMQueue();
         $this->domQueue = new DOMQueue();
         $this->htmlQueue = new HTMLQueue();
     }
@@ -68,7 +66,7 @@ final class HTMLProcessor
     public function autolinkUrls(?AutolinkOptions $options = null): self
     {
         return $this->mutate(function () use ($options) {
-            $this->domQueueEarly->add(new Autolinker($options  ?? new AutolinkOptions(
+            $this->domQueue->add(new Autolinker($options  ?? new AutolinkOptions(
                 stripScheme: true,
                 textLimit: 35,
                 autoTitle: false,
@@ -154,7 +152,6 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->domQueueEarly->applyTo($html);
         $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
 
