@@ -36,8 +36,6 @@ final readonly class Link
             $this->el->classList->add("{$prefix}--file");
         }
 
-        dump($this->type);
-
         if ($this->uri->getFragment()) {
             $this->el->classList->add("{$prefix}--anchor");
         }
