@@ -11,7 +11,7 @@
 - Automatically convert raw URLs to links
 - Remove empty elements
 - Process anchor `a` elements:
-  - Add classes reflecting the link type (e.g. `link--external link--file link--ext--pdf`)
+  - Add classes reflecting the link type (e.g. `link--external link--file`)
   - Open external links in a new tab
 - Obfuscate email addresses to confuse spam bots (see [this article](https://spencermortensen.com/articles/email-obfuscation/))
 - Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
