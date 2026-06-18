@@ -19,3 +19,13 @@ This is a tiny HTML processor with a fluent API, written in PHP 🐘
 
 - add matching tests for each new feature
 - run `composer test` and `composer analyse`
+
+## Commits
+
+- Before committing a feature/fix, suggest a changeset message and level (patch/minor/major) and write it via `@pnpm changeset`. Commit it together with the changes
+
+## Agent skills
+
+### Domain docs
+
+Single-context layout — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

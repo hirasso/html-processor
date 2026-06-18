@@ -45,13 +45,13 @@ final class Support
         }
 
         if (!$targetDoc = $textNode->ownerDocument) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         $tmpDoc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
 
         if (!$tmpDoc->body) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
         $fragment = $targetDoc->createDocumentFragment();

@@ -68,6 +68,19 @@ test('Runs autolinkUrls before obfuscateContacts', function () {
     expect(html_entity_decode($result))->toBe($expected);
 });
 
+test('apply() returns empty string unchanged when html is empty', function () {
+    expect(process('')->stripTags()->apply())->toBe('');
+});
+
+test('apply() returns original html when no mutations are queued', function () {
+    expect(process('<p>foo</p>')->apply())->toBe('<p>foo</p>');
+});
+
+test('__toString() returns the same result as apply()', function () {
+    $processor = process('<p>foo</p>')->stripTags();
+    expect((string) $processor)->toBe($processor->apply());
+});
+
 test('Works with self-closing tags', function () {
     $html = <<<HTML
     <p>

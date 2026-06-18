@@ -21,3 +21,15 @@ test('Truncates autolinked URLs', function () {
     $result = process("https://example.com/very-long-url-that-should-absolutely-be-truncated")->autolinkUrls()->apply();
     expect($result)->toBe('<a href="https://example.com/very-long-url-that-should-absolutely-be-truncated">example.com/very-long-url-that-s...</a>');
 });
+
+test('Works together with processLinks() in one Dom\HTMLDocument pass', function () {
+    $_SERVER['HTTP_HOST'] = 'https://example.local.com';
+
+    $result = process("https://example.com")->autolinkUrls()->processLinks()->apply();
+    expect($result)->toBe('<a href="https://example.com" class="link--external">example.com</a>');
+
+    $result = process("https://example.com")->processLinks()->autolinkUrls()->apply();
+    expect($result)->toBe('<a href="https://example.com" class="link--external">example.com</a>');
+
+    $_SERVER['HTTP_HOST'] = '';
+});

@@ -6,6 +6,7 @@ namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
 
 use Closure;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Dom\Element;
 use Dom\HTMLDocument;
 
@@ -21,16 +22,13 @@ use Dom\HTMLDocument;
  */
 final readonly class LinkProcessor implements DOMServiceContract
 {
+    use HasDefaultPrio;
+
     /**
      * @param ?Closure(Link $link): mixed $userCallback
      */
     public function __construct(private ?Closure $userCallback = null)
     {
-    }
-
-    public function prio(): int
-    {
-        return 0;
     }
 
     /**

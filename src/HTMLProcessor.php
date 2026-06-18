@@ -23,13 +23,9 @@ use Hirasso\HTMLProcessor\Service\HTML\StripTags;
  */
 final class HTMLProcessor
 {
-    /** track if entities should be decoded */
-    public bool $preserveEntities = false;
-
     /** used for typography optimizations */
     protected string $locale = 'en_US';
 
-    protected DOMQueue $domQueueEarly;
     protected DOMQueue $domQueue;
     protected HTMLQueue $htmlQueue;
 
@@ -38,7 +34,6 @@ final class HTMLProcessor
     protected function __construct(
         protected readonly string $originalHTML
     ) {
-        $this->domQueueEarly = new DOMQueue();
         $this->domQueue = new DOMQueue();
         $this->htmlQueue = new HTMLQueue();
     }
@@ -68,7 +63,7 @@ final class HTMLProcessor
     public function autolinkUrls(?AutolinkOptions $options = null): self
     {
         return $this->mutate(function () use ($options) {
-            $this->domQueueEarly->add(new Autolinker($options  ?? new AutolinkOptions(
+            $this->domQueue->add(new Autolinker($options  ?? new AutolinkOptions(
                 stripScheme: true,
                 textLimit: 35,
                 autoTitle: false,
@@ -136,10 +131,7 @@ final class HTMLProcessor
         bool $email = true,
         bool $phone = true
     ): self {
-        return $this->mutate(function () use ($email, $phone) {
-            $this->preserveEntities();
-            $this->htmlQueue->add(new ObfuscateContacts($email, $phone));
-        });
+        return $this->mutate(fn () => $this->htmlQueue->add(new ObfuscateContacts($email, $phone)));
     }
 
     /**
@@ -154,7 +146,6 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->domQueueEarly->applyTo($html);
         $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
 
@@ -186,14 +177,5 @@ final class HTMLProcessor
     public function __toString(): string
     {
         return $this->apply();
-    }
-
-    /**
-     * Preserve entities explicitly
-     */
-    public function preserveEntities(): self
-    {
-        $this->preserveEntities = true;
-        return $this;
     }
 }
