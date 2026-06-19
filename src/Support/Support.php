@@ -6,9 +6,9 @@ namespace Hirasso\HTMLProcessor\Support;
 
 use Dom\Element;
 use Dom\HTMLDocument;
+use Dom\Node;
 use Dom\Text;
 use Dom\XPath;
-use Generator;
 
 final class Support
 {
@@ -135,14 +135,14 @@ final class Support
         return false;
     }
 
-    /** @return \Generator<\Dom\Text> */
-    public static function getTextNodes(HTMLDocument $doc): Generator
+    /** @return list<Text> */
+    public static function getTextNodes(HTMLDocument $doc): array
     {
         $xpath = new XPath($doc);
-        foreach ($xpath->query('//text()') as $node) {
-            if ($node instanceof Text && trim($node->nodeValue ?? '') !== '') {
-                yield $node;
-            }
-        }
+        $nodes = array_filter(
+            [...$xpath->query('//text()')],
+            fn (Node $node) => $node instanceof Text && trim($node->nodeValue ?? '') !== ''
+        );
+        return array_values($nodes);
     }
 }
