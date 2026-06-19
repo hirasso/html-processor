@@ -17,7 +17,7 @@ final readonly class EmptyElements implements DOMServiceContract
     use HasDefaultPrio;
 
     public function __construct(
-        protected ?string $selector = null
+        private ?string $selector = null
     ) {
     }
 
