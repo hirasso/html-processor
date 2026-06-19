@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 3f4dd11: Add `->when()` for conditional fluent chaining
+
 ## 2.0.2
 
 ### Patch Changes
