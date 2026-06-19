@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+### Patch Changes
+
+- c2aa7e8: Fix: Do not link already-linked urls again
+
 ## 2.1.0
 
 ### Minor Changes
