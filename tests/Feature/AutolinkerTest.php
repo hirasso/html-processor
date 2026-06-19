@@ -22,6 +22,11 @@ test('Truncates autolinked URLs', function () {
     expect($result)->toBe('<a href="https://example.com/very-long-url-that-should-absolutely-be-truncated">example.com/very-long-url-that-s...</a>');
 });
 
+test('Ignores already-linked mailto: links', function () {
+    $result = process('<a href="mailto:mail@example.com">mail@example.com</a>')->autolinkUrls()->apply();
+    expect($result)->toBe('<a href="mailto:mail@example.com">mail@example.com</a>');
+});
+
 test('Works together with processLinks() in one Dom\HTMLDocument pass', function () {
     $_SERVER['HTTP_HOST'] = 'https://example.local.com';
 

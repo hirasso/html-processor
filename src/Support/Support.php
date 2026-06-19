@@ -123,6 +123,18 @@ final class Support
         return true;
     }
 
+    public static function hasAncestor(\Dom\Node $node, string $tagName): bool
+    {
+        $parent = $node->parentNode;
+        while ($parent !== null) {
+            if ($parent instanceof Element && strtolower($parent->tagName) === strtolower($tagName)) {
+                return true;
+            }
+            $parent = $parent->parentNode;
+        }
+        return false;
+    }
+
     /** @return \Generator<\Dom\Text> */
     public static function getTextNodes(HTMLDocument $doc): Generator
     {

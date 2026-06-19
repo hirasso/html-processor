@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
-use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Text;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
@@ -50,7 +49,7 @@ final class PrefixLinker implements DOMServiceContract
     {
         foreach (Support::getTextNodes($document) as $textNode) {
             // Skip text nodes inside <a> elements
-            if ($this->hasAnchorAncestor($textNode)) {
+            if (Support::hasAncestor($textNode, 'a')) {
                 continue;
             }
 
@@ -62,23 +61,6 @@ final class PrefixLinker implements DOMServiceContract
 
             Support::replaceTextNodeWithHtml($textNode, $text);
         }
-    }
-
-    /**
-     * Check if a text node has an <a> element ancestor.
-     * Uses DOM traversal instead of XPath to correctly handle the HTML namespace
-     * in Dom\HTMLDocument (PHP 8.4+), where XPath `ancestor::a` does not match.
-     */
-    private function hasAnchorAncestor(Text $textNode): bool
-    {
-        $parent = $textNode->parentNode;
-        while ($parent !== null) {
-            if ($parent instanceof Element && $parent->localName === 'a') {
-                return true;
-            }
-            $parent = $parent->parentNode;
-        }
-        return false;
     }
 
     private function link(string $text, string $prefix, string $url): string

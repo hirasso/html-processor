@@ -35,6 +35,9 @@ final readonly class Autolinker implements DOMServiceContract
         }
 
         foreach (Support::getTextNodes($document) as $node) {
+            if (Support::hasAncestor($node, 'a')) {
+                continue;
+            }
             $converted = $autolink->convert($node->textContent);
             $converted = $autolink->convertEmail($converted);
             Support::replaceTextNodeWithHtml($node, $converted);
