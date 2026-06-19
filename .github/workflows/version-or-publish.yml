@@ -21,7 +21,7 @@ jobs:
       fullName: ${{ steps.package-infos.outputs.fullName }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Read and Write Package Infos to Output
         id: package-infos
@@ -47,7 +47,7 @@ jobs:
           git config --global user.name "Rasso Hilber's Bot"
 
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Environment
         uses: ./.github/actions/setup-environment
@@ -56,7 +56,7 @@ jobs:
       # or if the commit message matches the release PR (= new versions must be published to NPM)
       - name: Create changesets PR or Publish
         id: cs
-        uses: changesets/action@v1
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           title: "[CI] Release"
           commit: "[CI] Release"

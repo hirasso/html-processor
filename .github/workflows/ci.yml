@@ -20,7 +20,7 @@ jobs:
         php: [8.4, 8.5]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Environment
         uses: ./.github/actions/setup-environment
@@ -33,7 +33,7 @@ jobs:
           composer test:ci
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         if: ${{ matrix.php == 8.4 }}
         with:
           files: ./coverage.xml
@@ -49,7 +49,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Environment
         uses: ./.github/actions/setup-environment
@@ -58,7 +58,7 @@ jobs:
         run: composer format
 
       - name: Commit linted files
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
         with:
           commit_message: Format Code
           file_pattern: 'src/*.php tests/*.php'
