@@ -92,12 +92,14 @@ final readonly class ObfuscateContacts implements HTMLServiceContract
                     return $matches[0];
                 }
 
+                // encode the link's href attribute
                 $attrs = preg_replace_callback(
-                    '/href=((["\'])tel:[^"\']+\2)/i',
-                    fn ($m) => 'href=' . $this->encodeString($m[1]),
+                    '/href=(["\'])(tel:.+?)\1/i',
+                    fn ($m) => 'href=' . $m[1] . $this->encodeString($m[2]) . $m[1],
                     $attrs
                 );
 
+                // encode any digits in the link text
                 $text = preg_replace_callback(
                     '/[\d+]/',
                     fn ($m) => $this->encodeString($m[0]),

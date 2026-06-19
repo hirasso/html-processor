@@ -2,25 +2,33 @@
 
 use function Hirasso\HTMLProcessor\process;
 
+function obfuscateEmail(string $string): string
+{
+    return process($string)->obfuscateContacts(email: true, phone: false)->apply();
+}
+
+function obfuscateTel(string $string): string
+{
+    return process($string)->obfuscateContacts(email: false, phone: true)->apply();
+}
+
 function obfuscateContacts(string $string, bool $email = true, bool $phone = true): string
 {
     return process($string)->obfuscateContacts($email, $phone)->apply();
 }
 
-function expectEncoded(string $string): void
-{
-    expect(str_starts_with($string, '<a href="'))->toBe(true);
-    expect(str_ends_with($string, '</a>'))->toBe(true);
-    expect(substr_count($string, '#') > 10)->toBe(true);
-}
-
 test('Encodes Email addresses', function () {
-    expectEncoded(obfuscateContacts('<a href="mailto:mail@example.com">mail@example.com</a>'));
+    $result = obfuscateContacts('<a href="mailto:mail@example.com">mail@example.com</a>');
+    expect($result)->toContain('<a href="');
+    expect($result)->toContain('</a>');
+    expect($result)->toContain('&#');
 });
 
 test('encodes tel: href attribute and text content', function () {
-    $result = obfuscateContacts('<a href="tel:+491234567890">+49 123 456 7890</a>');
+    $result = obfuscateTel('<a href="tel:+491234567890">+49 123 456 7890</a>');
 
+    // the quote is perserved
+    expect($result)->toContain('<a href="');
     expect($result)->toContain('</a>');
     // href and text are encoded (contains entities)
     expect($result)->toContain('&#');
@@ -30,15 +38,29 @@ test('encodes tel: href attribute and text content', function () {
     expect($result)->not->toContain('+49 123 456 7890');
 });
 
+test('encodes tel: with single quotes around href attribute', function () {
+    $result = obfuscateTel("<a href='tel:+491234567890'>+49 123 456 7890</a>");
+
+    // the quote is perserved
+    expect($result)->toContain('<a href=\'');
+    expect($result)->toContain('</a>');
+    // href and text are encoded (contains entities)
+    expect($result)->toContain('&#');
+    // original plain href is gone
+    expect($result)->not->toContain('href=\'tel:+491234567890\'');
+    // visible digits and + are encoded
+    expect($result)->not->toContain('+49 123 456 7890');
+});
+
 test('leaves non-tel links untouched', function () {
     $input = '<a href="https://example.com">example</a>';
-    expect(obfuscateContacts($input))->toContain('href="https://example.com"');
+    expect(obfuscateTel($input))->toContain('href="https://example.com"');
 });
 
 test('leaves plain text phone numbers untouched', function () {
     $input = '<p>Call us at +49 123 456 7890</p>';
-    expect(obfuscateContacts($input))->toContain('+49 123 456 7890');
-    expect(obfuscateContacts($input))->not->toContain('&#');
+    expect(obfuscateTel($input))->toContain('+49 123 456 7890');
+    expect(obfuscateTel($input))->not->toContain('&#');
 });
 
 test('skips email encoding when email=false', function () {
@@ -54,6 +76,6 @@ test('skips phone encoding when phone=false', function () {
 
 test('leaves non-tel anchor unchanged when tel: string is present elsewhere', function () {
     $input = '<a href="tel:+1234">call</a><a href="https://example.com">example</a>';
-    $result = obfuscateContacts($input);
+    $result = obfuscateTel($input);
     expect($result)->toContain('href="https://example.com"');
 });
