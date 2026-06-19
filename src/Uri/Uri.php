@@ -6,20 +6,21 @@ namespace Hirasso\HTMLProcessor\Uri;
 
 use Dom\Element;
 
+/**
+ * @phpstan-type ParsedUri array{
+ *   scheme?: string,
+ *   host?: string,
+ *   port?: int,
+ *   user?: string,
+ *   pass?: string,
+ *   path?: string,
+ *   query?: string,
+ *   fragment?: string
+ * }
+ */
 final readonly class Uri
 {
-    /**
-     * @var array{
-     *   scheme?: string,
-     *   host?: string,
-     *   port?: int,
-     *   user?: string,
-     *   pass?: string,
-     *   path?: string,
-     *   query?: string,
-     *   fragment?: string
-     * }|null
-     */
+    /** @var ParsedUri|null */
     public ?array $parsed;
 
     public string $uri;
@@ -28,12 +29,38 @@ final readonly class Uri
         string $uri
     ) {
         $this->uri = trim($uri);
-        $this->parsed = parse_url($uri) ?: null;
+
+        $this->parsed = $this->parse($uri);
+    }
+
+    /**
+     * Parse and normalize
+     * @return ParsedUri|null
+     */
+    private function parse(string $uri): ?array
+    {
+        if (!$parsed = parse_url($uri)) {
+            return null;
+        }
+
+        // Normalize scheme and host
+        foreach (['scheme', 'host'] as $part) {
+            if ($parsed[$part] ?? null) {
+                $parsed[$part] = strtolower($parsed[$part]);
+            }
+        }
+
+        return $parsed;
+    }
+
+    public static function fromString(string $str): self
+    {
+        return new self($str);
     }
 
     public static function fromElement(Element $el): self
     {
-        return new self($el->getAttribute('href') ?? '');
+        return self::fromString($el->getAttribute('href') ?? '');
     }
 
     public function isInvalid(): bool
