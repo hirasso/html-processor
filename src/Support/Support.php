@@ -36,7 +36,7 @@ final class Support
      */
     public static function replaceTextNodeWithHtml(Text $textNode, string $html): void
     {
-        if (self::containsOnlyWhitespace($html)) {
+        if (self::isOnlyWhitespace($html)) {
             return;
         }
 
@@ -64,7 +64,7 @@ final class Support
     }
 
     /**
-     * Remove any whitespace-looking stuff from a html string
+     * Normalize any whitespace-looking stuff from a html string
      * \s matches regular whitespace, \xc2\xa0 matches UTF-8 non-breaking space
      */
     public static function normalizeWhitespace(string $string): string
@@ -78,19 +78,19 @@ final class Support
     /**
      * Check if an element contains only white space and nothing else
      */
-    public static function elementContainsOnlyWhitespace(Element $el): bool
+    public static function containsOnlyWhitespace(Element $el): bool
     {
         if (!self::elementContainsOnlyText($el)) {
             return false;
         }
 
-        return self::containsOnlyWhitespace($el->textContent ?? '');
+        return self::isOnlyWhitespace($el->textContent ?? '');
     }
 
     /**
-     * Is a value only whitespace
+     * Check if a string consists of only whitespace
      */
-    private static function containsOnlyWhitespace(string $value): bool
+    private static function isOnlyWhitespace(string $value): bool
     {
         $value = self::normalizeWhitespace($value);
 

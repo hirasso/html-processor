@@ -24,7 +24,7 @@ final readonly class EmptyElements implements DOMServiceContract
     public function run(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll($this->selector ?? 'p') as $el) {
-            if (Support::elementContainsOnlyWhitespace($el)) {
+            if (Support::containsOnlyWhitespace($el)) {
                 $el->remove();
             }
         }
