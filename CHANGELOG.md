@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- a732034: Normalize `scheme` and `host` in URIs
+- d7f2de4: Fix: do not encode quotes around href attributes during obfuscation
+
 ## 2.0.1
 
 ### Patch Changes
