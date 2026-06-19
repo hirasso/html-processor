@@ -11,7 +11,7 @@ use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 final class HTMLQueue implements HTMLQueueContract
 {
     /** @var array<class-string<HTMLServiceContract>, HTMLServiceContract> */
-    protected array $services = [];
+    private array $services = [];
 
     public function add(HTMLServiceContract $service): void
     {

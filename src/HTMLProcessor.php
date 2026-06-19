@@ -23,16 +23,13 @@ use Hirasso\HTMLProcessor\Service\HTML\StripTags;
  */
 final class HTMLProcessor
 {
-    /** used for typography optimizations */
-    protected string $locale = 'en_US';
+    private DOMQueue $domQueue;
+    private HTMLQueue $htmlQueue;
 
-    protected DOMQueue $domQueue;
-    protected HTMLQueue $htmlQueue;
+    private bool $mutated = false;
 
-    protected bool $mutated = false;
-
-    protected function __construct(
-        protected readonly string $originalHTML
+    private function __construct(
+        private readonly string $originalHTML
     ) {
         $this->domQueue = new DOMQueue();
         $this->htmlQueue = new HTMLQueue();
@@ -50,7 +47,7 @@ final class HTMLProcessor
      * Mutate, return self
      * @param Closure(): mixed $mutation
      */
-    protected function mutate(Closure $mutation): self
+    private function mutate(Closure $mutation): self
     {
         $mutation();
         $this->mutated = true;
@@ -132,6 +129,31 @@ final class HTMLProcessor
         bool $phone = true
     ): self {
         return $this->mutate(fn () => $this->htmlQueue->add(new ObfuscateContacts($email, $phone)));
+    }
+
+    /**
+     * Conditionally apply operations
+     *
+     * @param bool|Closure(self): bool $condition
+     * @param Closure(self): mixed $then
+     * @param ?Closure(self): mixed $else
+     */
+    public function when(
+        bool|Closure $condition,
+        Closure $then,
+        ?Closure $else = null
+    ): self {
+        if ($condition instanceof Closure) {
+            $condition = $condition($this);
+        }
+
+        if ($condition) {
+            $then($this);
+        } elseif ($else !== null) {
+            $else($this);
+        }
+
+        return $this;
     }
 
     /**

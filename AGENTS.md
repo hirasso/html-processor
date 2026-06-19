@@ -22,7 +22,7 @@ This is a tiny HTML processor with a fluent API, written in PHP 🐘
 
 ## Commits
 
-- Before committing a feature/fix, suggest a changeset message and level (patch/minor/major) and write it via `@pnpm changeset`. Commit it together with the changes
+- Before committing a feature/fix, suggest a changeset message and level (patch/minor/major) and write it into the `./.changesets` folder. Commit it together with the changes
 
 ## Agent skills
 

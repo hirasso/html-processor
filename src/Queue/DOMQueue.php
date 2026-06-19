@@ -12,7 +12,7 @@ use Dom\HTMLDocument;
 final class DOMQueue implements DOMQueueContract
 {
     /** @var array<class-string<DOMServiceContract>, DOMServiceContract> */
-    protected array $services = [];
+    private array $services = [];
 
     public function add(DOMServiceContract $service): void
     {

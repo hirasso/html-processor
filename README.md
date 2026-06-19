@@ -13,9 +13,10 @@
 - Process anchor `a` elements:
   - Add classes reflecting the link type (e.g. `link--external link--file`)
   - Open external links in a new tab
-- Obfuscate email addresses to confuse spam bots (see [this article](https://spencermortensen.com/articles/email-obfuscation/))
+- Obfuscate email addresses and phone numbers to confuse spam bots (see [this article](https://spencermortensen.com/articles/email-obfuscation/))
 - Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
 - Strip tags
+- Conditionally apply any operation
 
 ## Promises
 
@@ -49,7 +50,9 @@ echo process($html)
     ->obfuscateContacts(email: true, phone: true)
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
-    ->autolinkPrefix('#', 'https://your-instance.social/tags');
+    ->autolinkPrefix('#', 'https://your-instance.social/tags')
+    // ->when() accepts a bool or a closure as the condition:
+    ->when($isRichText, fn ($p) => $p->stripTags(allowedTags: ['p', 'a', 'strong', 'em']));
 
 ```
 
