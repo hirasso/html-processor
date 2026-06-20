@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Support;
 
-use Dom\Element;
+use Dom\DocumentFragment;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\Text;
@@ -32,35 +32,39 @@ final class Support
     }
 
     /**
-     * Convert a text node to HTML
+     * Parse the text in a text node, if it contains HTML
      */
-    public static function replaceTextNodeWithHtml(Text $textNode, string $html): void
+    public static function parseTextNode(Text $node): ?DocumentFragment
     {
-        if (self::isOnlyWhitespace($html)) {
-            return;
+        // only makes sense if the data actually contains HTML tags
+        if (!str_contains($node->data, '<')) {
+            return null;
         }
 
-        if ($html === $textNode->nodeValue) {
-            return;
+        // only works if the node belongs to a document
+        if (!$doc = $node->ownerDocument) {
+            return null; // @codeCoverageIgnore
         }
 
-        if (!$targetDoc = $textNode->ownerDocument) {
-            return; // @codeCoverageIgnore
+        $newNodes = array_map(
+            fn ($newNode) => $doc->importNode($newNode, true),
+            [...HTMLDocument::createFromString($node->data, LIBXML_NOERROR)->body->childNodes ?? []]
+        );
+
+        if (empty($newNodes)) {
+            return null; // @codeCoverageIgnore
         }
 
-        $tmpDoc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
+        $fragment = $doc->createDocumentFragment();
 
-        if (!$tmpDoc->body) {
-            return; // @codeCoverageIgnore
+        // HTML parsers strip leading whitespace from <body>; restore it manually
+        if (preg_match('/^(\s+)/', $node->data, $m)) {
+            $fragment->append($doc->createTextNode($m[1]));
         }
 
-        $fragment = $targetDoc->createDocumentFragment();
+        $fragment->append(...$newNodes);
 
-        foreach ($tmpDoc->body->childNodes as $child) {
-            $fragment->appendChild($targetDoc->importNode($child, true));
-        }
-
-        $textNode->replaceWith($fragment);
+        return $fragment;
     }
 
     /**
@@ -69,22 +73,25 @@ final class Support
      */
     public static function normalizeWhitespace(string $string): string
     {
+        $string = preg_replace('/&nbsp;/', ' ', $string) ?? $string;
         $string = preg_replace('/^[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
-        $string = preg_replace('/^[\s\xc2\xa0]*&nbsp;[\s\xc2\xa0]*$/i', ' ', $string) ?? $string;
         $string = preg_replace('/\s+/', ' ', $string) ?? $string;
         return $string;
     }
 
     /**
-     * Check if an element contains only white space and nothing else
+     * Check if a node contains only white space
      */
-    public static function containsOnlyWhitespace(Element $el): bool
+    public static function containsOnlyWhitespace(Node $node): bool
     {
-        if (!self::elementContainsOnlyText($el)) {
-            return false;
+        /** any child that is not a text node? */
+        foreach ($node->childNodes as $childNode) {
+            if (!($childNode instanceof Text)) {
+                return false;
+            }
         }
 
-        return self::isOnlyWhitespace($el->textContent ?? '');
+        return self::isOnlyWhitespace($node->textContent ?? '');
     }
 
     /**
@@ -108,14 +115,11 @@ final class Support
     /**
      * Check if an element only contains text
      */
-    public static function elementContainsOnlyText(Element $el): bool
+    public static function elementContainsOnlyText(Node $el): bool
     {
-        if (!$el->hasChildNodes()) {
-            return true;
-        }
 
         foreach ($el->childNodes as $child) {
-            if ($child->nodeType !== XML_TEXT_NODE) {
+            if (!($child instanceof Text)) {
                 return false;
             }
         }
@@ -123,26 +127,10 @@ final class Support
         return true;
     }
 
-    public static function hasAncestor(\Dom\Node $node, string $tagName): bool
-    {
-        $parent = $node->parentNode;
-        while ($parent !== null) {
-            if ($parent instanceof Element && strtolower($parent->tagName) === strtolower($tagName)) {
-                return true;
-            }
-            $parent = $parent->parentNode;
-        }
-        return false;
-    }
-
-    /** @return list<Text> */
+    /** @return list<\Dom\Text> */
     public static function getTextNodes(HTMLDocument $doc): array
     {
-        $xpath = new XPath($doc);
-        $nodes = array_filter(
-            [...$xpath->query('//text()')],
-            fn (Node $node) => $node instanceof Text && trim($node->nodeValue ?? '') !== ''
-        );
-        return array_values($nodes);
+        /** @var list<\Dom\Text> */
+        return [...new XPath($doc)->query('//text()[normalize-space() != ""]')];
     }
 }

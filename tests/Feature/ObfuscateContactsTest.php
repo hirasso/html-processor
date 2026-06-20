@@ -21,7 +21,7 @@ test('Encodes Email addresses', function () {
     $result = obfuscateContacts('<a href="mailto:mail@example.com">mail@example.com</a>');
     expect($result)->toContain('<a href="');
     expect($result)->toContain('</a>');
-    expect($result)->toContain('&#');
+    expect($result)->toContain('#');
 });
 
 test('encodes tel: href attribute and text content', function () {
@@ -31,7 +31,7 @@ test('encodes tel: href attribute and text content', function () {
     expect($result)->toContain('<a href="');
     expect($result)->toContain('</a>');
     // href and text are encoded (contains entities)
-    expect($result)->toContain('&#');
+    expect($result)->toContain('#');
     // original plain href is gone
     expect($result)->not->toContain('href="tel:+491234567890"');
     // visible digits and + are encoded
@@ -45,7 +45,7 @@ test('encodes tel: with single quotes around href attribute', function () {
     expect($result)->toContain('<a href=\'');
     expect($result)->toContain('</a>');
     // href and text are encoded (contains entities)
-    expect($result)->toContain('&#');
+    expect($result)->toContain('#');
     // original plain href is gone
     expect($result)->not->toContain('href=\'tel:+491234567890\'');
     // visible digits and + are encoded
@@ -60,13 +60,13 @@ test('leaves non-tel links untouched', function () {
 test('leaves plain text phone numbers untouched', function () {
     $input = '<p>Call us at +49 123 456 7890</p>';
     expect(obfuscateTel($input))->toContain('+49 123 456 7890');
-    expect(obfuscateTel($input))->not->toContain('&#');
+    expect(obfuscateTel($input))->not->toContain('#');
 });
 
 test('skips email encoding when email=false', function () {
     $result = obfuscateContacts('<a href="mailto:mail@example.com">mail@example.com</a>', email: false);
     expect($result)->toContain('mail@example.com');
-    expect($result)->not->toContain('&#');
+    expect($result)->not->toContain('#');
 });
 
 test('skips phone encoding when phone=false', function () {

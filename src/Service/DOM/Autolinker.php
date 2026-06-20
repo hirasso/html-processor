@@ -28,19 +28,17 @@ final readonly class Autolinker implements DOMServiceContract
 
     public function run(HTMLDocument $document): void
     {
-        static $autolink;
-
-        if (!isset($autolink)) {
-            $autolink = new Autolink($this->options);
-        }
+        $autolink = new Autolink($this->options);
 
         foreach (Support::getTextNodes($document) as $node) {
-            if (Support::hasAncestor($node, 'a')) {
+            if ($node->parentElement?->closest('a')) {
                 continue;
             }
-            $converted = $autolink->convert($node->textContent);
-            $converted = $autolink->convertEmail($converted);
-            Support::replaceTextNodeWithHtml($node, $converted);
+            $node->data = $autolink->convert($node->data);
+            $node->data = $autolink->convertEmail($node->data);
+            if ($parsed = Support::parseTextNode($node)) {
+                $node->replaceWith($parsed);
+            };
         }
     }
 }
