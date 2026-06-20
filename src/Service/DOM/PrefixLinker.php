@@ -49,7 +49,7 @@ final class PrefixLinker implements DOMServiceContract
     {
         foreach (Support::getTextNodes($document) as $textNode) {
             // Skip text nodes inside <a> elements
-            if (Support::hasAncestor($textNode, 'a')) {
+            if ($textNode->parentElement?->closest('a')) {
                 continue;
             }
 

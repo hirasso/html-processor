@@ -123,30 +123,10 @@ final class Support
         return true;
     }
 
-    public static function hasAncestor(Node $node, string $tagName): bool
+    /** @return list<\Dom\Text> */
+    public static function getTextNodes(HTMLDocument $doc): array
     {
-        $tagName = strtolower($tagName);
-        $parent = $node->parentNode;
-        while ($parent !== null) {
-            if ($parent instanceof Element && strtolower($parent->tagName) === $tagName) {
-                return true;
-            }
-            $parent = $parent->parentNode;
-        }
-        return false;
-    }
-
-    /** @return list<Text> */
-    public static function getTextNodes(HTMLDocument $doc, bool $ignoreEmpty = true): array
-    {
-        $query = $ignoreEmpty
-            ? '//text()[normalize-space() != ""]'
-            : '//text()';
-
-        $xpath = new XPath($doc);
-        return array_values(array_filter(
-            [...$xpath->query($query)],
-            fn (Node $node) => $node instanceof Text,
-        ));
+        /** @var list<\Dom\Text> */
+        return [...new XPath($doc)->query('//text()[normalize-space() != ""]')];
     }
 }

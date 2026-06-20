@@ -31,7 +31,7 @@ final readonly class Autolinker implements DOMServiceContract
         $autolink = new Autolink($this->options);
 
         foreach (Support::getTextNodes($document) as $node) {
-            if (Support::hasAncestor($node, 'a') || empty($node->textContent)) {
+            if ($node->parentElement?->closest('a') || empty($node->textContent)) {
                 continue;
             }
             $converted = $autolink->convert($node->textContent);
