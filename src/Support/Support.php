@@ -136,13 +136,16 @@ final class Support
     }
 
     /** @return list<Text> */
-    public static function getTextNodes(HTMLDocument $doc): array
+    public static function getTextNodes(HTMLDocument $doc, bool $ignoreEmpty = true): array
     {
+        $query = $ignoreEmpty
+            ? '//text()[normalize-space() != ""]'
+            : '//text()';
+
         $xpath = new XPath($doc);
-        $nodes = array_filter(
-            [...$xpath->query('//text()')],
-            fn (Node $node) => $node instanceof Text && trim($node->nodeValue ?? '') !== ''
-        );
-        return array_values($nodes);
+        return array_values(array_filter(
+            [...$xpath->query($query)],
+            fn (Node $node) => $node instanceof Text,
+        ));
     }
 }
