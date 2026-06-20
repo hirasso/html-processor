@@ -34,7 +34,7 @@ final class Support
     /**
      * Parse the text in a text node, if it contains HTML
      */
-    public static function parseHtmlFragment(string $html): ?DocumentFragment
+    public static function parseHtml(string $html): ?DocumentFragment
     {
         // only makes sense if the data actually contains HTML tags
         if (!str_contains($html, '<')) {
@@ -59,23 +59,6 @@ final class Support
         $fragment->append(...$newNodes);
 
         return $fragment;
-    }
-
-    /**
-     * Convert a text node's content to real DOM nodes if it contains HTML
-     */
-    public static function parseTextNodeValue(Text $node): ?Node
-    {
-        // only works if the node belongs to a document
-        if (!$node->ownerDocument) {
-            return null; // @codeCoverageIgnore
-        }
-
-        if (!$parsed = self::parseHtmlFragment($node->data)) {
-            return null;
-        }
-
-        return $node->ownerDocument->importNode($parsed, true);
     }
 
     /**

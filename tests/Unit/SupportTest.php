@@ -4,7 +4,7 @@ use Dom\Text;
 use Dom\XPath;
 use Hirasso\HTMLProcessor\Support\Support;
 
-test('parseTextNodeValue() parses html and preserves leading and trailing whitespace', function () {
+test('parseHtml() parses html and preserves leading and trailing whitespace', function () {
     $doc = Support::createDocument('<p>hello</p>');
     $xp = new XPath($doc);
     $node = $xp->query('//text()')->item(0);
@@ -12,12 +12,12 @@ test('parseTextNodeValue() parses html and preserves leading and trailing whites
     assert($node instanceof Text);
 
     $node->data = ' <span>hello</span> ';
-    $parsed = Support::parseTextNodeValue($node);
+    $parsed = Support::parseHtml($node->data);
 
     expect(count($parsed->childNodes ?? []))->toBe(3);
 });
 
-test('parseTextNodeValue() preserves leading and trailing white space', function () {
+test('parseHtml() preserves leading and trailing white space', function () {
     $doc = Support::createDocument('<p>hello</p>');
     $xp = new XPath($doc);
     $node = $xp->query('//text()')->item(0);
@@ -25,23 +25,9 @@ test('parseTextNodeValue() preserves leading and trailing white space', function
     assert($node instanceof Text);
 
     $node->data = ' <em>please</em> preserve the whitespace ';
-    $parsed = Support::parseTextNodeValue($node);
+    $parsed = Support::parseHtml($node->data);
 
     expect($parsed->textContent ?? null)->toBe(" please preserve the whitespace ");
-});
-
-test('parseTextNodeValue() skips whitespace-only html', function () {
-    $doc = Support::createDocument('<p>hello</p>');
-    $xp = new XPath($doc);
-    $node = $xp->query('//text()')->item(0);
-
-    if (!$node instanceof Dom\Text) {
-        throw new \RuntimeException('Expected a Dom\Text node');
-    }
-
-    Support::parseTextNodeValue($node);
-
-    expect(Support::extractBodyHTML($doc))->toBe('<p>hello</p>');
 });
 
 test('elementContainsOnlyText() returns true when element has only text nodes', function () {
