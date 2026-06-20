@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.3
+
+### Patch Changes
+
+- f449036: Make API arguments more strict
+- d01097c: Simplify internals of `parseHtml()`
+
 ## 2.1.2
 
 ### Patch Changes
