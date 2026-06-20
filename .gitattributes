@@ -16,3 +16,5 @@ phpunit.xml export-ignore
 # other
 pint.json export-ignore
 LICENSE export-ignore
+AGENTS.md export-ignore
+docs export-ignore
