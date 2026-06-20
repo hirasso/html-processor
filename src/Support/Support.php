@@ -123,11 +123,12 @@ final class Support
         return true;
     }
 
-    public static function hasAncestor(\Dom\Node $node, string $tagName): bool
+    public static function hasAncestor(Node $node, string $tagName): bool
     {
+        $tagName = strtolower($tagName);
         $parent = $node->parentNode;
         while ($parent !== null) {
-            if ($parent instanceof Element && strtolower($parent->tagName) === strtolower($tagName)) {
+            if ($parent instanceof Element && strtolower($parent->tagName) === $tagName) {
                 return true;
             }
             $parent = $parent->parentNode;
