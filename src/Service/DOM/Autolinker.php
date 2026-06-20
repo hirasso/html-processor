@@ -31,12 +31,14 @@ final readonly class Autolinker implements DOMServiceContract
         $autolink = new Autolink($this->options);
 
         foreach (Support::getTextNodes($document) as $node) {
-            if ($node->parentElement?->closest('a') || empty($node->textContent)) {
+            if ($node->parentElement?->closest('a')) {
                 continue;
             }
-            $converted = $autolink->convert($node->textContent);
-            $converted = $autolink->convertEmail($converted);
-            Support::replaceTextNodeWithHtml($node, $converted);
+            $node->data = $autolink->convert($node->data);
+            $node->data = $autolink->convertEmail($node->data);
+            if ($parsed = Support::parseTextNode($node)) {
+                $node->replaceWith($parsed);
+            };
         }
     }
 }

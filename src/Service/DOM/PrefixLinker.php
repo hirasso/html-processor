@@ -47,19 +47,19 @@ final class PrefixLinker implements DOMServiceContract
      */
     public function run(HTMLDocument $document): void
     {
-        foreach (Support::getTextNodes($document) as $textNode) {
+        foreach (Support::getTextNodes($document) as $node) {
             // Skip text nodes inside <a> elements
-            if ($textNode->parentElement?->closest('a')) {
+            if ($node->parentElement?->closest('a')) {
                 continue;
             }
 
-            $text = $textNode->nodeValue ?? '';
-
             foreach ($this->entries as $prefix => $url) {
-                $text = $this->link($text, $prefix, $url);
+                $node->data = $this->link($node->data, $prefix, $url);
             }
 
-            Support::replaceTextNodeWithHtml($textNode, $text);
+            if ($parsed = Support::parseTextNode($node)) {
+                $node->replaceWith($parsed);
+            };
         }
     }
 
