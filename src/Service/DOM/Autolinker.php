@@ -36,9 +36,9 @@ final readonly class Autolinker implements DOMServiceContract
             }
             $node->data = $autolink->convert($node->data);
             $node->data = $autolink->convertEmail($node->data);
-            if ($parsed = Support::parseTextNode($node)) {
+            if ($parsed = Support::parseTextNodeValue($node)) {
                 $node->replaceWith($parsed);
-            };
+            }
         }
     }
 }

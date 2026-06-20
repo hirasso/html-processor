@@ -34,22 +34,16 @@ final class Support
     /**
      * Parse the text in a text node, if it contains HTML
      */
-    public static function parseTextNode(Text $node): ?DocumentFragment
+    public static function parseHtmlFragment(string $html): ?DocumentFragment
     {
         // only makes sense if the data actually contains HTML tags
-        if (!str_contains($node->data, '<')) {
+        if (!str_contains($html, '<')) {
             return null;
         }
 
-        // only works if the node belongs to a document
-        if (!$doc = $node->ownerDocument) {
-            return null; // @codeCoverageIgnore
-        }
+        $doc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
 
-        $newNodes = array_map(
-            fn ($newNode) => $doc->importNode($newNode, true),
-            [...HTMLDocument::createFromString($node->data, LIBXML_NOERROR)->body->childNodes ?? []]
-        );
+        $newNodes = [...$doc->body->childNodes ?? []];
 
         if (empty($newNodes)) {
             return null; // @codeCoverageIgnore
@@ -58,13 +52,30 @@ final class Support
         $fragment = $doc->createDocumentFragment();
 
         // HTML parsers strip leading whitespace from <body>; restore it manually
-        if (preg_match('/^(\s+)/', $node->data, $m)) {
+        if (preg_match('/^(\s+)/', $html, $m)) {
             $fragment->append($doc->createTextNode($m[1]));
         }
 
         $fragment->append(...$newNodes);
 
         return $fragment;
+    }
+
+    /**
+     * Convert a text node's content to real DOM nodes if it contains HTML
+     */
+    public static function parseTextNodeValue(Text $node): ?Node
+    {
+        // only works if the node belongs to a document
+        if (!$node->ownerDocument) {
+            return null; // @codeCoverageIgnore
+        }
+
+        if (!$parsed = self::parseHtmlFragment($node->data)) {
+            return null;
+        }
+
+        return $node->ownerDocument->importNode($parsed, true);
     }
 
     /**

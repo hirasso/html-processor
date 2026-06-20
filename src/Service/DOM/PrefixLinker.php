@@ -57,9 +57,9 @@ final class PrefixLinker implements DOMServiceContract
                 $node->data = $this->link($node->data, $prefix, $url);
             }
 
-            if ($parsed = Support::parseTextNode($node)) {
+            if ($parsed = Support::parseTextNodeValue($node)) {
                 $node->replaceWith($parsed);
-            };
+            }
         }
     }
 
