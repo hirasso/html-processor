@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.2
+
+### Patch Changes
+
+- 49cf5b8: Use more `Dom\Document`-native functionality
+- 99c35e9: Optimize `getTextNodes` to return only non-empty nodes
+- 382ed5c: Make parsing of text nodes more robust
+
 ## 2.1.1
 
 ### Patch Changes
