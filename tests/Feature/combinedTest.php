@@ -99,7 +99,7 @@ test('Works with self-closing tags', function () {
 
     expect(
         process($html)
-            ->removeEmptyElements()
+            ->removeEmptyElements('p')
             ->apply()
     )->toBe($expected);
 

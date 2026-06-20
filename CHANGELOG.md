@@ -167,7 +167,7 @@
 
   echo process($html)
       ->autolinkUrls() // wrap raw url strings in `<a>` tags
-      ->removeEmptyElements() // remove empty paragraphs
+      ->removeEmptyElements('p') // remove empty paragraphs
       ->encodeEmails() // encode emails to confuse spam bots
       ->typography('de_DE') // fix typography based on locale
       ->processLinks(); // add classes based on link type

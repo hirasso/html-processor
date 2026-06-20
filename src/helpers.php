@@ -8,7 +8,7 @@ namespace Hirasso\HTMLProcessor;
  * Process a HTML string using a fluent API
  * @see https://github.com/hirasso/html-processor
  */
-function process(?string $html = null): HTMLProcessor
+function process(string $html): HTMLProcessor
 {
-    return HTMLProcessor::fromString($html ?? '');
+    return HTMLProcessor::fromString($html);
 }

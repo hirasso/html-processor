@@ -13,7 +13,7 @@ final readonly class Link
     public Uri $uri;
 
     public UriType $type;
-    public ?string $extension;
+    public null|string $extension;
 
     public function __construct(
         public Element $el
@@ -26,10 +26,8 @@ final readonly class Link
     /**
      * Apply classes with a customizable prefix
      */
-    public function addClasses(?string $prefix = null): self
+    public function addClasses(string $prefix = 'link'): self
     {
-        $prefix ??= 'link';
-
         $this->el->classList->add("{$prefix}--{$this->type->value}");
 
         if ($this->uri->pointsToFile()) {
@@ -45,9 +43,9 @@ final readonly class Link
 
     /**
      * Open external links in a new tab by adding [target="_blank"]
-     * @param ?bool $safe add [rel="noopener noreferrer"] to links
+     * @param bool $safe add [rel="noopener noreferrer"] to links
      */
-    public function openExternalInNewTab(?bool $safe = true): self
+    public function openExternalInNewTab(bool $safe = true): self
     {
         if ($this->type !== UriType::External) {
             return $this;

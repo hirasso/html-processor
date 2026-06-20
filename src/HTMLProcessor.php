@@ -9,12 +9,12 @@ use Closure;
 use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\DOM\EmptyElements;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\HTML\ObfuscateContacts;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
+use Hirasso\HTMLProcessor\Service\DOM\EmptyElementsRemover;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -111,10 +111,10 @@ final class HTMLProcessor
     /**
      * Remove empty elements
      */
-    public function removeEmptyElements(?string $selector = null): self
+    public function removeEmptyElements(string $selector): self
     {
         return $this->mutate(function () use ($selector) {
-            $this->domQueue->add(new EmptyElements($selector));
+            $this->domQueue->add(new EmptyElementsRemover($selector));
         });
     }
 
