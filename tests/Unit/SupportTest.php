@@ -48,6 +48,20 @@ test('parseTextNode() skips whitespace-only html', function () {
     expect(Support::extractBodyHTML($doc))->toBe('<p>hello</p>');
 });
 
+test('elementContainsOnlyText() returns true when element has only text nodes', function () {
+    $doc = Support::createDocument('<p>hello world</p>');
+    $p = $doc->querySelector('p');
+    assert($p !== null);
+    expect(Support::elementContainsOnlyText($p))->toBe(true);
+});
+
+test('elementContainsOnlyText() returns false when element has non-text children', function () {
+    $doc = Support::createDocument('<p>hello <span>world</span></p>');
+    $p = $doc->querySelector('p');
+    assert($p !== null);
+    expect(Support::elementContainsOnlyText($p))->toBe(false);
+});
+
 test('getTextNodes() ignores empty nodes', function () {
     $doc = Support::createDocument('<p>hello <span>world</span> <span> </span><span> <!-- foo --></span>!</p>');
 
