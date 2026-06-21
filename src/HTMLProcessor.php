@@ -12,9 +12,9 @@ use Hirasso\HTMLProcessor\Queue\HTMLQueue;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
 use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\HTML\ObfuscateContacts;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElementsRemover;
+use Hirasso\HTMLProcessor\Service\DOM\ObfuscateEmail;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -122,13 +122,11 @@ final class HTMLProcessor
      * Obfuscate contact data to protect it from spam bots
      *
      * @param bool $email obfuscate email addresses
-     * @param bool $phone obfuscate phone numbers
      */
-    public function obfuscateContacts(
+    public function obfuscateEmail(
         bool $email = true,
-        bool $phone = true
     ): self {
-        return $this->mutate(fn () => $this->htmlQueue->add(new ObfuscateContacts($email, $phone)));
+        return $this->mutate(fn () => $this->domQueue->add(new ObfuscateEmail($email)));
     }
 
     /**
