@@ -10,15 +10,11 @@ function obfuscatePhoneNumbers(string $string): string
 test('Obfuscates phone numbers in links', function () {
     $result = obfuscatePhoneNumbers('<a href="tel:+49 12 345 67">call us</a>');
 
-    expect($result)->toContain('<script>');
-    expect($result)->not->toContain('+49 12 345 67');
-    expect($result)->toContain('split("/").reverse().join("")');
+    expect($result)->toBe('<a data-html-processor="/ 345 67/+49 12/">call us</a>');
 });
 
 test('Obfuscates phone numbers in plaintext', function () {
     $result = obfuscatePhoneNumbers('foo bar baz +49 12 345 67 foo bar baz');
 
-    expect($result)->toContain('<script>');
-    expect($result)->not->toContain('+49 12 345 67');
-    expect($result)->toContain('split("/").reverse().join("")');
+    expect($result)->toBe('foo bar baz <!--html-processor:/345 67 /+49 12 /--> foo bar baz');
 });

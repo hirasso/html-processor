@@ -68,9 +68,7 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
             pattern: '/' . self::EMAIL_REGEX . '/',
             callback: function ($matches) {
                 $encoded = $this->encode($matches[0]);
-                return <<<HTML
-                <!--html-processor:$encoded-->
-                HTML;
+                return "<!--html-processor:$encoded--> ";
             },
             subject: $node->data
         ) ?? '';

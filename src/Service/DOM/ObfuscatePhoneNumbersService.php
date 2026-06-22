@@ -64,9 +64,7 @@ final readonly class ObfuscatePhoneNumbersService implements DOMServiceContract
             pattern: '/' . self::TEL_REGEX . '/',
             callback: function ($matches) {
                 $encoded = $this->encode($matches[0]);
-                return <<<HTML
-                <!--html-processor:$encoded-->
-                HTML;
+                return "<!--html-processor:$encoded--> ";
             },
             subject: $node->data
         ) ?? '';
