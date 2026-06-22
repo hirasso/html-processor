@@ -7,17 +7,21 @@ namespace Hirasso\HTMLProcessor\Service\DOM;
 use Dom\HTMLDocument;
 use Dom\Text;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
-use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
+use Override;
 
 /**
  * Obfuscate email addresses in HTML to protect them from spam bots.
  *
  * @see https://spencermortensen.com/articles/email-obfuscation/
  */
-final readonly class ObfuscateEmail implements DOMServiceContract
+final readonly class JavaScriptObfuscator implements DOMServiceContract
 {
-    use HasDefaultPrio;
+    #[Override]
+    public function prio(): int
+    {
+        return 10;
+    }
 
     private const string EMAIL_REGEX = "[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}";
 
@@ -26,6 +30,7 @@ final readonly class ObfuscateEmail implements DOMServiceContract
     ) {
     }
 
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         if (!$this->email) {

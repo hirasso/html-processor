@@ -18,7 +18,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscateEmail()
+        ->obfuscate()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
@@ -51,7 +51,7 @@ test('Runs autolinkUrls before processLinks', function () {
     expect($result)->toBe($expected);
 });
 
-test('Runs autolinkUrls before obfuscateEmail', function () {
+test('Runs autolinkUrls before obfuscate', function () {
     $html = trimLines(<<<HTML
     <p>mail@example.com</p>
     HTML);
@@ -61,11 +61,11 @@ test('Runs autolinkUrls before obfuscateEmail', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscateEmail()
+        ->obfuscate()
         ->autolinkUrls()
         ->apply();
 
-    // autolinkUrls (prio -10) runs before obfuscateEmail (prio 0), so the naked
+    // autolinkUrls (prio -10) runs before obfuscate (prio 0), so the naked
     // email gets linked first and then link-conversion obfuscates the resulting <a>
     expect($result)->toContain('href="liam/moc.elpmaxe"');
     expect($result)->not->toContain('href="mailto:');

@@ -6,6 +6,7 @@ namespace Hirasso\HTMLProcessor\Service\HTML;
 
 use Hirasso\HTMLProcessor\Service\Contract\HTMLServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
+use Override;
 
 /**
  * Encodes email addresses found in the HTML to make it a little harder for bots
@@ -22,6 +23,7 @@ final readonly class StripTags implements HTMLServiceContract
     ) {
     }
 
+    #[Override]
     public function run(string $html): string
     {
         return strip_tags($html, $this->allowed_tags);

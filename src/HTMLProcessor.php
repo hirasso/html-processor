@@ -14,7 +14,7 @@ use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
 use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
 use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
 use Hirasso\HTMLProcessor\Service\DOM\EmptyElementsRemover;
-use Hirasso\HTMLProcessor\Service\DOM\ObfuscateEmail;
+use Hirasso\HTMLProcessor\Service\DOM\JavaScriptObfuscator;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -25,8 +25,6 @@ final class HTMLProcessor
 {
     private DOMQueue $domQueue;
     private HTMLQueue $htmlQueue;
-
-    private bool $mutated = false;
 
     private function __construct(
         private readonly string $originalHTML
@@ -44,31 +42,20 @@ final class HTMLProcessor
     }
 
     /**
-     * Mutate, return self
-     * @param Closure(): mixed $mutation
-     */
-    private function mutate(Closure $mutation): self
-    {
-        $mutation();
-        $this->mutated = true;
-        return $this;
-    }
-
-    /**
      * Make urls clickable
      */
     public function autolinkUrls(?AutolinkOptions $options = null): self
     {
-        return $this->mutate(function () use ($options) {
-            $this->domQueue->add(new Autolinker($options  ?? new AutolinkOptions(
-                stripScheme: true,
-                textLimit: 35,
-                autoTitle: false,
-                escape: true,
-                // poses issues with e.g. "Architekt.innen"
-                linkNoScheme: false
-            )));
-        });
+        $this->domQueue->add(new Autolinker($options  ?? new AutolinkOptions(
+            stripScheme: true,
+            textLimit: 35,
+            autoTitle: false,
+            escape: true,
+            // poses issues with e.g. "Architekt.innen"
+            linkNoScheme: false
+        )));
+
+        return $this;
     }
 
     /**
@@ -76,14 +63,14 @@ final class HTMLProcessor
      */
     public function autolinkPrefix(string $prefix, string $url): self
     {
-        return $this->mutate(function () use ($prefix, $url) {
-            $linker = $this->domQueue->get(PrefixLinker::class)
+        $linker = $this->domQueue->get(PrefixLinker::class)
             ?? new PrefixLinker();
 
-            $linker->register($prefix, $url);
+        $linker->register($prefix, $url);
 
-            $this->domQueue->add($linker);
-        });
+        $this->domQueue->add($linker);
+
+        return $this;
     }
 
     /**
@@ -91,9 +78,9 @@ final class HTMLProcessor
      */
     public function stripTags(string|array|null $allowedTags = null): self
     {
-        return $this->mutate(function () use ($allowedTags) {
-            $this->htmlQueue->add(new StripTags($allowedTags));
-        });
+        $this->htmlQueue->add(new StripTags($allowedTags));
+
+        return $this;
     }
 
     /**
@@ -103,9 +90,9 @@ final class HTMLProcessor
      */
     public function processLinks(?Closure $callback = null): self
     {
-        return $this->mutate(function () use ($callback) {
-            $this->domQueue->add(new LinkProcessor($callback));
-        });
+        $this->domQueue->add(new LinkProcessor($callback));
+
+        return $this;
     }
 
     /**
@@ -113,20 +100,19 @@ final class HTMLProcessor
      */
     public function removeEmptyElements(string $selector): self
     {
-        return $this->mutate(function () use ($selector) {
-            $this->domQueue->add(new EmptyElementsRemover($selector));
-        });
+        $this->domQueue->add(new EmptyElementsRemover($selector));
+
+        return $this;
     }
 
     /**
      * Obfuscate contact data to protect it from spam bots
-     *
-     * @param bool $email obfuscate email addresses
      */
-    public function obfuscateEmail(
-        bool $email = true,
+    public function obfuscate(
     ): self {
-        return $this->mutate(fn () => $this->domQueue->add(new ObfuscateEmail($email)));
+        $this->domQueue->add(new JavaScriptObfuscator());
+
+        return $this;
     }
 
     /**
@@ -161,7 +147,7 @@ final class HTMLProcessor
      */
     public function apply(): string
     {
-        if (empty($this->originalHTML) || !$this->mutated) {
+        if (empty($this->originalHTML)) {
             return $this->originalHTML;
         }
 

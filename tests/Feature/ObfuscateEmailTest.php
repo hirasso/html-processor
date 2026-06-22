@@ -2,7 +2,7 @@
 
 use function Hirasso\HTMLProcessor\process;
 
-function obfuscateEmail(string $string): string
+function obfuscate(string $string): string
 {
-    return process($string)->obfuscateEmail(email: true)->apply();
+    return process($string)->obfuscate()->apply();
 }

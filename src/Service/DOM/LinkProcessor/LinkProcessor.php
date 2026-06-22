@@ -9,6 +9,7 @@ use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Dom\Element;
 use Dom\HTMLDocument;
+use Override;
 
 /**
  * Process links in HTML. Currently detects these URL types
@@ -34,6 +35,7 @@ final readonly class LinkProcessor implements DOMServiceContract
     /**
      * Run this service
      */
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {
