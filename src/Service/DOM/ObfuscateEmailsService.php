@@ -54,7 +54,7 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
     }
 
     /**
-     * Text-conversion: naked email in text nodes → inline JS
+     * Text-conversion: naked emails in text nodes
      *
      * @see https://spencermortensen.com/articles/email-obfuscation/#text-conversion
      */

@@ -54,7 +54,7 @@ final readonly class ObfuscatePhoneNumbersService implements DOMServiceContract
     }
 
     /**
-     * Text-conversion: naked email in text nodes → inline JS
+     * Text-conversion: naked phone numbers in text nodes
      *
      * @see https://spencermortensen.com/articles/email-obfuscation/#text-conversion
      */
