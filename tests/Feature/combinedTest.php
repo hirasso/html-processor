@@ -56,10 +56,6 @@ test('Runs autolinkUrls before obfuscate', function () {
     <p>mail@example.com</p>
     HTML);
 
-    $expected = trimLines(<<<HTML
-    <p><a href="mailto:mail@example.com">mail@example.com</a></p>
-    HTML);
-
     $result = process($html)
         ->obfuscate()
         ->autolinkUrls()
