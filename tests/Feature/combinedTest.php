@@ -18,7 +18,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscate()
+        ->obfuscateEmails()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
@@ -57,7 +57,7 @@ test('Runs autolinkUrls before obfuscate', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscate()
+        ->obfuscateEmails()
         ->autolinkUrls()
         ->apply();
 

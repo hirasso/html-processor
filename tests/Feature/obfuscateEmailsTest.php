@@ -4,7 +4,7 @@ use function Hirasso\HTMLProcessor\process;
 
 function obfuscate(string $string): string
 {
-    return process($string)->obfuscate()->apply();
+    return process($string)->obfuscateEmails()->apply();
 }
 
 test('Obfuscates emails in links', function () {

@@ -108,7 +108,7 @@ final class HTMLProcessor
     /**
      * Obfuscate emails in plaintext and mailto: links
      */
-    public function obfuscate(
+    public function obfuscateEmails(
     ): self {
         $this->domQueue->add(new ObfuscateEmailsService());
 
