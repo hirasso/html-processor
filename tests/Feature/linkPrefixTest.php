@@ -1,5 +1,7 @@
 <?php
 
+use Hirasso\HTMLProcessor\Support\Support;
+
 use function Hirasso\HTMLProcessor\process;
 
 test('Links @mentions to Instagram', function () {
@@ -50,12 +52,12 @@ test('Does not re-link text already inside an anchor', function () {
 });
 
 test('Works with repeated calls', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
         <p>Follow @acme on SocialWeb.</p>
         <p>Learn more about #php on SocialWeb.</p>
     HTML);
 
-    $expected = trimLines(<<<HTML
+    $expected = Support::trimLines(<<<HTML
         <p>Follow <a href="https://your-instance.social/@acme">@acme</a> on SocialWeb.</p>
         <p>Learn more about <a href="https://your-instance.social/tags/php">#php</a> on SocialWeb.</p>
     HTML);

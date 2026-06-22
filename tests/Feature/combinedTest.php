@@ -5,7 +5,7 @@ use Hirasso\HTMLProcessor\Support\Support;
 use function Hirasso\HTMLProcessor\process;
 
 test('Runs various tasks on a string', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
     <p></p><div></div>
     <p><!-- preserve-me --></p>
     <p>Please reach out to <a href="mailto:mail@example.com">mail@example.com</a> to learn more.</p>
@@ -35,11 +35,11 @@ test('Runs various tasks on a string', function () {
 
 
 test('Runs autolinkUrls before processLinks', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
     <p>https://example.com</p>
     HTML);
 
-    $expected = trimLines(<<<HTML
+    $expected = Support::trimLines(<<<HTML
     <p><a href="https://example.com" class="link--internal">example.com</a></p>
     HTML);
 
@@ -52,7 +52,7 @@ test('Runs autolinkUrls before processLinks', function () {
 });
 
 test('Runs autolinkUrls before obfuscate', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
     <p>mail@example.com</p>
     HTML);
 

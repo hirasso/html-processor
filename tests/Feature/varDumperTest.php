@@ -1,12 +1,13 @@
 <?php
 
 use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
+use Hirasso\HTMLProcessor\Support\Support;
 use Symfony\Component\VarDumper\VarDumper;
 
 use function Hirasso\HTMLProcessor\process;
 
 test('->dump() and continue', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
     <p>Follow @acme on SocialWeb.</p>
     <p>See the tag #test on SocialWeb.</p>
     HTML);
@@ -14,7 +15,7 @@ test('->dump() and continue', function () {
     $dumps = [];
     $prevHandler = VarDumper::setHandler(
         function (mixed $var) use (&$dumps) {
-            $dumps[] = trimWhitespace($var);
+            $dumps[] = Support::trimWhitespace($var);
         }
     );
 
@@ -37,7 +38,7 @@ test('->dump() and continue', function () {
 });
 
 test('->dd() and die', function () {
-    $html = trimLines(<<<HTML
+    $html = Support::trimLines(<<<HTML
     <p>Follow @acme on SocialWeb.</p>
     HTML);
 

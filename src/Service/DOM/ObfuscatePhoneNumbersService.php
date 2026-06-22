@@ -15,7 +15,7 @@ use Override;
  *
  * @see https://spencermortensen.com/articles/email-obfuscation/
  */
-final readonly class ObfuscateEmailsService implements DOMServiceContract
+final readonly class ObfuscatePhoneNumbersService implements DOMServiceContract
 {
     #[Override]
     public function prio(): int
@@ -23,7 +23,7 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
         return 10;
     }
 
-    private const string EMAIL_REGEX = "[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}";
+    private const string TEL_REGEX = "[\+\d][\d\s\-\(\)\.]{6,20}";
 
     #[Override]
     public function run(HTMLDocument $document): void
@@ -42,21 +42,21 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
      */
     private function obfuscateLinks(HTMLDocument $document): void
     {
-        foreach ($document->querySelectorAll('a[href^="mailto:"]') as $link) {
-            $email = substr($link->getAttribute('href') ?? '', strlen('mailto:'));
-            if (!preg_match('/^' . self::EMAIL_REGEX . '$/', $email)) {
+        foreach ($document->querySelectorAll('a[href^="tel:"]') as $link) {
+            $tel = substr($link->getAttribute('href') ?? '', strlen('tel:'));
+            if (!preg_match('/^' . self::TEL_REGEX . '$/', $tel)) {
                 continue;
             }
 
-            $link->setAttribute('href', $this->encode($email));
+            $link->setAttribute('href', $this->encode($tel));
             $link->setAttribute('rel', 'nofollow noindex');
             $script = $document->createElement('script');
             $script->textContent = Support::trimWhitespace(<<<'JS'
-            (function() {
-                const l = document.currentScript.closest("a");
-                const decode = (value) => value.split("/").map((p)=>p.split("").reverse().join("")).join("@");
-                l.setAttribute("href", "mailto:" + decode(l.getAttribute("href")));
-                l.removeAttribute("rel");
+            (function () {
+                const el = document.currentScript.closest("a");
+                const decode = (tel) => tel.split("/").reverse().join("");
+                el.setAttribute("href", "tel:" + decode(el.getAttribute("href")));
+                el.removeAttribute("rel");
                 document.currentScript.remove();
             })();
             JS);
@@ -71,16 +71,12 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
      */
     private function obfuscateTextNode(Text $node, HTMLDocument $document): void
     {
-        if (!str_contains($node->data, '@')) {
-            return;
-        }
-
         $obfuscated = preg_replace_callback(
-            pattern: '/' . self::EMAIL_REGEX . '/',
+            pattern: '/' . self::TEL_REGEX . '/',
             callback: function ($matches) {
                 $encoded = $this->encode($matches[0]);
                 return <<<HTML
-                <body><script>document.currentScript.replaceWith("$encoded".split("/").map((p)=>p.split("").reverse().join("")).join("@"))</script></body>
+                <body><script>document.currentScript.replaceWith("$encoded".split("/").reverse().join(""))</script></body>
                 HTML;
             },
             subject: $node->data
@@ -92,12 +88,15 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
     }
 
     /**
-     * Encode an email address by reversing the local part and domain separately,
-     * joined by a slash: user@example.com → resu/moc.elpmaxe
+     * Encode a telephone number
+     * - split in two parts
+     * - reverse the parts and wrap with '/'
      */
-    private function encode(string $email): string
+    private function encode(string $tel): string
     {
-        [$local, $domain] = explode('@', $email, 2);
-        return strrev($local) . '/' . strrev($domain);
+        $splitAt = intdiv(strlen($tel), 2);
+        $a = substr($tel, 0, $splitAt);
+        $b = substr($tel, $splitAt);
+        return "/{$b}/{$a}/";
     }
 }

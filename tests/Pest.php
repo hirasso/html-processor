@@ -56,22 +56,3 @@ function getMaliciousAttributeValue(): string
 {
     return '" onload="alert(\'Hacked!\')"';
 }
-
-/**
- * Trim lines from a string of text
- */
-function trimLines(string $text): string
-{
-    return implode("\n", array_map(
-        'trim',
-        preg_split("/\R/", $text) ?: []
-    ));
-}
-
-/**
- * Trim whitespace from a string of text
- */
-function trimWhitespace(string $text): string
-{
-    return str_replace("\n", '', trimLines($text));
-}

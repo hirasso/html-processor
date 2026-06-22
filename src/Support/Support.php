@@ -132,4 +132,23 @@ final class Support
             )
         ));
     }
+
+    /**
+     * Trim lines from a string of text
+     */
+    public static function trimLines(string $text): string
+    {
+        return implode("\n", array_map(
+            'trim',
+            preg_split("/\R/", $text) ?: []
+        ));
+    }
+
+    /**
+     * Trim whitespace from a string of text
+     */
+    public static function trimWhitespace(string $text): string
+    {
+        return str_replace("\n", '', self::trimLines($text));
+    }
 }

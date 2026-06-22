@@ -15,6 +15,7 @@ use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\ProcessLinksService;
 use Hirasso\HTMLProcessor\Service\DOM\LinkPrefixService;
 use Hirasso\HTMLProcessor\Service\DOM\RemoveEmptyElementsService;
 use Hirasso\HTMLProcessor\Service\DOM\ObfuscateEmailsService;
+use Hirasso\HTMLProcessor\Service\DOM\ObfuscatePhoneNumbersService;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -111,6 +112,16 @@ final class HTMLProcessor
     public function obfuscateEmails(
     ): self {
         $this->domQueue->add(new ObfuscateEmailsService());
+
+        return $this;
+    }
+
+    /**
+     * Obfuscate phone numbers in plaintext and tel: links
+     */
+    public function obfuscatePhoneNumbers(
+    ): self {
+        $this->domQueue->add(new ObfuscatePhoneNumbersService());
 
         return $this;
     }
