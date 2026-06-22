@@ -42,25 +42,14 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
      */
     private function obfuscateLinks(HTMLDocument $document): void
     {
-        foreach ($document->querySelectorAll('a[href^="mailto:"]') as $link) {
+        foreach ($document->querySelectorAll('a[href*="mailto:"]') as $link) {
             $email = substr($link->getAttribute('href') ?? '', strlen('mailto:'));
             if (!preg_match('/^' . self::EMAIL_REGEX . '$/', $email)) {
                 continue;
             }
 
-            $link->setAttribute('href', $this->encode($email));
-            $link->setAttribute('rel', 'nofollow noindex');
-            $script = $document->createElement('script');
-            $script->textContent = Support::trimWhitespace(<<<'JS'
-            (function() {
-                const l = document.currentScript.closest("a");
-                const decode = (value) => value.split("/").map((p)=>p.split("").reverse().join("")).join("@");
-                l.setAttribute("href", "mailto:" + decode(l.getAttribute("href")));
-                l.removeAttribute("rel");
-                document.currentScript.remove();
-            })();
-            JS);
-            $link->prepend($script);
+            $link->removeAttribute('href');
+            $link->setAttribute('data-html-processor-obfuscated', $this->encode($email));
         }
     }
 
@@ -80,13 +69,15 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
             callback: function ($matches) {
                 $encoded = $this->encode($matches[0]);
                 return <<<HTML
-                <body><script>document.currentScript.replaceWith("$encoded".split("/").map((p)=>p.split("").reverse().join("")).join("@"))</script></body>
+                <!--html-processor:$encoded-->
                 HTML;
             },
             subject: $node->data
         ) ?? '';
 
-        if ($parsed = Support::parseHtml($obfuscated)) {
+        $parsed = Support::parseHtml("$obfuscated");
+
+        if ($parsed) {
             $node->replaceWith($document->importNode($parsed, deep: true));
         }
     }

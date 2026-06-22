@@ -163,8 +163,8 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
+        $html = $this->domQueue->applyTo($html);
 
         return $html;
     }
