@@ -8,11 +8,12 @@ use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
 use Dom\HTMLDocument;
+use Override;
 
 /**
  * Remove empty-looking paragraphs from html
  */
-final readonly class EmptyElementsRemover implements DOMServiceContract
+final readonly class RemoveEmptyElementsService implements DOMServiceContract
 {
     use HasDefaultPrio;
 
@@ -21,6 +22,7 @@ final readonly class EmptyElementsRemover implements DOMServiceContract
     ) {
     }
 
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll($this->selector) as $el) {

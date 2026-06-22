@@ -9,11 +9,12 @@ use Asika\Autolink\AutolinkOptions;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use Dom\HTMLDocument;
+use Override;
 
 /**
  * Makes urls clickable
  */
-final readonly class Autolinker implements DOMServiceContract
+final readonly class AutolinkUrlsService implements DOMServiceContract
 {
     public function __construct(
         public AutolinkOptions $options,
@@ -21,11 +22,13 @@ final readonly class Autolinker implements DOMServiceContract
     }
 
     /** autolink has to happen before everything else */
+    #[Override]
     public function prio(): int
     {
         return -10;
     }
 
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         $autolink = new Autolink($this->options);

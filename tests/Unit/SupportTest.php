@@ -53,3 +53,15 @@ test('getTextNodes() ignores empty nodes', function () {
     $filtered = Support::getTextNodes($doc);
     expect(count($filtered))->toBe(3);
 });
+
+test('getTextNodes() ignores text inside <script>, <style> etc...', function () {
+    $doc = Support::createDocument(<<<HTML
+        Keep this
+        <script>console.log("but drop this")</script>
+        <style>.and-this {}</style>
+        <svg>...</svg>
+    HTML);
+    $nodes = Support::getTextNodes($doc);
+    expect(count($nodes))->toBe(1);
+    expect(trim($nodes[0]->data))->toBe("Keep this");
+});

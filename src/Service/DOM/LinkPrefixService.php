@@ -9,8 +9,9 @@ use Dom\Text;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
+use Override;
 
-final class PrefixLinker implements DOMServiceContract
+final class LinkPrefixService implements DOMServiceContract
 {
     use HasDefaultPrio;
 
@@ -45,6 +46,7 @@ final class PrefixLinker implements DOMServiceContract
     /**
      * Link a prefix to a URL
      */
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         foreach (Support::getTextNodes($document) as $node) {

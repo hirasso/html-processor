@@ -125,6 +125,11 @@ final class Support
     public static function getTextNodes(HTMLDocument $doc): array
     {
         /** @var list<\Dom\Text> */
-        return [...new XPath($doc)->query('//text()[normalize-space() != ""]')];
+        return array_values(array_filter(
+            [...new XPath($doc)->query('//text()[normalize-space() != ""]')],
+            fn ($node) => !$node->parentElement?->closest(
+                'script, style, svg, noscript, title, textarea, select, iframe, canvas'
+            )
+        ));
     }
 }

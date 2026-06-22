@@ -18,7 +18,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscateContacts()
+        ->obfuscateEmails()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
@@ -29,7 +29,8 @@ test('Runs various tasks on a string', function () {
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
-    expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
+    expect($result)->toContain('href="liam/moc.elpmaxe"'); // email should be obfuscated via data attribute
+    expect($result)->not->toContain('href="mailto:'); // original mailto href should be gone
 });
 
 
@@ -50,22 +51,20 @@ test('Runs autolinkUrls before processLinks', function () {
     expect($result)->toBe($expected);
 });
 
-test('Runs autolinkUrls before obfuscateContacts', function () {
+test('Runs autolinkUrls before obfuscate', function () {
     $html = trimLines(<<<HTML
     <p>mail@example.com</p>
     HTML);
 
-    $expected = trimLines(<<<HTML
-    <p><a href="mailto:mail@example.com">mail@example.com</a></p>
-    HTML);
-
     $result = process($html)
-        ->obfuscateContacts()
+        ->obfuscateEmails()
         ->autolinkUrls()
         ->apply();
 
-    expect($result)->toMatch('/&#[0-9]+;|&#x[0-9a-fA-F]+;/'); // Should contain encoded email entities
-    expect(html_entity_decode($result))->toBe($expected);
+    // autolinkUrls (prio -10) runs before obfuscate (prio 0), so the naked
+    // email gets linked first and then link-conversion obfuscates the resulting <a>
+    expect($result)->toContain('href="liam/moc.elpmaxe"');
+    expect($result)->not->toContain('href="mailto:');
 });
 
 test('apply() returns empty string unchanged when html is empty', function () {

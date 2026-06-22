@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
+namespace Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService;
 
 use Closure;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Dom\Element;
 use Dom\HTMLDocument;
+use Override;
 
 /**
  * Process links in HTML. Currently detects these URL types
@@ -20,7 +21,7 @@ use Dom\HTMLDocument;
  * - external
  * - file (has non-web extension)
  */
-final readonly class LinkProcessor implements DOMServiceContract
+final readonly class ProcessLinksService implements DOMServiceContract
 {
     use HasDefaultPrio;
 
@@ -34,6 +35,7 @@ final readonly class LinkProcessor implements DOMServiceContract
     /**
      * Run this service
      */
+    #[Override]
     public function run(HTMLDocument $document): void
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {
