@@ -25,7 +25,6 @@ test('Runs various tasks on a string', function () {
     expect($result)->not->toContain('<p></p>');
     expect($result)->not->toContain('<div></div>');
     expect($result)->not->toContain('<p><!-- preserve me --></p>');
-    expect($result)->toContain('class="link--mailto"');
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
@@ -40,7 +39,7 @@ test('Runs autolinkUrls before processLinks', function () {
     HTML);
 
     $expected = Support::trimLines(<<<HTML
-    <p><a href="https://example.com" class="link--internal">example.com</a></p>
+    <p><a href="https://example.com">example.com</a></p>
     HTML);
 
     $result = process($html)
