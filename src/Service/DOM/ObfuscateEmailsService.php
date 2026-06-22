@@ -49,7 +49,7 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
             }
 
             $link->removeAttribute('href');
-            $link->setAttribute('data-html-processor-obfuscated', $this->encode($email));
+            $link->setAttribute('data-html-processor', $this->encode($email));
         }
     }
 
@@ -75,7 +75,7 @@ final readonly class ObfuscateEmailsService implements DOMServiceContract
             subject: $node->data
         ) ?? '';
 
-        $parsed = Support::parseHtml("$obfuscated");
+        $parsed = Support::parseHtml("<body>$obfuscated</body>")?->firstChild;
 
         if ($parsed) {
             $node->replaceWith($document->importNode($parsed, deep: true));

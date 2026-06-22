@@ -49,7 +49,7 @@ final readonly class ObfuscatePhoneNumbersService implements DOMServiceContract
             }
 
             $link->removeAttribute('href');
-            $link->setAttribute('data-html-processor-obfuscated', $this->encode($tel));
+            $link->setAttribute('data-html-processor', $this->encode($tel));
         }
     }
 

@@ -6,7 +6,7 @@
   const seen = new WeakSet();
 
   /** @param {string} attr */
-  function processElements(attr = "data-html-processor-obfuscated") {
+  function processElements(attr = "data-html-processor") {
     document.querySelectorAll(`a[${attr}],span[${attr}]`).forEach((el) => {
       if (seen.has(el)) return;
       seen.add(el);
@@ -66,6 +66,7 @@
   processComments();
 
   const observer = new MutationObserver(() => {
+    // TODO: maybe it's faster to do this on the mutations rather then globally?
     processElements();
     processComments();
   });
