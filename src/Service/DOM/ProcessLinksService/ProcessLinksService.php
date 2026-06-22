@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\LinkProcessor;
+namespace Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService;
 
 use Closure;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
@@ -21,7 +21,7 @@ use Override;
  * - external
  * - file (has non-web extension)
  */
-final readonly class LinkProcessor implements DOMServiceContract
+final readonly class ProcessLinksService implements DOMServiceContract
 {
     use HasDefaultPrio;
 

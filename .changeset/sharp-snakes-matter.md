@@ -1,5 +1,5 @@
 ---
-"html-processor": patch
+"html-processor": major
 ---
 
-Rename `obfiuscateEmail()` to `obfuscate()`
+Split `obfuscateContacts()` into `obfuscateEmails()` and `obfuscatePhoneNumbers()`

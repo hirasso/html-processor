@@ -13,7 +13,7 @@ use Override;
 /**
  * Remove empty-looking paragraphs from html
  */
-final readonly class EmptyElementsRemover implements DOMServiceContract
+final readonly class RemoveEmptyElementsService implements DOMServiceContract
 {
     use HasDefaultPrio;
 

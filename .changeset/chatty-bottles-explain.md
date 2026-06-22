@@ -1,5 +1,5 @@
 ---
-"html-processor": patch
+"html-processor": major
 ---
 
-Switch to email obfuscation using JavaScript. Rename `->obfuscateContacts()` to `obfuscate()`.
+Switch to email obfuscation using JavaScript

@@ -14,7 +14,7 @@ use Override;
 /**
  * Makes urls clickable
  */
-final readonly class Autolinker implements DOMServiceContract
+final readonly class AutolinkUrlsService implements DOMServiceContract
 {
     public function __construct(
         public AutolinkOptions $options,

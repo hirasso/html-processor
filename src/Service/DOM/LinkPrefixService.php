@@ -11,7 +11,7 @@ use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
 use Override;
 
-final class PrefixLinker implements DOMServiceContract
+final class LinkPrefixService implements DOMServiceContract
 {
     use HasDefaultPrio;
 

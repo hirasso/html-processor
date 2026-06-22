@@ -9,12 +9,12 @@ use Closure;
 use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\Link;
-use Hirasso\HTMLProcessor\Service\DOM\LinkProcessor\LinkProcessor;
-use Hirasso\HTMLProcessor\Service\DOM\PrefixLinker;
-use Hirasso\HTMLProcessor\Service\DOM\Autolinker;
-use Hirasso\HTMLProcessor\Service\DOM\EmptyElementsRemover;
-use Hirasso\HTMLProcessor\Service\DOM\JavaScriptObfuscator;
+use Hirasso\HTMLProcessor\Service\DOM\AutolinkUrlsService;
+use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\Link;
+use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\ProcessLinksService;
+use Hirasso\HTMLProcessor\Service\DOM\LinkPrefixService;
+use Hirasso\HTMLProcessor\Service\DOM\RemoveEmptyElementsService;
+use Hirasso\HTMLProcessor\Service\DOM\ObfuscateEmailsService;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -46,7 +46,7 @@ final class HTMLProcessor
      */
     public function autolinkUrls(?AutolinkOptions $options = null): self
     {
-        $this->domQueue->add(new Autolinker($options  ?? new AutolinkOptions(
+        $this->domQueue->add(new AutolinkUrlsService($options  ?? new AutolinkOptions(
             stripScheme: true,
             textLimit: 35,
             autoTitle: false,
@@ -63,8 +63,8 @@ final class HTMLProcessor
      */
     public function autolinkPrefix(string $prefix, string $url): self
     {
-        $linker = $this->domQueue->get(PrefixLinker::class)
-            ?? new PrefixLinker();
+        $linker = $this->domQueue->get(LinkPrefixService::class)
+            ?? new LinkPrefixService();
 
         $linker->register($prefix, $url);
 
@@ -90,7 +90,7 @@ final class HTMLProcessor
      */
     public function processLinks(?Closure $callback = null): self
     {
-        $this->domQueue->add(new LinkProcessor($callback));
+        $this->domQueue->add(new ProcessLinksService($callback));
 
         return $this;
     }
@@ -100,17 +100,17 @@ final class HTMLProcessor
      */
     public function removeEmptyElements(string $selector): self
     {
-        $this->domQueue->add(new EmptyElementsRemover($selector));
+        $this->domQueue->add(new RemoveEmptyElementsService($selector));
 
         return $this;
     }
 
     /**
-     * Obfuscate contact data to protect it from spam bots
+     * Obfuscate emails in plaintext and mailto: links
      */
     public function obfuscate(
     ): self {
-        $this->domQueue->add(new JavaScriptObfuscator());
+        $this->domQueue->add(new ObfuscateEmailsService());
 
         return $this;
     }

@@ -15,7 +15,7 @@ use Override;
  *
  * @see https://spencermortensen.com/articles/email-obfuscation/
  */
-final readonly class JavaScriptObfuscator implements DOMServiceContract
+final readonly class ObfuscateEmailsService implements DOMServiceContract
 {
     #[Override]
     public function prio(): int
@@ -61,8 +61,7 @@ final readonly class JavaScriptObfuscator implements DOMServiceContract
             $link->setAttribute('rel', 'nofollow noindex');
             $script = $document->createElement('script');
             $script->textContent = <<<'JS'
-            document.currentScript.closest('a').setAttribute('href', 'mailto:' + document.currentScript.closest('a').getAttribute('href').split('/').map(function(p){return p.split('').reverse().join('');}).join('@'));
-            document.currentScript.remove();
+            document.currentScript.closest("a").setAttribute("href", "mailto:" + document.currentScript.closest("a").getAttribute("href").split("/").map((p)=>p.split("").reverse().join("")).join("@"));document.currentScript.remove();
             JS;
             $link->append($script);
         }
@@ -84,7 +83,7 @@ final readonly class JavaScriptObfuscator implements DOMServiceContract
             callback: function ($matches) {
                 $encoded = $this->encode($matches[0]);
                 return <<<HTML
-                <body><script>document.currentScript.replaceWith('$encoded'.split('/').map(function(p){return p.split('').reverse().join('');}).join('@'))</script></body>
+                <body><script>document.currentScript.replaceWith("$encoded".split("/").map((p)=>p.split("").reverse().join("")).join("@"))</script></body>
                 HTML;
             },
             subject: $node->data
