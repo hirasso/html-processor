@@ -24,6 +24,7 @@ final readonly class Uri
     public ?array $parsed;
 
     public string $uri;
+    public UriType $type;
 
     private function __construct(
         string $uri
@@ -31,6 +32,7 @@ final readonly class Uri
         $this->uri = trim($uri);
 
         $this->parsed = $this->parse($uri);
+        $this->type = $this->getType();
     }
 
     /**
@@ -122,7 +124,8 @@ final readonly class Uri
      */
     public function isCurrentDomain(): bool
     {
-        $currentBaseDomain = new self('//' . ($_SERVER['HTTP_HOST'] ?? ''))->getDomain();
+        $host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+        $currentBaseDomain = preg_replace('/^www\./', '', $host) ?: null;
         return !$currentBaseDomain || $this->getDomain() === $currentBaseDomain;
     }
 
@@ -163,6 +166,14 @@ final readonly class Uri
 
             default => $this->isCurrentDomain() ? UriType::Internal : UriType::External,
         };
+    }
+
+    /**
+     * Check if this link is external
+     */
+    public function isExternal(): bool
+    {
+        return $this->type === UriType::External;
     }
 
 

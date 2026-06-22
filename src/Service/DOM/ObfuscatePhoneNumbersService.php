@@ -69,7 +69,7 @@ final readonly class ObfuscatePhoneNumbersService implements DOMServiceContract
             subject: $node->data
         ) ?? '';
 
-        $parsed = Support::parseHtml("$obfuscated");
+        $parsed = Support::parseHtml($obfuscated);
 
         if ($parsed) {
             $node->replaceWith($document->importNode($parsed, deep: true));
