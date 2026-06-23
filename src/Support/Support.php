@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hirasso\HTMLProcessor\Support;
 
 use Dom\DocumentFragment;
+use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\Text;
@@ -53,7 +54,8 @@ final class Support
     /**
      * Hydrate tags within a text node
      */
-    public static function hydrateTextNode(Text $node): void {
+    public static function hydrateTextNode(Text $node): void
+    {
         if (!$document = $node->ownerDocument) {
             throw new RuntimeException('Text nodes without ownerDocument can\'t be hydrated');
         }
@@ -150,5 +152,15 @@ final class Support
     public static function trimWhitespace(string $text): string
     {
         return str_replace("\n", '', self::trimLines($text));
+    }
+
+    /**
+     * Get the outer HTML of an element (not implemented natively, yet)
+     */
+    public static function outerHTML(Element $el): string
+    {
+        $doc = HTMLDocument::createEmpty();
+        $doc->appendChild($doc->importNode($el, true));
+        return $doc->saveHTML();
     }
 }

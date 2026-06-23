@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Service\DOM;
 
+use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Text;
 use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use Override;
+use RuntimeException;
 
 /**
  * Obfuscate email addresses in HTML to protect them from spam bots.
@@ -29,8 +31,8 @@ final class ObfuscationService implements DOMServiceContract
 
     public function __construct(
         string $keyPrefix = 'html-processor-obfuscation',
-        public bool $obfuscateEmails = false,
-        public bool $obfuscatePhoneNumbers = false
+        public bool $processEmails = false,
+        public bool $processPhoneNumbers = false
     ) {
         $this->keyPrefix = md5($keyPrefix);
     }
@@ -38,56 +40,66 @@ final class ObfuscationService implements DOMServiceContract
     #[Override]
     public function run(HTMLDocument $document): void
     {
-        // $this->obfuscateLinks($document);
+        $this->obfuscateLinks($document);
 
-        if ($this->obfuscateEmails) {
+        if ($this->processEmails) {
             foreach (Support::getTextNodes($document) as $node) {
-                $this->processTextNode($node, self::EMAIL_REGEX);
+                $this->obfuscateTextNode($node, self::EMAIL_REGEX);
             }
         }
-        if ($this->obfuscatePhoneNumbers) {
+        if ($this->processPhoneNumbers) {
             foreach (Support::getTextNodes($document) as $node) {
-                $this->processTextNode($node, self::PHONE_NUMBER_REGEX);
+                $this->obfuscateTextNode($node, self::PHONE_NUMBER_REGEX);
             }
         }
 
     }
 
     /**
-     * Convert <a href="mailto:...">
-     *
-     * @see https://spencermortensen.com/articles/email-obfuscation/#link-conversion
+     * Obfuscate links
      */
     private function obfuscateLinks(HTMLDocument $document): void
     {
-        if ($this->obfuscateEmails) {
+        if ($this->processEmails) {
             foreach ($document->querySelectorAll('a[href*="mailto:"]') as $link) {
                 $email = substr($link->getAttribute('href') ?? '', strlen('mailto:'));
                 if (!preg_match('/^' . self::EMAIL_REGEX . '$/', $email)) {
                     continue;
                 }
-
-                $link->removeAttribute('href');
-                $link->setAttribute('data-html-processor', $this->encode($email));
+                $link->replaceWith($this->obfuscateElement($link));
             }
         }
-        if ($this->obfuscatePhoneNumbers) {
+        if ($this->processPhoneNumbers) {
             foreach ($document->querySelectorAll('a[href*="tel:"]') as $link) {
                 $tel = substr($link->getAttribute('href') ?? '', strlen('tel:'));
                 if (!preg_match('/^' . self::PHONE_NUMBER_REGEX . '$/', $tel)) {
                     continue;
                 }
-
-                $link->removeAttribute('href');
-                $link->setAttribute('data-html-processor', $this->encode($tel));
+                $link->replaceWith($this->obfuscateElement($link));
             }
         }
     }
 
     /**
-     * Obfuscate all matches within a text node
+     * Process a whole element
      */
-    private function processTextNode(Text $node, string $regex): void
+    private function obfuscateElement(Element $el): Element
+    {
+        if (!$el->ownerDocument) {
+            throw new RuntimeException('No owner document found');
+        }
+        $obfuscated = $el->ownerDocument->createElement('html-processor-obfuscated');
+        $obfuscated->setAttribute('key', $this->getKey());
+        $obfuscated->setAttribute('value', $this->encode(Support::outerHTML($el)));
+        $obfuscated->setAttribute('type', 'element');
+
+        return $obfuscated;
+    }
+
+    /**
+     * Process all matches within a text node
+     */
+    private function obfuscateTextNode(Text $node, string $regex): void
     {
         $node->data = preg_replace_callback(
             "/{$regex}/",

@@ -4,7 +4,7 @@
 
 class ObfuscatedElement extends HTMLElement {
   connectedCallback() {
-    const value = atob(this.getAttribute("value") ?? '');
+    const value = atob(this.getAttribute("value") ?? "");
     const key = this.getAttribute("key");
 
     if (!value || !key) {
@@ -19,23 +19,7 @@ class ObfuscatedElement extends HTMLElement {
         value.charCodeAt(i) ^ key.charCodeAt(i % key.length),
       );
 
-    console.log(result);
-
-    this.replaceWith(result);
-  }
-
-  /**
-   * @param {string} data
-   * @param {string} key
-   * @return {string}
-   */
-  decode(data, key) {
-    let out = "";
-    for (let i = 0; i < data.length; i++)
-      out += String.fromCharCode(
-        data.charCodeAt(i) ^ key.charCodeAt(i % key.length),
-      );
-    return out;
+    this.outerHTML = result;
   }
 }
 

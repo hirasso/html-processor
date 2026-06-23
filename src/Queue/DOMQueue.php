@@ -70,7 +70,6 @@ final class DOMQueue implements DOMQueueContract
         $script->setAttribute('type', 'module');
         $script->textContent = file_get_contents(dirname(__DIR__, 2). '/resources/obfuscation.js') ?: '';
         $document->body?->append($script);
-
     }
 
     /**

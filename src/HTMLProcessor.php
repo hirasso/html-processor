@@ -113,7 +113,7 @@ final class HTMLProcessor
         $service = $this->domQueue->get(ObfuscationService::class)
             ?? new ObfuscationService();
 
-        $service->obfuscateEmails = true;
+        $service->processEmails = true;
 
         $this->domQueue->add($service);
 
@@ -128,7 +128,7 @@ final class HTMLProcessor
         $service = $this->domQueue->get(ObfuscationService::class)
             ?? new ObfuscationService();
 
-        $service->obfuscatePhoneNumbers = true;
+        $service->processPhoneNumbers = true;
 
         $this->domQueue->add($service);
 
