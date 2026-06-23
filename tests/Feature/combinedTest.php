@@ -56,7 +56,7 @@ test('Runs autolinkUrls before obfuscate', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscate(fn ($o) => $o->setKey('testing')->injectDeobfuscationScript(false))
+        ->obfuscate(fn ($o) => $o->setPassphrase('testing')->injectDeobfuscationScript(false))
         ->autolinkUrls()
         ->apply();
 

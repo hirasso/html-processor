@@ -48,7 +48,7 @@ use function Hirasso\HTMLProcessor\process;
 echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
-    ->obfuscate(fn ($obfuscator) => $obfuscator->setKey('foobar'))
+    ->obfuscate(fn ($obfuscator) => $obfuscator->setPassphrase('nobody will guess that'))
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags')

@@ -31,8 +31,7 @@ final class Obfuscator implements DOMServiceContract
 
     public static bool $injected = false;
 
-    private string $rawKey;
-    private string $key;
+    private string $passphrase = 'html-processor';
     private bool $obfuscateEmails = true;
     private bool $obfuscatePhoneNumbers = true;
     private bool $injectJS = true;
@@ -42,8 +41,6 @@ final class Obfuscator implements DOMServiceContract
      */
     public function __construct(private ?Closure $userCallback = null)
     {
-        $this->rawKey = 'html-processor-obfuscation' . microtime(true);
-        $this->key = md5($this->rawKey);
     }
 
     /**
@@ -65,13 +62,17 @@ final class Obfuscator implements DOMServiceContract
     }
 
     /**
-     * Set a custom key for improved security
+     * Set a custom passphrase for improved security
      */
-    public function setKey(string $key): self
+    public function setPassphrase(string $passphrase): self
     {
-        $this->rawKey = $key;
-        $this->key = md5($key);
+        $this->passphrase = $passphrase;
         return $this;
+    }
+
+    private function getKey(): string
+    {
+        return md5($this->passphrase);
     }
 
     public function injectDeobfuscationScript(bool $bool): self
@@ -138,7 +139,7 @@ final class Obfuscator implements DOMServiceContract
         }
         $obfuscated = $el->ownerDocument->createElement('html-processor-obfuscated');
         $obfuscated->setAttribute('value', $this->encode(Support::outerHTML($el)));
-        $obfuscated->setAttribute('key', $this->key);
+        $obfuscated->setAttribute('key', $this->getKey());
         $obfuscated->setAttribute('type', 'element');
 
         return $obfuscated;
@@ -175,18 +176,19 @@ final class Obfuscator implements DOMServiceContract
             <html-processor-obfuscated value="%s" key="%s"></html-processor-obfuscated>
             HTML,
             $encoded,
-            $this->key
+            $this->getKey()
         );
     }
 
     /**
-     * Encode a string, using a secret key
+     * Encode a string, using a passphrase key
      */
     private function encode(string $data): string
     {
+        $key = $this->getKey();
         $out = '';
         for ($i = 0; $i < mb_strlen($data); $i++) {
-            $out .= mb_substr($data, $i, 1) ^ mb_substr($this->key, $i % mb_strlen($this->key), 1);
+            $out .= mb_substr($data, $i, 1) ^ mb_substr($key, $i % mb_strlen($key), 1);
         }
         return base64_encode($out);
     }

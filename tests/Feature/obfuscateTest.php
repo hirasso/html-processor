@@ -9,7 +9,7 @@ function obfuscate(string $string, bool $injectJS = false): string
     Obfuscator::$injected = false;
 
     return process($string)->obfuscate(
-        fn ($o) => $o->setKey('testing')->injectDeobfuscationScript($injectJS)
+        fn ($o) => $o->setPassphrase('testing')->injectDeobfuscationScript($injectJS)
     )->apply();
 }
 
