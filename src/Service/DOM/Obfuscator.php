@@ -72,7 +72,7 @@ final class Obfuscator implements DOMServiceContract
 
     private function getKey(): string
     {
-        return md5($this->passphrase);
+        return md5($this->passphrase . rand(0, 100));
     }
 
     public function injectDeobfuscationScript(bool $bool): self
@@ -137,9 +137,11 @@ final class Obfuscator implements DOMServiceContract
         if (!$el->ownerDocument) {
             throw new RuntimeException('No owner document found');
         }
+        $key = $this->getKey();
+
         $obfuscated = $el->ownerDocument->createElement('html-processor-obfuscated');
-        $obfuscated->setAttribute('value', $this->encode(Support::outerHTML($el)));
-        $obfuscated->setAttribute('key', $this->getKey());
+        $obfuscated->setAttribute('value', $this->encode(Support::outerHTML($el), $key));
+        $obfuscated->setAttribute('key', $key);
         $obfuscated->setAttribute('type', 'element');
 
         return $obfuscated;
@@ -152,7 +154,7 @@ final class Obfuscator implements DOMServiceContract
     {
         $obfuscated = preg_replace_callback(
             "/{$regex}/",
-            fn ($matches) => $this->obfuscate($matches[0]),
+            fn ($matches) => $this->obfuscateString($matches[0]),
             $node->data
         ) ?? $node->data;
 
@@ -167,25 +169,25 @@ final class Obfuscator implements DOMServiceContract
     /**
      * Obfuscate a string
      */
-    private function obfuscate(string $value): string
+    private function obfuscateString(string $value): string
     {
-        $encoded = $this->encode($value);
+        $key = $this->getKey();
+        $encoded = $this->encode($value, $key);
 
         return sprintf(
             <<<HTML
             <html-processor-obfuscated value="%s" key="%s"></html-processor-obfuscated>
             HTML,
             $encoded,
-            $this->getKey()
+            $key
         );
     }
 
     /**
      * Encode a string, using a passphrase key
      */
-    private function encode(string $data): string
+    private function encode(string $data, string $key): string
     {
-        $key = $this->getKey();
         $out = '';
         for ($i = 0; $i < mb_strlen($data); $i++) {
             $out .= mb_substr($data, $i, 1) ^ mb_substr($key, $i % mb_strlen($key), 1);
