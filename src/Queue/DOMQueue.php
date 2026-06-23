@@ -50,7 +50,7 @@ final class DOMQueue implements DOMQueueContract
         $document = Support::createDocument($html);
 
         $this->runServices($document);
-        $this->injectObfuscationScript($document);
+        $this->injectDeobfuscationScript($document);
 
         return Support::extractBodyHTML($document);
     }
@@ -58,7 +58,7 @@ final class DOMQueue implements DOMQueueContract
     /**
      * Inject the script that de-obfuscates obfuscated emails in the frontend
      */
-    private function injectObfuscationScript(HTMLDocument $document): void
+    private function injectDeobfuscationScript(HTMLDocument $document): void
     {
         static $injected = false;
         if ($injected) {
@@ -68,7 +68,6 @@ final class DOMQueue implements DOMQueueContract
 
         $script = $document->createElement('script');
         $script->setAttribute('type', 'module');
-        $script->setAttribute('data-email-obfuscation', '');
         $script->textContent = file_get_contents(dirname(__DIR__, 2). '/resources/obfuscation.js') ?: '';
         $document->body?->append($script);
 

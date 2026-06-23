@@ -9,6 +9,7 @@ use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\Text;
 use Dom\XPath;
+use RuntimeException;
 
 final class Support
 {
@@ -34,31 +35,30 @@ final class Support
     /**
      * Parse the text in a text node, if it contains HTML
      */
-    public static function parseHtml(string $html): ?DocumentFragment
+    public static function parseHtml(string $html): DocumentFragment
     {
-        // only makes sense if the data actually contains HTML tags
-        if (!str_contains($html, '<')) {
-            return null;
-        }
-
         $doc = HTMLDocument::createFromString($html, LIBXML_NOERROR);
 
-        $newNodes = [...$doc->body->childNodes ?? []];
-
-        if (empty($newNodes)) {
-            return null; // @codeCoverageIgnore
-        }
-
         $fragment = $doc->createDocumentFragment();
+        $fragment->append(...$doc->body->childNodes ?? []);
 
         // HTML parsers strip leading whitespace from <body>; restore it manually
         if (preg_match('/^(\s+)/', $html, $m)) {
-            $fragment->append($doc->createTextNode($m[1]));
+            $fragment->prepend($doc->createTextNode($m[1]));
         }
 
-        $fragment->append(...$newNodes);
-
         return $fragment;
+    }
+
+    /**
+     * Hydrate tags within a text node
+     */
+    public static function hydrateTextNode(Text $node): void {
+        if (!$document = $node->ownerDocument) {
+            throw new RuntimeException('Text nodes without ownerDocument can\'t be hydrated');
+        }
+        $parsed = self::parseHtml($node->data);
+        $node->replaceWith($document->importNode($parsed, deep: true));
     }
 
     /**

@@ -59,9 +59,7 @@ final class LinkPrefixService implements DOMServiceContract
                 $node->data = $this->link($node->data, $prefix, $url);
             }
 
-            if ($parsed = Support::parseHtml($node->data)) {
-                $node->replaceWith($document->importNode($parsed, deep: true));
-            }
+            Support::hydrateTextNode($node);
         }
     }
 

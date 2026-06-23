@@ -2,73 +2,43 @@
 
 // @ts-check
 
-(function () {
-  const seen = new WeakSet();
+class ObfuscatedElement extends HTMLElement {
+  connectedCallback() {
+    const value = atob(this.getAttribute("value") ?? '');
+    const key = this.getAttribute("key");
 
-  /** @param {string} attr */
-  function processElements(attr = "data-html-processor") {
-    document.querySelectorAll(`a[${attr}],span[${attr}]`).forEach((el) => {
-      if (seen.has(el)) return;
-      seen.add(el);
-
-      const encoded = el.getAttribute(attr) ?? "";
-      const isTel = encoded.match(/^\/[\d\s\+]+\/[\d\s\+]+\//);
-      const decoded = isTel
-        ? encoded.split("/").reverse().join("")
-        : encoded
-            .split("/")
-            .map((p) => p.split("").reverse().join(""))
-            .join("@");
-
-      if (el instanceof HTMLAnchorElement) {
-        el.setAttribute("href", isTel ? `tel:${decoded}` : `mailto:${decoded}`);
-        el.removeAttribute(attr);
-      }
-      if (el instanceof HTMLSpanElement) {
-        el.replaceWith(decoded);
-      }
-    });
-  }
-
-  function processComments() {
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_COMMENT,
-    );
-
-    const comments = [];
-    while (walker.nextNode()) {
-      if (walker.currentNode.textContent?.startsWith("html-processor:")) {
-        comments.push(walker.currentNode);
-      }
+    if (!value || !key) {
+      console.error("No value or key provided, destroying...");
+      this.remove();
+      return;
     }
 
-    comments.forEach((comment) => {
-      const encoded = comment.textContent?.match(/html-processor:(.*)$/)?.[1];
-      if (!encoded) return;
-
-      const isTel = encoded.match(/^\/[\d\s\+]+\/[\d\s\+]+\//);
-      const decoded = isTel
-        ? encoded.split("/").reverse().join("")
-        : encoded
-            .split("/")
-            .map((p) => p.split("").reverse().join(""))
-            .join("@");
-
-      comment.parentNode?.replaceChild(
-        document.createTextNode(decoded),
-        comment,
+    let result = "";
+    for (let i = 0; i < value.length; i++)
+      result += String.fromCharCode(
+        value.charCodeAt(i) ^ key.charCodeAt(i % key.length),
       );
-    });
+
+    console.log(result);
+
+    this.replaceWith(result);
   }
 
-  processElements();
-  processComments();
+  /**
+   * @param {string} data
+   * @param {string} key
+   * @return {string}
+   */
+  decode(data, key) {
+    let out = "";
+    for (let i = 0; i < data.length; i++)
+      out += String.fromCharCode(
+        data.charCodeAt(i) ^ key.charCodeAt(i % key.length),
+      );
+    return out;
+  }
+}
 
-  const observer = new MutationObserver(() => {
-    // TODO: maybe it's faster to do this on the mutations rather then globally?
-    processElements();
-    processComments();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
+if (!window.customElements.get("html-processor-obfuscated")) {
+  window.customElements.define("html-processor-obfuscated", ObfuscatedElement);
+}

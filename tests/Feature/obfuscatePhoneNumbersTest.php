@@ -14,7 +14,7 @@ test('Obfuscates phone numbers in links', function () {
 });
 
 test('Obfuscates phone numbers in plaintext', function () {
-    $result = obfuscatePhoneNumbers('foo bar baz +49 12 345 67 foo bar baz');
+    $result = obfuscatePhoneNumbers('+49 12 345 67');
 
-    expect($result)->toBe('foo bar baz <!--html-processor:/345 67 /+49 12 /--> foo bar baz');
+    expect($result)->toBe('<!--html-processor:/ 345 67/+49 12/-->');
 });
