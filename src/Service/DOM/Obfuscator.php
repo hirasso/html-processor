@@ -29,11 +29,13 @@ final class Obfuscator implements DOMServiceContract
     private const string EMAIL_REGEX = "[^\s@]+@[^\s@]+\.[^\s@]{2,}";
     private const string PHONE_NUMBER_REGEX = "[\+\d][\d \-\(\)\.]{6,20}(?<!\s)";
 
-    public static bool $injected = false;
-
     private string $passphrase = 'html-processor';
+    private bool $randomizeKey = true;
+
     private bool $obfuscateEmails = true;
     private bool $obfuscatePhoneNumbers = true;
+
+    public static bool $jsInjected = false;
     private bool $injectJS = true;
 
     /**
@@ -62,6 +64,15 @@ final class Obfuscator implements DOMServiceContract
     }
 
     /**
+     * Should the passphrase be randomized each time?
+     */
+    public function randomizeKey(bool $bool = true): self
+    {
+        $this->randomizeKey = $bool;
+        return $this;
+    }
+
+    /**
      * Set a custom passphrase for improved security
      */
     public function setPassphrase(string $passphrase): self
@@ -70,11 +81,31 @@ final class Obfuscator implements DOMServiceContract
         return $this;
     }
 
+    /**
+     * Get the key for encoding and decoding
+     */
     private function getKey(): string
     {
-        return md5($this->passphrase . rand(0, 100));
+        $passphrase = $this->randomizeKey
+            ? $this->shuffleString($this->passphrase)
+            : $this->passphrase;
+
+        return md5($passphrase);
     }
 
+    /**
+     * Randomize a string
+     */
+    private function shuffleString(string $str): string
+    {
+        $chars = str_split($str);
+        shuffle($chars);
+        return implode('', $chars);
+    }
+
+    /**
+     * Should the deobfuscation script be injected or not?
+     */
     public function injectDeobfuscationScript(bool $bool): self
     {
         $this->injectJS = $bool;
@@ -130,7 +161,7 @@ final class Obfuscator implements DOMServiceContract
     }
 
     /**
-     * Process a whole element
+     * Obfuscate an element
      */
     private function obfuscateElement(Element $el): Element
     {
@@ -201,10 +232,10 @@ final class Obfuscator implements DOMServiceContract
      */
     private function maybeInjectJS(HTMLDocument $document): void
     {
-        if (self::$injected || !$this->injectJS) {
+        if (self::$jsInjected || !$this->injectJS) {
             return;
         }
-        self::$injected = true;
+        self::$jsInjected = true;
 
         $script = $document->createElement('script');
         $script->setAttribute('type', 'module');

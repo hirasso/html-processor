@@ -6,10 +6,10 @@ use function Hirasso\HTMLProcessor\process;
 
 function obfuscate(string $string, bool $injectJS = false): string
 {
-    Obfuscator::$injected = false;
+    Obfuscator::$jsInjected = false;
 
     return process($string)->obfuscate(
-        fn ($o) => $o->setPassphrase('testing')->injectDeobfuscationScript($injectJS)
+        fn ($o) => $o->setPassphrase('testing')->randomizeKey(false)->injectDeobfuscationScript($injectJS)
     )->apply();
 }
 
