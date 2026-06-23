@@ -94,11 +94,11 @@ final class Obfuscator implements DOMServiceContract
     }
 
     /**
-     * Randomize a string
+     * Shuffle a string
      */
     private function shuffleString(string $str): string
     {
-        $chars = str_split($str);
+        $chars = mb_str_split($str);
         shuffle($chars);
         return implode('', $chars);
     }
