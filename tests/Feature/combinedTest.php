@@ -18,7 +18,7 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscateEmails()
+        ->obfuscate()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
@@ -28,7 +28,7 @@ test('Runs various tasks on a string', function () {
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
-    expect($result)->toContain('liam/moc.elpmaxe'); // email should be obfuscated via data attribute
+    expect($result)->toContain('html-processor-obfuscated'); // email should be obfuscated via data attribute
     expect($result)->not->toContain('href="mailto:'); // original mailto href should be gone
 });
 
@@ -56,11 +56,11 @@ test('Runs autolinkUrls before obfuscate', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscateEmails()
+        ->obfuscate(fn ($o) => $o->setKey('testing')->injectDeobfuscationScript(false))
         ->autolinkUrls()
         ->apply();
 
-    expect($result)->toBe('<p><a data-html-processor="liam/moc.elpmaxe"><!--html-processor:liam/moc.elpmaxe--></a></p>');
+    expect($result)->toBe('<p><html-processor-obfuscated value="XQQSCkMDBVwXXFRQWE0KDwlUXQoiV0oDVRUIXBtWWFhDW18DWAojBE1QWElYXEtWC1gISQMM" key="ae2b1fca515949e5d54fb22b8ed95575" type="element"></html-processor-obfuscated></p>');
 });
 
 test('apply() returns empty string unchanged when html is empty', function () {

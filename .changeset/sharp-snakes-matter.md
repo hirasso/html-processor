@@ -2,4 +2,4 @@
 "html-processor": major
 ---
 
-Split `obfuscateContacts()` into `obfuscateEmails()` and `obfuscatePhoneNumbers()`
+Split `obfuscateContacts()` into `obfuscate()`

@@ -36,7 +36,8 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-echo process($html)->obfuscateEmails();
+/** obfuscate emails and phone numbers in your HTML */
+echo process($html)->obfuscate();
 ```
 
 ## Maximal Example
@@ -47,11 +48,11 @@ use function Hirasso\HTMLProcessor\process;
 echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
-    ->obfuscateEmails()
+    ->obfuscate(fn ($obfuscator) => $obfuscator->setKey('foobar'))
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags')
-    // ->when() accepts a bool or a closure as the condition:
+    /** ->when() accepts a bool or a closure as the condition: */
     ->when($isRichText, fn ($p) => $p->stripTags(allowedTags: ['p', 'a', 'strong', 'em']));
 
 ```

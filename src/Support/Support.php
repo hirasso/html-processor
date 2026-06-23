@@ -52,14 +52,21 @@ final class Support
     }
 
     /**
-     * Hydrate tags within a text node
+     * Hydrate HTML tags within a text node
      */
     public static function hydrateTextNode(Text $node): void
     {
+        /** No tags? We don't need hydration */
+        if (!str_contains($node->data, '<')) {
+            return;
+        }
+
         if (!$document = $node->ownerDocument) {
             throw new RuntimeException('Text nodes without ownerDocument can\'t be hydrated');
         }
+
         $parsed = self::parseHtml($node->data);
+
         $node->replaceWith($document->importNode($parsed, deep: true));
     }
 
