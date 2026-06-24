@@ -23,12 +23,14 @@ final readonly class RemoveEmptyElementsService implements DOMServiceContract
     }
 
     #[Override]
-    public function run(HTMLDocument $document): void
+    public function run(HTMLDocument $document): HTMLDocument
     {
         foreach ($document->querySelectorAll($this->selector) as $el) {
             if (Support::containsOnlyWhitespace($el)) {
                 $el->remove();
             }
         }
+
+        return $document;
     }
 }

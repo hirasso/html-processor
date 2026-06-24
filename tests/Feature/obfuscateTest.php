@@ -1,15 +1,15 @@
 <?php
 
-use Hirasso\HTMLProcessor\Service\DOM\Obfuscator;
+use Hirasso\HTMLObfuscator\HTMLObfuscator;
 
 use function Hirasso\HTMLProcessor\process;
 
 function obfuscate(string $string, bool $injectJS = false): string
 {
-    Obfuscator::$jsInjected = false;
+    HTMLObfuscator::$jsInjected = false;
 
     return process($string)->obfuscate(
-        fn ($o) => $o->setPassphrase('testing')->randomizeKey(false)->injectDeobfuscationScript($injectJS)
+        fn ($o) => $o->passphrase('testing')->randomizeKey(false)->injectDeobfuscationScript($injectJS)
     )->apply();
 }
 

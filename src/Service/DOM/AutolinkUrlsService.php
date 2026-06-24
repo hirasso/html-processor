@@ -29,7 +29,7 @@ final readonly class AutolinkUrlsService implements DOMServiceContract
     }
 
     #[Override]
-    public function run(HTMLDocument $document): void
+    public function run(HTMLDocument $document): HTMLDocument
     {
         $autolink = new Autolink($this->options);
 
@@ -42,5 +42,7 @@ final readonly class AutolinkUrlsService implements DOMServiceContract
 
             Support::hydrateTextNode($node);
         }
+
+        return $document;
     }
 }

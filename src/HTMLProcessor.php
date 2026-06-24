@@ -6,6 +6,7 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
+use Hirasso\HTMLObfuscator\HTMLObfuscator;
 use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
 use Hirasso\HTMLProcessor\Queue\DOMQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
@@ -14,7 +15,7 @@ use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\Link;
 use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\ProcessLinksService;
 use Hirasso\HTMLProcessor\Service\DOM\LinkPrefixService;
 use Hirasso\HTMLProcessor\Service\DOM\RemoveEmptyElementsService;
-use Hirasso\HTMLProcessor\Service\DOM\Obfuscator;
+use Hirasso\HTMLProcessor\Service\DOM\ObfuscatorService;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -108,11 +109,11 @@ final class HTMLProcessor
     /**
      * Obfuscate emails and phone numbers
      *
-     * @param ?Closure(Obfuscator $obfuscator): mixed $callback
+     * @param ?Closure(HTMLObfuscator $obfuscator): mixed $callback
      */
     public function obfuscate(?Closure $callback = null): self
     {
-        $this->domQueue->add(new Obfuscator($callback));
+        $this->domQueue->add(new ObfuscatorService($callback));
 
         return $this;
     }

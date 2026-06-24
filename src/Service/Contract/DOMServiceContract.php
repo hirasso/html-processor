@@ -8,6 +8,6 @@ use Dom\HTMLDocument;
 
 interface DOMServiceContract
 {
-    public function run(HTMLDocument $document): void;
+    public function run(HTMLDocument $document): HTMLDocument;
     public function prio(): int;
 }
