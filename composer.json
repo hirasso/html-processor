@@ -25,6 +25,7 @@
   "require": {
     "php": ">=8.4",
     "asika/autolink": ">=2.2",
+    "hirasso/html-obfuscator": "dev-main",
     "symfony/var-dumper": ">=6.4"
   },
   "require-dev": {

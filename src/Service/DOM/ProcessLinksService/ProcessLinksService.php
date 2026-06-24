@@ -36,11 +36,13 @@ final readonly class ProcessLinksService implements DOMServiceContract
      * Run this service
      */
     #[Override]
-    public function run(HTMLDocument $document): void
+    public function run(HTMLDocument $document): HTMLDocument
     {
         foreach ($document->querySelectorAll('a[href]') as $el) {
             $this->process($el);
         }
+
+        return $document;
     }
 
     /**

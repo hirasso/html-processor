@@ -47,7 +47,7 @@ final class LinkPrefixService implements DOMServiceContract
      * Link a prefix to a URL
      */
     #[Override]
-    public function run(HTMLDocument $document): void
+    public function run(HTMLDocument $document): HTMLDocument
     {
         foreach (Support::getTextNodes($document) as $node) {
             // Skip text nodes inside <a> elements
@@ -61,6 +61,8 @@ final class LinkPrefixService implements DOMServiceContract
 
             Support::hydrateTextNode($node);
         }
+
+        return $document;
     }
 
     private function link(string $text, string $prefix, string $url): string
