@@ -57,4 +57,4 @@ echo process($html)
 
 ```
 
-&rarr; Browse the <a href="./tests/Feature">tests folder</a> for more usage examples.
+&rarr; Browse the <a href="./tests/">tests folder</a> for more usage examples.
