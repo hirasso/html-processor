@@ -28,7 +28,7 @@ test('Runs various tasks on a string', function () {
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
-    expect($result)->toContain('html-processor-obfuscated'); // email should be obfuscated via data attribute
+    expect($result)->toContain('obfuscated-element'); // email should be obfuscated via data attribute
     expect($result)->not->toContain('href="mailto:'); // original mailto href should be gone
 });
 
@@ -60,7 +60,7 @@ test('Runs autolinkUrls before obfuscate', function () {
         ->autolinkUrls()
         ->apply();
 
-    expect($result)->toBe('<p><html-processor-obfuscated value="XQQSCkMDBVwXXFRQWE0KDwlUXQoiV0oDVRUIXBtWWFhDW18DWAojBE1QWElYXEtWC1gISQMM" key="ae2b1fca515949e5d54fb22b8ed95575" type="element"></html-processor-obfuscated></p>');
+    expect($result)->toBe('<p><obfuscated-element value="XQQSCkMDBVwXXFRQWE0KDwlUXQoiV0oDVRUIXBtWWFhDW18DWAojBE1QWElYXEtWC1gISQMM" key="ae2b1fca515949e5d54fb22b8ed95575" type="element"></obfuscated-element></p>');
 });
 
 test('apply() returns empty string unchanged when html is empty', function () {
