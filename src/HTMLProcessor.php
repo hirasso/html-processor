@@ -14,8 +14,7 @@ use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\Link;
 use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\ProcessLinksService;
 use Hirasso\HTMLProcessor\Service\DOM\LinkPrefixService;
 use Hirasso\HTMLProcessor\Service\DOM\RemoveEmptyElementsService;
-use Hirasso\HTMLProcessor\Service\DOM\ObfuscateEmailsService;
-use Hirasso\HTMLProcessor\Service\DOM\ObfuscatePhoneNumbersService;
+use Hirasso\HTMLProcessor\Service\DOM\Obfuscator;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -107,21 +106,13 @@ final class HTMLProcessor
     }
 
     /**
-     * Obfuscate emails in plaintext and mailto: links
+     * Obfuscate emails and phone numbers
+     *
+     * @param ?Closure(Obfuscator $obfuscator): mixed $callback
      */
-    public function obfuscateEmails(
-    ): self {
-        $this->domQueue->add(new ObfuscateEmailsService());
-
-        return $this;
-    }
-
-    /**
-     * Obfuscate phone numbers in plaintext and tel: links
-     */
-    public function obfuscatePhoneNumbers(
-    ): self {
-        $this->domQueue->add(new ObfuscatePhoneNumbersService());
+    public function obfuscate(?Closure $callback = null): self
+    {
+        $this->domQueue->add(new Obfuscator($callback));
 
         return $this;
     }
@@ -163,8 +154,8 @@ final class HTMLProcessor
         }
 
         $html = $this->originalHTML;
-        $html = $this->domQueue->applyTo($html);
         $html = $this->htmlQueue->applyTo($html);
+        $html = $this->domQueue->applyTo($html);
 
         return $html;
     }

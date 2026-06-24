@@ -18,18 +18,17 @@ test('Runs various tasks on a string', function () {
         ->autolinkPrefix('@', 'https://your-instance.social/@') // link @profileName to Mastodon
         ->autolinkPrefix('#', 'https://your-instance.social/tags') // link #hashTag to Mastodon
         ->removeEmptyElements('p,div') // remove empty paragraphs
-        ->obfuscateEmails()
+        ->obfuscate()
         ->apply();
 
     // Email encoding is randomized, so check for specific patterns instead of exact match
     expect($result)->not->toContain('<p></p>');
     expect($result)->not->toContain('<div></div>');
     expect($result)->not->toContain('<p><!-- preserve me --></p>');
-    expect($result)->toContain('class="link--mailto"');
     expect($result)->toContain('href="https://your-instance.social/@acme">@acme</a>');
     expect($result)->not->toContain('&lt;'); // HTML tags should not be escaped
     expect($result)->not->toContain('&amp;nbsp;'); // Entities should not be double-encoded
-    expect($result)->toContain('href="liam/moc.elpmaxe"'); // email should be obfuscated via data attribute
+    expect($result)->toContain('html-processor-obfuscated'); // email should be obfuscated via data attribute
     expect($result)->not->toContain('href="mailto:'); // original mailto href should be gone
 });
 
@@ -40,7 +39,7 @@ test('Runs autolinkUrls before processLinks', function () {
     HTML);
 
     $expected = Support::trimLines(<<<HTML
-    <p><a href="https://example.com" class="link--internal">example.com</a></p>
+    <p><a href="https://example.com">example.com</a></p>
     HTML);
 
     $result = process($html)
@@ -57,14 +56,11 @@ test('Runs autolinkUrls before obfuscate', function () {
     HTML);
 
     $result = process($html)
-        ->obfuscateEmails()
+        ->obfuscate(fn ($o) => $o->setPassphrase('testing')->randomizeKey(false)->injectDeobfuscationScript(false))
         ->autolinkUrls()
         ->apply();
 
-    // autolinkUrls (prio -10) runs before obfuscate (prio 0), so the naked
-    // email gets linked first and then link-conversion obfuscates the resulting <a>
-    expect($result)->toContain('href="liam/moc.elpmaxe"');
-    expect($result)->not->toContain('href="mailto:');
+    expect($result)->toBe('<p><html-processor-obfuscated value="XQQSCkMDBVwXXFRQWE0KDwlUXQoiV0oDVRUIXBtWWFhDW18DWAojBE1QWElYXEtWC1gISQMM" key="ae2b1fca515949e5d54fb22b8ed95575" type="element"></html-processor-obfuscated></p>');
 });
 
 test('apply() returns empty string unchanged when html is empty', function () {

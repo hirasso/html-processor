@@ -6,20 +6,16 @@ namespace Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService;
 
 use Dom\Element;
 use Hirasso\HTMLProcessor\Uri\Uri;
-use Hirasso\HTMLProcessor\Uri\UriType;
 
 final readonly class Link
 {
     public Uri $uri;
-
-    public UriType $type;
     public null|string $extension;
 
     public function __construct(
         public Element $el
     ) {
         $this->uri = Uri::fromElement($el);
-        $this->type = $this->uri->getType();
         $this->extension = $this->uri->getExtension();
     }
 
@@ -28,7 +24,9 @@ final readonly class Link
      */
     public function addClasses(string $prefix = 'link'): self
     {
-        $this->el->classList->add("{$prefix}--{$this->type->value}");
+        if ($this->uri->isExternal()) {
+            $this->el->classList->add("{$prefix}--external");
+        }
 
         if ($this->uri->pointsToFile()) {
             $this->el->classList->add("{$prefix}--file");
@@ -47,7 +45,7 @@ final readonly class Link
      */
     public function openExternalInNewTab(bool $safe = true): self
     {
-        if ($this->type !== UriType::External) {
+        if (!$this->uri->isExternal()) {
             return $this;
         }
 

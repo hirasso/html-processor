@@ -4,7 +4,7 @@ use Dom\Text;
 use Dom\XPath;
 use Hirasso\HTMLProcessor\Support\Support;
 
-test('parseHtml() parses html and preserves leading and trailing whitespace', function () {
+test('parseHtml() preserves leading and trailing whitespace', function () {
     $doc = Support::createDocument('<p>hello</p>');
     $xp = new XPath($doc);
     $node = $xp->query('//text()')->item(0);
