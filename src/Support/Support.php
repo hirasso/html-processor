@@ -160,14 +160,4 @@ final class Support
     {
         return str_replace("\n", '', self::trimLines($text));
     }
-
-    /**
-     * Get the outer HTML of an element (not implemented natively, yet)
-     */
-    public static function outerHTML(Element $el): string
-    {
-        $doc = HTMLDocument::createEmpty();
-        $doc->appendChild($doc->importNode($el, true));
-        return $doc->saveHTML();
-    }
 }
