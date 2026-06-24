@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM;
+namespace Hirasso\HTMLProcessor\Service\Dom;
 
 use Dom\HTMLDocument;
 use Dom\Text;
-use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\Contract\DomServiceContract;
 use Hirasso\HTMLProcessor\Service\Trait\HasDefaultPrio;
 use Hirasso\HTMLProcessor\Support\Support;
 use Override;
 
-final class LinkPrefixService implements DOMServiceContract
+final class LinkPrefixService implements DomServiceContract
 {
     use HasDefaultPrio;
 
@@ -47,7 +47,7 @@ final class LinkPrefixService implements DOMServiceContract
      * Link a prefix to a URL
      */
     #[Override]
-    public function run(HTMLDocument $document): HTMLDocument
+    public function run(HTMLDocument $document): void
     {
         foreach (Support::getTextNodes($document) as $node) {
             // Skip text nodes inside <a> elements
@@ -61,8 +61,6 @@ final class LinkPrefixService implements DOMServiceContract
 
             Support::hydrateTextNode($node);
         }
-
-        return $document;
     }
 
     private function link(string $text, string $prefix, string $url): string

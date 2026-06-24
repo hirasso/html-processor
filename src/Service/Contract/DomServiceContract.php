@@ -6,8 +6,8 @@ namespace Hirasso\HTMLProcessor\Service\Contract;
 
 use Dom\HTMLDocument;
 
-interface DOMServiceContract
+interface DomServiceContract
 {
-    public function run(HTMLDocument $document): HTMLDocument;
+    public function run(HTMLDocument $document): void;
     public function prio(): int;
 }

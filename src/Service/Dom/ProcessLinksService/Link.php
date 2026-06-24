@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService;
+namespace Hirasso\HTMLProcessor\Service\Dom\ProcessLinksService;
 
 use Dom\Element;
 use Hirasso\HTMLProcessor\Uri\Uri;

@@ -15,6 +15,7 @@
   - Open external links in a new tab
 - Obfuscate email addresses and phone numbers to confuse spam bots (see [this article](https://spencermortensen.com/articles/email-obfuscation/))
 - Automatically link prefixed words (e.g. `@mention` or `#hashtag`) to a URL of your choice
+- Apply arbitrary DOM mutations with full access to the `HTMLDocument`
 - Strip tags
 - Conditionally apply any operation
 
@@ -36,8 +37,8 @@ composer require hirasso/html-processor
 ```php
 use function Hirasso\HTMLProcessor\process;
 
-/** obfuscate emails and phone numbers in your HTML */
-echo process($html)->obfuscate();
+/** remove empty parahraphs from HTML */
+echo process($html)->removeEmptyElements('p');
 ```
 
 ## Maximal Example
@@ -48,10 +49,11 @@ use function Hirasso\HTMLProcessor\process;
 echo process($html)
     ->autolinkUrls()
     ->removeEmptyElements('p')
-    ->obfuscate(fn ($obfuscator) => $obfuscator->setPassphrase('nobody will guess this!'))
     ->processLinks(fn ($link) => $link->addClasses()->openExternalInNewTab())
     ->autolinkPrefix('@', 'https://your-instance.social/@')
     ->autolinkPrefix('#', 'https://your-instance.social/tags')
+    /** ->mutate() gives you direct access to the HTMLDocument: */
+    ->mutate(fn (\Dom\HTMLDocument $doc) => $doc->querySelector('h1')?->setAttribute('class', 'text-2xl'))
     /** ->when() accepts a bool or a closure as the condition: */
     ->when($isRichText, fn ($p) => $p->stripTags(allowedTags: ['p', 'a', 'strong', 'em']));
 

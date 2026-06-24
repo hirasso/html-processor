@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Hirasso\HTMLProcessor\Service\DOM;
+namespace Hirasso\HTMLProcessor\Service\Dom;
 
 use Asika\Autolink\Autolink;
 use Asika\Autolink\AutolinkOptions;
-use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\Contract\DomServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use Dom\HTMLDocument;
 use Override;
@@ -14,7 +14,7 @@ use Override;
 /**
  * Makes urls clickable
  */
-final readonly class AutolinkUrlsService implements DOMServiceContract
+final readonly class AutolinkUrlsService implements DomServiceContract
 {
     public function __construct(
         public AutolinkOptions $options,
@@ -29,7 +29,7 @@ final readonly class AutolinkUrlsService implements DOMServiceContract
     }
 
     #[Override]
-    public function run(HTMLDocument $document): HTMLDocument
+    public function run(HTMLDocument $document): void
     {
         $autolink = new Autolink($this->options);
 
@@ -42,7 +42,5 @@ final readonly class AutolinkUrlsService implements DOMServiceContract
 
             Support::hydrateTextNode($node);
         }
-
-        return $document;
     }
 }
