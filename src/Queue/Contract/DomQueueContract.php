@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue\Contract;
 
-use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Service\Contract\DomServiceContract;
 use Dom\HTMLDocument;
 
-interface DOMQueueContract extends QueueContract
+interface DomQueueContract extends QueueContract
 {
-    public function add(DOMServiceContract $service): void;
+    public function add(DomServiceContract $service): void;
     public function runServices(HTMLDocument $document): void;
 }

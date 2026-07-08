@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Hirasso\HTMLProcessor\Queue;
 
-use Hirasso\HTMLProcessor\Queue\Contract\DOMQueueContract;
-use Hirasso\HTMLProcessor\Service\Contract\DOMServiceContract;
+use Hirasso\HTMLProcessor\Queue\Contract\DomQueueContract;
+use Hirasso\HTMLProcessor\Service\Contract\DomServiceContract;
 use Hirasso\HTMLProcessor\Support\Support;
 use Dom\HTMLDocument;
 
-final class DOMQueue implements DOMQueueContract
+final class DomQueue implements DomQueueContract
 {
-    /** @var array<class-string<DOMServiceContract>, DOMServiceContract> */
+    /** @var array<class-string<DomServiceContract>, DomServiceContract> */
     private array $services = [];
 
-    public function add(DOMServiceContract $service): void
+    public function add(DomServiceContract $service): void
     {
         $this->services[$service::class] = $service;
         uasort($this->services, function ($a, $b) {
@@ -59,7 +59,7 @@ final class DOMQueue implements DOMQueueContract
      */
     public function runServices(HTMLDocument $document): void
     {
-        // Execute all DOM services
+        // Execute all Dom services
         foreach ($this->services as $service) {
             $service->run($document);
         }

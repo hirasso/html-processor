@@ -6,16 +6,16 @@ namespace Hirasso\HTMLProcessor;
 
 use Asika\Autolink\AutolinkOptions;
 use Closure;
-use Hirasso\HTMLObfuscator\HTMLObfuscator;
+use Dom\HTMLDocument;
 use Hirasso\HTMLProcessor\Exceptions\DumpAndDieException;
-use Hirasso\HTMLProcessor\Queue\DOMQueue;
+use Hirasso\HTMLProcessor\Queue\DomQueue;
 use Hirasso\HTMLProcessor\Queue\HTMLQueue;
-use Hirasso\HTMLProcessor\Service\DOM\AutolinkUrlsService;
-use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\Link;
-use Hirasso\HTMLProcessor\Service\DOM\ProcessLinksService\ProcessLinksService;
-use Hirasso\HTMLProcessor\Service\DOM\LinkPrefixService;
-use Hirasso\HTMLProcessor\Service\DOM\RemoveEmptyElementsService;
-use Hirasso\HTMLProcessor\Service\DOM\ObfuscatorService;
+use Hirasso\HTMLProcessor\Service\Dom\AutolinkUrlsService;
+use Hirasso\HTMLProcessor\Service\Dom\DomMutationService;
+use Hirasso\HTMLProcessor\Service\Dom\ProcessLinksService\Link;
+use Hirasso\HTMLProcessor\Service\Dom\ProcessLinksService\ProcessLinksService;
+use Hirasso\HTMLProcessor\Service\Dom\LinkPrefixService;
+use Hirasso\HTMLProcessor\Service\Dom\RemoveEmptyElementsService;
 use Hirasso\HTMLProcessor\Service\HTML\StripTags;
 
 /**
@@ -24,13 +24,13 @@ use Hirasso\HTMLProcessor\Service\HTML\StripTags;
  */
 final class HTMLProcessor
 {
-    private DOMQueue $domQueue;
+    private DomQueue $domQueue;
     private HTMLQueue $htmlQueue;
 
     private function __construct(
         private readonly string $originalHTML
     ) {
-        $this->domQueue = new DOMQueue();
+        $this->domQueue = new DomQueue();
         $this->htmlQueue = new HTMLQueue();
     }
 
@@ -107,14 +107,14 @@ final class HTMLProcessor
     }
 
     /**
-     * Obfuscate emails and phone numbers
+     * Add a mutation to the Dom queue
      *
-     * @param ?Closure(HTMLObfuscator $obfuscator): mixed $callback
+     * @param Closure(HTMLDocument $document): mixed $mutation
+     * @param int $prio high is later in the queue
      */
-    public function obfuscate(?Closure $callback = null): self
+    public function mutate(Closure $mutation, int $prio = 0): self
     {
-        $this->domQueue->add(new ObfuscatorService($callback));
-
+        $this->domQueue->add(new DomMutationService($mutation, $prio));
         return $this;
     }
 
@@ -144,7 +144,7 @@ final class HTMLProcessor
     }
 
     /**
-     * Execute all queued operations in optimal order
+     * Execute all queued services in optimal order
      *
      * @return string – the processed HTML string
      */
