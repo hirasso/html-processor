@@ -1,3 +1,6 @@
+> [!NOTE]
+> This package is abandoned in favor of two new packages: [hirasso/prose](https://github.com/hirasso/prose/) and [hirasso/html-obfuscator](https://github.com/hirasso/html-obfuscator).
+
 # hirasso/html-processor
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/hirasso/html-processor.svg?color=3ef09d)](https://packagist.org/packages/hirasso/html-processor)
