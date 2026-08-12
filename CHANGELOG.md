@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.0.0
+
+### Major Changes
+
+- e59c0b8: Extract obfuscation to [`hirasso/html-obfuscator`](https://github.com/hirasso/html-obfuscator)
+
+### Minor Changes
+
+- 6aad4d1: Add `mutate()` method for applying arbitrary DOM mutations via a closure
+
+### Patch Changes
+
+- 82a8604: Ignore text nodes within `<style>`, `<script>`, etc... elements during processing
+
 ## 2.1.3
 
 ### Patch Changes
